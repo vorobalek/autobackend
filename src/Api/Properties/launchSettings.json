@@ -1,0 +1,13 @@
+﻿{
+  "profiles": {
+    "Api": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "HOST": "http://localhost:8080",
+        "PORT": "8080"
+      }
+    }
+  }
+}

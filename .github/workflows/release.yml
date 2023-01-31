@@ -1,0 +1,251 @@
+name: Release
+run-name: Publish Release Build initiated by ${{ github.actor }} on ${{ github.ref }}
+
+on:
+  push:
+    branches: 
+      - main
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  verify_release_notes:
+    name: Verify RELEASE_NOTES.md has been changed before Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Verify RELEASE_NOTES.md has been changed before Release
+        uses: tj-actions/changed-files@v35
+        id: verify_release_notes
+        with:
+          files: |
+            RELEASE_NOTES.md
+
+      - name: Abort If RELEASE_NOTES.md has not been changed before Release
+        if: steps.verify_release_notes.outputs.any_changed != 'true'
+        run: exit 1
+
+      - name: Success If RELEASE_NOTES.md has been changed before Release
+        run: exit 0
+
+  test_release:
+    name: Run Unit Tests before Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore
+        run: dotnet restore lib/AutoBackend.Sdk
+
+      - name: Build
+        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
+
+  create_release:
+    name: Create Release
+    needs:
+      - verify_release_notes
+      - test_release
+    runs-on: ubuntu-latest
+    outputs:
+      created_release_version: ${{ steps.get_release_version.outputs.result }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Release Version
+        id: get_release_version
+        uses: actions/github-script@v6
+        with:
+          script: |
+            var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
+            var minor = ${{ vars.DEFAULT_MINOR_VERSION }};
+            var patch = ${{ vars.DEFAULT_PATCH_VERSION }};
+            var latestRelease = { data: { name: `${major}.${minor}.${patch}` } };
+            try {
+              latestRelease = await github.rest.repos.getLatestRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+            } catch {
+              // do nothing
+            }
+
+            if (/\d+\.\d+\.\d+/.test(latestRelease?.data?.name)) {
+              var latestVersion = latestRelease.data.name.match(/\d+\.\d+\.\d+/)[0];
+              var parsed = latestVersion.split('.');
+              if (parsed.length == 3) {
+                var major_max = Math.max(major, +parsed[0]);
+                var minor_max = Math.max(minor, +parsed[1]);
+                var patch_max = Math.max(patch, +parsed[2]);
+                return `${major_max}.${minor_max}.${patch_max+1}`;
+              }
+              throw latestRelease;
+            }
+            throw latestRelease;
+          result-encoding: string
+
+      - name: Create Github Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_release_version.outputs.result }}
+          release_name: Release ${{ steps.get_release_version.outputs.result }}
+          draft: false
+          prerelease: false
+          body_path: RELEASE_NOTES.md
+
+  build_package:
+    name: Build Package Version "${{ needs.create_release.outputs.created_release_version }}"
+    needs: 
+      - verify_release_notes
+      - test_release
+      - create_release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Build Version "${{ needs.create_release.outputs.created_release_version }}"
+        run: |
+          echo "BUILD_VERSION=${{ needs.create_release.outputs.created_release_version }}" >> ${GITHUB_ENV}
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore
+        run: dotnet restore lib/AutoBackend.Sdk
+
+      - name: Build Version "${{ env.BUILD_VERSION }}"
+        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+
+      - name: Pack Version "${{ env.BUILD_VERSION }}"
+        run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: release_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+  publish_github:
+    name: Publish Github Package Version "${{ needs.create_release.outputs.created_release_version }}"
+    needs:
+      - verify_release_notes
+      - test_release
+      - create_release
+      - build_package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - uses: actions/download-artifact@master
+        with:
+          name: release_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Publish Github Package Version "${{ needs.create_release.outputs.created_release_version }}"
+        run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/vorobalek/index.json
+
+  publish_myget:
+    name: Publish MyGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
+    needs:
+      - verify_release_notes
+      - test_release
+      - create_release
+      - build_package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - uses: actions/download-artifact@master
+        with:
+          name: release_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Publish MyGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
+        run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json
+
+  publish_nuget:
+    name: Publish NuGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
+    needs:
+      - verify_release_notes
+      - test_release
+      - create_release
+      - build_package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - uses: actions/download-artifact@master
+        with:
+          name: release_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Publish NuGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
+        run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+
+  comment_commit:
+    name: Comment Commit with the Version build's link
+    needs:
+      - verify_release_notes
+      - test_release
+      - create_release
+      - build_package
+      - publish_github
+      - publish_myget
+      - publish_nuget
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Comment Commit with the Version "${{ needs.create_release.outputs.created_release_version }}" build's link
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.repos.createCommitComment({
+              commit_sha: context.sha,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Ok. You can find your release package v${{ needs.create_release.outputs.created_release_version }} ' +
+              'here: \n' +
+              '- NuGet https://www.nuget.org/packages/AutoBackend.SDK/' +
+              '${{ needs.create_release.outputs.created_release_version }}\n' +
+              '- MyGet https://www.myget.org/feed/autobackend/package/nuget/AutoBackend.SDK/' +
+              '${{ needs.create_release.outputs.created_release_version }}\n\n' +
+              '❗ Please be noticed it may take a few minutes to the verifying.'
+            })
