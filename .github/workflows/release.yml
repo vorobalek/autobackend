@@ -1,0 +1,158 @@
+name: Release
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  test_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore
+        run: dotnet restore lib/AutoBackend.Sdk
+
+      - name: Build
+        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
+
+  create_release:
+    needs: test_release
+    runs-on: ubuntu-latest
+    outputs:
+      created_release_version: ${{ steps.get_release_version.outputs.result }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Release Version
+        id: get_release_version
+        uses: actions/github-script@v6
+        with:
+          script: |
+            var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
+            var minor = ${{ vars.DEFAULT_MINOR_VERSION }};
+            var patch = ${{ vars.DEFAULT_PATCH_VERSION }};
+            var latestRelease = { data: { name: `${major}.${minor}.${patch}` } };
+            try {
+              latestRelease = await github.rest.repos.getLatestRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+            } catch {
+              // do nothing
+            }
+
+            if (/\d+\.\d+\.\d+/.test(latestRelease?.data?.name)) {
+              var latestVersion = latestRelease.data.name.match(/\d+\.\d+\.\d+/)[0];
+              var parsed = latestVersion.split('.');
+              if (parsed.length == 3) {
+                var major_max = Math.max(major, +parsed[0]);
+                var minor_max = Math.max(minor, +parsed[1]);
+                var patch_max = Math.max(patch, +parsed[2]);
+                return `${major_max}.${minor_max}.${patch_max+1}`;
+              }
+              throw latestRelease;
+            }
+            throw latestRelease;
+          result-encoding: string
+
+      - name: Create Release Notes
+        run: |
+          echo "RELEASE_NOTES=$(cat RELEASE_NOTES.md)" >> ${GITHUB_ENV}
+
+      - name: Create Github Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_release_version.outputs.result }}
+          release_name: Release ${{ steps.get_release_version.outputs.result }}
+          draft: false
+          prerelease: false
+          body: ${{ env.RELEASE_NOTES }}
+
+  build_package:
+    needs: create_release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Build Version
+        run: |
+          echo "BUILD_VERSION=${{ needs.create_release.outputs.created_release_version }}" >> ${GITHUB_ENV}
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore
+        run: dotnet restore lib/AutoBackend.Sdk
+
+      - name: Build
+        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+
+      - name: Pack
+        run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: release_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+  publish_github:
+    needs: build_package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - uses: actions/download-artifact@master
+        with:
+          name: release_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Create Github Package
+        run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/vorobalek/index.json
+
+  publish_myget:
+    needs: build_package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - uses: actions/download-artifact@master
+        with:
+          name: release_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Create MyGet Package
+        run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json

@@ -1,0 +1,83 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>AutoBackend.SDK</PackageId>
+        <Version Condition="'$(BUILD_VERSION)' == ''">1.0.0</Version>
+        <Version Condition="'$(BUILD_VERSION)' != ''">$(BUILD_VERSION)</Version>
+        <Authors>Alexey Vorobev</Authors>
+        <Product>AutoBackend.SDK</Product>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageDescription>This package provides the boilerplate infrastructure to create simplified backend services by managing DataBase and API layers.</PackageDescription>
+        <PackageProjectUrl>https://github.com/vorobalek/autobackend</PackageProjectUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Flurl.Http" Version="3.2.4"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.3"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.3"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="NSwag.AspNetCore" Version="13.18.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.3.cs">
+            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.4.cs">
+            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.5.cs">
+            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.6.cs">
+            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.7.cs">
+            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.8.cs">
+            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.3.cs">
+            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.4.cs">
+            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.5.cs">
+            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.6.cs">
+            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.7.cs">
+            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.8.cs">
+            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <Target Name="PrepareReleaseNotes" BeforeTargets="GenerateNuspec">
+        <PropertyGroup>
+            <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../RELEASE_NOTES.md"))</PackageReleaseNotes>
+        </PropertyGroup>
+    </Target>
+
+</Project>

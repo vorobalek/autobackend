@@ -1,0 +1,96 @@
+name: Release Dev
+
+on:
+  push:
+    branches: [ "develop" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test_release_dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore
+        run: dotnet restore lib/AutoBackend.Sdk
+
+      - name: Build
+        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
+
+  publish_release_dev:
+    needs: test_release_dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get build stamp
+        run: |
+          echo "BUILD_STAMP=$(git rev-parse --short HEAD)" >> ${GITHUB_ENV}
+
+      - name: Get version
+        id: get_version
+        uses: actions/github-script@v6
+        env:
+          BUILD_STAMP: '${{ env.BUILD_STAMP }}'
+        with:
+          script: |
+            var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
+            var minor = ${{ vars.DEFAULT_MINOR_VERSION }};
+            var patch = ${{ vars.DEFAULT_PATCH_VERSION }};
+            var latestRelease = { data: { name: `${major}.${minor}.${patch}` } };
+            try {
+              latestRelease = await github.rest.repos.getLatestRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+            } catch {
+              // do nothing
+            }
+            
+            if (/\d+\.\d+\.\d+/.test(latestRelease?.data?.name)) {
+              var latestVersion = latestRelease.data.name.match(/\d+\.\d+\.\d+/)[0];
+              var parsed = latestVersion.split('.');
+              if (parsed.length == 3) {
+                var major_max = Math.max(major, +parsed[0]);
+                var minor_max = Math.max(minor, +parsed[1]);
+                var patch_max = Math.max(patch, +parsed[2]);
+                return `${major_max}.${minor_max}.${patch_max+1}-dev-${process.env.BUILD_STAMP}`;
+              }
+              throw latestRelease;
+            }
+            throw latestRelease;
+          result-encoding: string
+
+      - name: Set version
+        run: |
+          echo "BUILD_VERSION=${{ steps.get_version.outputs.result }}" >> ${GITHUB_ENV}
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore
+        run: dotnet restore lib/AutoBackend.Sdk
+
+      - name: Build
+        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+
+      - name: Pack
+        run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Publish MyGet Package
+        run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend-dev/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json

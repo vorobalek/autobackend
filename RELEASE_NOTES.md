@@ -1,0 +1,1 @@
+This is the initial release of the `AutoBackend.SDK`. This package provides the boilerplate infrastructure to create simplified backend services by managing DataBase and API layers. For more information see [readme](https://github.com/vorobalek/autobackend/blob/main/README.md).
