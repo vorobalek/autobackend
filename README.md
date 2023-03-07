@@ -25,7 +25,7 @@ like GraphQL. I dunno. I have already spent much more time trying to express how
 
 # Examples
 
-The basic using scenario can be found in the "Api" project. Also, here is a copy of that samples.
+The basic using scenario can be found in [the Api project](src/Api). Also, here is a copy of that samples.
 
 ## Initialize AutoBackend from your Program.cs file
 
