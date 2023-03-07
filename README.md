@@ -401,12 +401,12 @@ To manage database connections, choose the "Database" configuration section.
 
 ```json
 "Database": {
-"PrimaryProvider": "InMemory",
-"Providers": {
-"InMemory": "InMemory database name",
-"SqlServer": "SqlServer database connection string",
-"Postgres": "Postgres database connection string"
-}
+  "PrimaryProvider": "InMemory",
+  "Providers": {
+    "InMemory": "InMemory database name",
+    "SqlServer": "SqlServer database connection string",
+    "Postgres": "Postgres database connection string"
+  }
 }
 ```
 
