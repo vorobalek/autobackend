@@ -38,7 +38,7 @@ jobs:
 
       - name: Get build stamp
         run: |
-          echo "BUILD_STAMP=$(git rev-parse --short HEAD)" >> ${GITHUB_ENV}
+          echo "BUILD_STAMP=$(date +'%Y%m%d%H%M%s')" >> ${GITHUB_ENV}
 
       - name: Get version
         id: get_version
