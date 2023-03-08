@@ -17,8 +17,8 @@ like GraphQL. I dunno. I have already spent much more time trying to express how
 
 # Features
 
-- [Database schema modelling](#mark-models-which-autobackend-has-to-generate-tables-in-the-database-for)
-- [CRUD API modelling](#mark-models-which-autobackend-has-to-generate-api-endpoints-for)
+- [Database schema modeling](#mark-models-which-autobackend-has-to-generate-tables-in-the-database-for)
+- [CRUD API modeling](#mark-models-which-autobackend-has-to-generate-api-endpoints-for)
 - [Filtering models for API](#mark-model-properties-which-autobackend-has-to-generate-filters-for)
 - [Cross-database provider support](#make-sure-you-have-configured-your-application-database-connection-correctly)
 - [Always up-to-date database schema](#make-sure-you-have-configured-your-application-startup-correctly)
@@ -465,7 +465,7 @@ you can create a new migration using one of the following commands executed from
 you use the SqlServer.
 
 `dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresAutoBackendDbContext` - in case you
-use the Postgres.
+use Postgres.
 
 Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
 migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
