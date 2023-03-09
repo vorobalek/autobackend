@@ -16,6 +16,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Verify Release Notes have been changed
+        if: github.ref == 'ref/head/main'
+        uses: tj-actions/verify-changed-files@v13
+        id: verify_release_notes
+        with:
+          files: |
+            RELEASE_NOTES.md
+
+      - name: Abort If Release Notes have not been changed
+        if: github.ref == 'ref/head/main' && !contains(steps.verify_release_notes.outputs.changed_files, 'RELEASE_NOTES.md')
+        run: exit 1
+
       - name: Setup
         uses: actions/setup-dotnet@v3
         with:
