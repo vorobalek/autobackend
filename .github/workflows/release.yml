@@ -18,18 +18,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Verify RELEASE_NOTES.md has been changed
-        uses: tj-actions/verify-changed-files@v13
+      - name: Verify RELEASE_NOTES.md has been changed before Release
+        uses: tj-actions/changed-files@v35
         id: verify_release_notes
         with:
           files: |
             RELEASE_NOTES.md
 
-      - name: Abort If RELEASE_NOTES.md has not been changed
-        if: steps.verify_release_notes.outputs.files_changed != 'true'
+      - name: Abort If RELEASE_NOTES.md has not been changed before Release
+        if: steps.verify_release_notes.outputs.any_changed != 'true'
         run: exit 1
 
-      - name: Success
+      - name: Success If RELEASE_NOTES.md has been changed before Release
         run: exit 0
 
   test_release:
