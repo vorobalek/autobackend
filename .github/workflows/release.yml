@@ -1,4 +1,5 @@
 name: Release
+run-name: Publish release build initiated by ${{ github.actor }} from ${{ github.ref }}
 
 on:
   push:
@@ -76,7 +77,6 @@ jobs:
           echo "RELEASE_NOTES=$(cat RELEASE_NOTES.md)" >> ${GITHUB_ENV}
 
       - name: Create Github Release
-        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,7 +94,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set Build Version
+      - name: Set Build Version "${{ env.BUILD_VERSION }}"
         run: |
           echo "BUILD_VERSION=${{ needs.create_release.outputs.created_release_version }}" >> ${GITHUB_ENV}
 
@@ -106,10 +106,10 @@ jobs:
       - name: Restore
         run: dotnet restore lib/AutoBackend.Sdk
 
-      - name: Build
+      - name: Build Version "${{ env.BUILD_VERSION }}"
         run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
 
-      - name: Pack
+      - name: Pack Version "${{ env.BUILD_VERSION }}"
         run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
 
       - uses: actions/upload-artifact@master
@@ -118,7 +118,7 @@ jobs:
           path: ${{ env.DOTNET_ROOT }}/Package
 
   publish_github:
-    needs: build_package
+    needs: [create_release, build_package]
     runs-on: ubuntu-latest
 
     steps:
@@ -134,11 +134,11 @@ jobs:
           name: release_package
           path: ${{ env.DOTNET_ROOT }}/Package
 
-      - name: Create Github Package
+      - name: Publish Github Package Version "${{ needs.create_release.outputs.created_release_version }}"
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/vorobalek/index.json
 
   publish_myget:
-    needs: build_package
+    needs: [create_release, build_package]
     runs-on: ubuntu-latest
 
     steps:
@@ -154,5 +154,25 @@ jobs:
           name: release_package
           path: ${{ env.DOTNET_ROOT }}/Package
 
-      - name: Create MyGet Package
+      - name: Publish MyGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json
+
+  publish_nuget:
+    needs: [create_release, build_package]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - uses: actions/download-artifact@master
+        with:
+          name: release_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Publish NuGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
+        run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
