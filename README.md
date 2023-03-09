@@ -465,5 +465,7 @@ you can create a new migration using one of the following commands executed from
 
 `dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresAutoBackendDbContext` - if you use Postgres.
 
+Or you can create scripts for [adding a new migration](https://github.com/vorobalek/autobackend/blob/main/add_migration.sh) or [removing the last migration](https://github.com/vorobalek/autobackend/blob/main/remove_migration.sh) for both database providers.
+
 Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
 migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
