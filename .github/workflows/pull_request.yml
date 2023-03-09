@@ -12,13 +12,14 @@ permissions:
   contents: read
 
 jobs:
-  test_pull_request:
+  verify_release_notes:
+    name: Verify RELEASE_NOTES.md has been changed on Pull Request
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v3
 
-      - name: Verify Release Notes have been changed on ${{ github.base_ref }}
+      - name: Verify RELEASE_NOTES.md has been changed on ${{ github.base_ref }}
         if: github.base_ref == 'main'
         uses: tj-actions/verify-changed-files@v13
         id: verify_release_notes
@@ -26,9 +27,19 @@ jobs:
           files: |
             RELEASE_NOTES.md
 
-      - name: Abort If Release Notes have not been changed on ${{ github.base_ref }}
+      - name: Abort If RELEASE_NOTES.md has not been changed on ${{ github.base_ref }}
         if: github.base_ref == 'main' && steps.verify_release_notes.outputs.files_changed != 'true'
         run: exit 1
+
+      - name: Success
+        run: exit 0
+
+  test_pull_request:
+    name: Run Unit Tests on Pull Request
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
 
       - name: Setup
         uses: actions/setup-dotnet@v3
