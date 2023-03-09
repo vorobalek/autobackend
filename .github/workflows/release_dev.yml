@@ -79,7 +79,7 @@ jobs:
             throw latestRelease;
           result-encoding: string
 
-      - name: Set Build Version "${{ env.BUILD_VERSION }}"
+      - name: Set Build Version "${{ steps.get_version.outputs.result }}"
         run: |
           echo "BUILD_VERSION=${{ steps.get_version.outputs.result }}" >> ${GITHUB_ENV}
 
