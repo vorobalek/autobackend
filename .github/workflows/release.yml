@@ -25,7 +25,7 @@ jobs:
             RELEASE_NOTES.md
 
       - name: Abort If Release Notes have not been changed
-        if: !contains(steps.verify_release_notes.outputs.changed_files, 'RELEASE_NOTES.md')
+        if: steps.verify_release_notes.outputs.files_changed != 'true'
         run: exit 1
 
       - name: Setup
