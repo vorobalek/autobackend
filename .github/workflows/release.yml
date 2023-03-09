@@ -113,7 +113,7 @@ jobs:
           body: ${{ env.RELEASE_NOTES }}
 
   build_package:
-    name: Build Package Version "${{ env.BUILD_VERSION }}"
+    name: Build Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs: 
       - verify_release_notes
       - test_release
@@ -123,7 +123,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set Build Version "${{ env.BUILD_VERSION }}"
+      - name: Set Build Version "${{ needs.create_release.outputs.created_release_version }}"
         run: |
           echo "BUILD_VERSION=${{ needs.create_release.outputs.created_release_version }}" >> ${GITHUB_ENV}
 
@@ -147,7 +147,7 @@ jobs:
           path: ${{ env.DOTNET_ROOT }}/Package
 
   publish_github:
-    name: Publish Github Package Version "${{ env.BUILD_VERSION }}"
+    name: Publish Github Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
       - verify_release_notes
       - test_release
@@ -172,7 +172,7 @@ jobs:
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/vorobalek/index.json
 
   publish_myget:
-    name: Publish MyGet Package Version "${{ env.BUILD_VERSION }}"
+    name: Publish MyGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
       - verify_release_notes
       - test_release
@@ -197,7 +197,7 @@ jobs:
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json
 
   publish_nuget:
-    name: Publish NuGet Package Version "${{ env.BUILD_VERSION }}"
+    name: Publish NuGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
       - verify_release_notes
       - test_release
