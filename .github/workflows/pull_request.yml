@@ -3,7 +3,9 @@ run-name: Run Pull Request checks initiated by ${{ github.actor }} from ${{ gith
 
 on:
   pull_request:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
   workflow_dispatch:
 
 permissions:
@@ -25,7 +27,7 @@ jobs:
             RELEASE_NOTES.md
 
       - name: Abort If Release Notes have not been changed on ${{ github.base_ref }}
-        if: github.base_ref == 'main' && !contains(steps.verify_release_notes.outputs.changed_files, 'RELEASE_NOTES.md')
+        if: github.base_ref == 'main' && steps.verify_release_notes.outputs.files_changed != 'true'
         run: exit 1
 
       - name: Setup

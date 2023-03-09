@@ -3,7 +3,8 @@ run-name: Publish release build initiated by ${{ github.actor }} from ${{ github
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - main
 
 permissions:
   contents: write
@@ -24,7 +25,7 @@ jobs:
             RELEASE_NOTES.md
 
       - name: Abort If Release Notes have not been changed
-        if: !contains(steps.verify_release_notes.outputs.changed_files, 'RELEASE_NOTES.md')
+        if: steps.verify_release_notes.outputs.files_changed != 'true'
         run: exit 1
 
       - name: Setup
@@ -128,7 +129,9 @@ jobs:
           path: ${{ env.DOTNET_ROOT }}/Package
 
   publish_github:
-    needs: [create_release, build_package]
+    needs:
+      - create_release
+      - build_package
     runs-on: ubuntu-latest
 
     steps:
@@ -148,7 +151,9 @@ jobs:
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/vorobalek/index.json
 
   publish_myget:
-    needs: [create_release, build_package]
+    needs:
+      - create_release
+      - build_package
     runs-on: ubuntu-latest
 
     steps:
@@ -168,7 +173,9 @@ jobs:
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json
 
   publish_nuget:
-    needs: [create_release, build_package]
+    needs:
+      - create_release
+      - build_package
     runs-on: ubuntu-latest
 
     steps:
