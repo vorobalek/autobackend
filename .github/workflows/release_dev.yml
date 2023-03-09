@@ -3,7 +3,8 @@ run-name: Publish developer build initiated by ${{ github.actor }} from ${{ gith
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: 
+      - develop
   workflow_dispatch:
 
 permissions:

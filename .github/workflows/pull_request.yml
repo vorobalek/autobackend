@@ -3,7 +3,9 @@ run-name: Run Pull Request checks initiated by ${{ github.actor }} from ${{ gith
 
 on:
   pull_request:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
   workflow_dispatch:
 
 permissions:
