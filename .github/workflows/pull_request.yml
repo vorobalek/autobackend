@@ -30,7 +30,7 @@ jobs:
         if: steps.verify_release_notes.outputs.any_changed != 'true'
         run: exit 1
 
-      - name: Success
+      - name: Success If RELEASE_NOTES.md has been changed on ${{ github.base_ref }}
         run: exit 0
 
   test_pull_request:
