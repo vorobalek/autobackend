@@ -43,7 +43,7 @@ jobs:
 
       - name: Get Build Stamp
         run: |
-          echo "BUILD_STAMP=$(date +'%Y%m%d%H%M%s')" >> ${GITHUB_ENV}
+          echo "BUILD_STAMP=$(date +'%Y%m%d%H%M%S')" >> ${GITHUB_ENV}
 
       - name: Get Version
         id: get_version
