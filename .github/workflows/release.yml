@@ -17,7 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Verify Release Notes have been changed
+        uses: tj-actions/verify-changed-files@v13
+        id: verify_release_notes
+        with:
+          files: |
+            RELEASE_NOTES.md
+
       - name: Setup
+        if: contains(steps.verify_release_notes.outputs.changed_files, 'RELEASE_NOTES.md')
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.0.x
