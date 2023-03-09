@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test_release_dev:
-    name: Run Unit Tests
+    name: Run Unit Tests before Developer Release
     runs-on: ubuntu-latest
 
     steps:

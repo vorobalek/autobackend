@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   verify_release_notes:
-    name: Verify RELEASE_NOTES.md has been changed on ${{ github.base_ref }}
+    name: Verify RELEASE_NOTES.md has been changed on Pull Request
     runs-on: ubuntu-latest
     
     steps:
@@ -35,7 +35,7 @@ jobs:
         run: exit 0
 
   test_pull_request:
-    name: Run Unit Tests on ${{ github.ref }}
+    name: Run Unit Tests on Pull Request
     runs-on: ubuntu-latest
     
     steps:

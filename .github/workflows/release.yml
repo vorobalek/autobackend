@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   verify_release_notes:
-    name: Verify RELEASE_NOTES.md has been changed
+    name: Verify RELEASE_NOTES.md has been changed before Release
     runs-on: ubuntu-latest
     
     steps:
@@ -33,7 +33,7 @@ jobs:
         run: exit 0
 
   test_release:
-    name: Run Unit Tests
+    name: Run Unit Tests before Release
     runs-on: ubuntu-latest
 
     steps:
