@@ -1,8 +1,10 @@
 name: Release Dev
+run-name: Publish developer build initiated by ${{ github.actor }} from ${{ github.ref }}
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: 
+      - develop
   workflow_dispatch:
 
 permissions:
@@ -10,6 +12,7 @@ permissions:
 
 jobs:
   test_release_dev:
+    name: Run Unit Tests before Developer Release
     runs-on: ubuntu-latest
 
     steps:
@@ -30,17 +33,19 @@ jobs:
         run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
 
   publish_release_dev:
-    needs: test_release_dev
+    name: Create and Publish Developer Release
+    needs: 
+      - test_release_dev
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get build stamp
+      - name: Get Build Stamp
         run: |
-          echo "BUILD_STAMP=$(git rev-parse --short HEAD)" >> ${GITHUB_ENV}
+          echo "BUILD_STAMP=$(date +'%Y%m%d%H%M%S')" >> ${GITHUB_ENV}
 
-      - name: Get version
+      - name: Get Version
         id: get_version
         uses: actions/github-script@v6
         env:
@@ -74,7 +79,7 @@ jobs:
             throw latestRelease;
           result-encoding: string
 
-      - name: Set version
+      - name: Set Build Version "${{ steps.get_version.outputs.result }}"
         run: |
           echo "BUILD_VERSION=${{ steps.get_version.outputs.result }}" >> ${GITHUB_ENV}
 
@@ -86,11 +91,11 @@ jobs:
       - name: Restore
         run: dotnet restore lib/AutoBackend.Sdk
 
-      - name: Build
+      - name: Build Version "${{ env.BUILD_VERSION }}"
         run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
 
-      - name: Pack
+      - name: Pack Version "${{ env.BUILD_VERSION }}"
         run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
 
-      - name: Publish MyGet Package
+      - name: Publish MyGet Package Version "${{ env.BUILD_VERSION }}"
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend-dev/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json

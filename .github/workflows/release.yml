@@ -1,16 +1,39 @@
 name: Release
+run-name: Publish release build initiated by ${{ github.actor }} from ${{ github.ref }}
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches: 
+      - main
 
 permissions:
   contents: write
   packages: write
 
 jobs:
+  verify_release_notes:
+    name: Verify RELEASE_NOTES.md has been changed before Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Verify RELEASE_NOTES.md has been changed before Release
+        uses: tj-actions/changed-files@v35
+        id: verify_release_notes
+        with:
+          files: |
+            RELEASE_NOTES.md
+
+      - name: Abort If RELEASE_NOTES.md has not been changed before Release
+        if: steps.verify_release_notes.outputs.any_changed != 'true'
+        run: exit 1
+
+      - name: Success If RELEASE_NOTES.md has been changed before Release
+        run: exit 0
+
   test_release:
+    name: Run Unit Tests before Release
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +54,10 @@ jobs:
         run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
 
   create_release:
-    needs: test_release
+    name: Create Release
+    needs:
+      - verify_release_notes
+      - test_release
     runs-on: ubuntu-latest
     outputs:
       created_release_version: ${{ steps.get_release_version.outputs.result }}
@@ -76,7 +102,6 @@ jobs:
           echo "RELEASE_NOTES=$(cat RELEASE_NOTES.md)" >> ${GITHUB_ENV}
 
       - name: Create Github Release
-        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -88,13 +113,17 @@ jobs:
           body: ${{ env.RELEASE_NOTES }}
 
   build_package:
-    needs: create_release
+    name: Build Package Version "${{ env.BUILD_VERSION }}"
+    needs: 
+      - verify_release_notes
+      - test_release
+      - create_release
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set Build Version
+      - name: Set Build Version "${{ env.BUILD_VERSION }}"
         run: |
           echo "BUILD_VERSION=${{ needs.create_release.outputs.created_release_version }}" >> ${GITHUB_ENV}
 
@@ -106,10 +135,10 @@ jobs:
       - name: Restore
         run: dotnet restore lib/AutoBackend.Sdk
 
-      - name: Build
+      - name: Build Version "${{ env.BUILD_VERSION }}"
         run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
 
-      - name: Pack
+      - name: Pack Version "${{ env.BUILD_VERSION }}"
         run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
 
       - uses: actions/upload-artifact@master
@@ -118,7 +147,12 @@ jobs:
           path: ${{ env.DOTNET_ROOT }}/Package
 
   publish_github:
-    needs: build_package
+    name: Publish Github Package Version "${{ env.BUILD_VERSION }}"
+    needs:
+      - verify_release_notes
+      - test_release
+      - create_release
+      - build_package
     runs-on: ubuntu-latest
 
     steps:
@@ -134,11 +168,16 @@ jobs:
           name: release_package
           path: ${{ env.DOTNET_ROOT }}/Package
 
-      - name: Create Github Package
+      - name: Publish Github Package Version "${{ needs.create_release.outputs.created_release_version }}"
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/vorobalek/index.json
 
   publish_myget:
-    needs: build_package
+    name: Publish MyGet Package Version "${{ env.BUILD_VERSION }}"
+    needs:
+      - verify_release_notes
+      - test_release
+      - create_release
+      - build_package
     runs-on: ubuntu-latest
 
     steps:
@@ -154,5 +193,30 @@ jobs:
           name: release_package
           path: ${{ env.DOTNET_ROOT }}/Package
 
-      - name: Create MyGet Package
+      - name: Publish MyGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json
+
+  publish_nuget:
+    name: Publish NuGet Package Version "${{ env.BUILD_VERSION }}"
+    needs:
+      - verify_release_notes
+      - test_release
+      - create_release
+      - build_package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - uses: actions/download-artifact@master
+        with:
+          name: release_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Publish NuGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
+        run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

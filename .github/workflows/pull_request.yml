@@ -1,15 +1,40 @@
 name: Pull Request
+run-name: Run Pull Request checks initiated by ${{ github.actor }} from ${{ github.head_ref }} to ${{ github.base_ref }}
 
 on:
   pull_request:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  verify_release_notes:
+    name: Verify RELEASE_NOTES.md has been changed on Pull Request
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Verify RELEASE_NOTES.md has been changed on ${{ github.base_ref }}
+        uses: tj-actions/changed-files@v35
+        id: verify_release_notes
+        with:
+          files: |
+            RELEASE_NOTES.md
+
+      - name: Abort If RELEASE_NOTES.md has not been changed on ${{ github.base_ref }}
+        if: steps.verify_release_notes.outputs.any_changed != 'true'
+        run: exit 1
+
+      - name: Success If RELEASE_NOTES.md has been changed on ${{ github.base_ref }}
+        run: exit 0
+
   test_pull_request:
+    name: Run Unit Tests on Pull Request
     runs-on: ubuntu-latest
     
     steps:

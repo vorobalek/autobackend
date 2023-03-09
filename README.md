@@ -17,15 +17,15 @@ like GraphQL. I dunno. I have already spent much more time trying to express how
 
 # Features
 
-- [Database schema modelling](#mark-models-which-autobackend-has-to-generate-tables-in-the-database-for)
-- [CRUD API modelling](#mark-models-which-autobackend-has-to-generate-api-endpoints-for)
+- [Database schema modeling](#mark-models-which-autobackend-has-to-generate-tables-in-the-database-for)
+- [CRUD API modeling](#mark-models-which-autobackend-has-to-generate-api-endpoints-for)
 - [Filtering models for API](#mark-model-properties-which-autobackend-has-to-generate-filters-for)
 - [Cross-database provider support](#make-sure-you-have-configured-your-application-database-connection-correctly)
 - [Always up-to-date database schema](#make-sure-you-have-configured-your-application-startup-correctly)
 
 # Examples
 
-The basic using scenario can be found in the "Api" project. Also, here is a copy of that samples.
+The basic using scenario can be found in [the Api project](https://github.com/vorobalek/autobackend/tree/main/src/Api). Also, here is a copy of that samples.
 
 ## Initialize AutoBackend from your Program.cs file
 
@@ -461,11 +461,11 @@ await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args, migrateRelat
 First, you must [install Entity Framework Core Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet). After that,
 you can create a new migration using one of the following commands executed from the root of the project folder.
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerAutoBackendDbContext` - in case
-you use the SqlServer.
+`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerAutoBackendDbContext` - if you use SqlServer.
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresAutoBackendDbContext` - in case you
-use the Postgres.
+`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresAutoBackendDbContext` - if you use Postgres.
+
+Or you can create scripts for [adding a new migration](https://github.com/vorobalek/autobackend/blob/main/add_migration.sh) or [removing the last migration](https://github.com/vorobalek/autobackend/blob/main/remove_migration.sh) for both database providers.
 
 Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
 migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
