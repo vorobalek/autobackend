@@ -1,4 +1,5 @@
 name: Pull Request
+run-name: Run Pull Request checks initiated by ${{ github.actor }} from ${{ github.head_ref }} to ${{ github.base_ref }}
 
 on:
   pull_request:
