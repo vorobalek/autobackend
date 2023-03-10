@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   verify_release_notes:
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    if: github.event_name == 'pull_request'
     name: Verify RELEASE_NOTES.md has been changed on Pull Request
     runs-on: ubuntu-latest
     
@@ -58,7 +58,7 @@ jobs:
 
   create_release_hot:
     if: github.event_name == 'pull_request'
-    name: Create Release Hot
+    name: Create Release Hot Version
     needs:
       - test_pull_request
     runs-on: ubuntu-latest

@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test_release_dev:
-    name: Run Unit Tests before Release Dev
+    name: Run Unit Tests before Release Dev Version
     runs-on: ubuntu-latest
 
     steps:
@@ -33,7 +33,7 @@ jobs:
         run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
 
   create_release_dev:
-    name: Create Release Dev
+    name: Create Release Dev Version
     needs:
       - test_release_dev
     runs-on: ubuntu-latest
