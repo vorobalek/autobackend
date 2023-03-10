@@ -24,7 +24,7 @@ internal record GenericFilter<TOriginal, TNullable>(
                 $"Method {nameof(EqualExpr)} should be invoked only if {nameof(Equal)} filter was filled");
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
-        if (entityProperty == null)
+        if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
                 $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}");
 
@@ -47,7 +47,7 @@ internal record GenericFilter<TOriginal, TNullable>(
                 $"Method {nameof(NotEqualExpr)} should be invoked only if {nameof(NotEqual)} filter was filled");
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
-        if (entityProperty == null)
+        if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
                 $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}");
 
@@ -68,7 +68,7 @@ internal record GenericFilter<TOriginal, TNullable>(
                 $"Method {nameof(IsNullExpr)} should be invoked only if {nameof(IsNull)} filter was filled");
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
-        if (entityProperty == null)
+        if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
                 $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}");
 
@@ -97,7 +97,7 @@ internal record GenericFilter<TOriginal, TNullable>(
                 $"Method {nameof(GreaterThanExpr)} should be invoked only if {nameof(GreaterThan)} filter was filled");
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
-        if (entityProperty == null)
+        if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
                 $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}");
 
@@ -120,7 +120,7 @@ internal record GenericFilter<TOriginal, TNullable>(
                 $"Method {nameof(GreaterThanOrEqualExpr)} should be invoked only if {nameof(GreaterThanOrEqual)} filter was filled");
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
-        if (entityProperty == null)
+        if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
                 $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}");
 
@@ -143,7 +143,7 @@ internal record GenericFilter<TOriginal, TNullable>(
                 $"Method {nameof(LessThanExpr)} should be invoked only if {nameof(LessThan)} filter was filled");
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
-        if (entityProperty == null)
+        if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
                 $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}");
 
@@ -166,7 +166,7 @@ internal record GenericFilter<TOriginal, TNullable>(
                 $"Method {nameof(LessThanOrEqualExpr)} should be invoked only if {nameof(LessThanOrEqual)} filter was filled");
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
-        if (entityProperty == null)
+        if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
                 $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}");
 
@@ -189,7 +189,7 @@ internal record GenericFilter<TOriginal, TNullable>(
                 $"Method {nameof(InExpr)} should be invoked only if {nameof(In)} filter was filled");
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
-        if (entityProperty == null)
+        if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
                 $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}");
 

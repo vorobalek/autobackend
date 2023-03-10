@@ -7,10 +7,4 @@ public sealed class InMemoryAutoBackendDbContext : AutoBackendDbContext<InMemory
     public InMemoryAutoBackendDbContext(DbContextOptions<InMemoryAutoBackendDbContext> options) : base(options)
     {
     }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-        optionsBuilder.UseInMemoryDatabase("InMemoryTemporary");
-    }
 }

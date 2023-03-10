@@ -22,6 +22,8 @@ like GraphQL. I dunno. I have already spent much more time trying to express how
 - [Filtering models for API](#mark-model-properties-which-autobackend-has-to-generate-filters-for)
 - [Cross-database provider support](#make-sure-you-have-configured-your-application-database-connection-correctly)
 - [Always up-to-date database schema](#make-sure-you-have-configured-your-application-startup-correctly)
+- [Best practices to use](#be-noticed-of-best-practices)
+  - [AutoBackendDbContext](#autobackenddbcontext-is-way-better-than-any-other)
 
 # Examples
 
@@ -434,7 +436,6 @@ For example:
     }
   }
   ```
-  ```
 - If you would like to use the InMemory database, you shall fill in the "Database" configuration section like this:
   ```json
   "Database": {
@@ -469,3 +470,8 @@ Or you can create scripts for [adding a new migration](https://github.com/voroba
 
 Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
 migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
+
+## Be noticed of best practices
+
+### AutoBackendDbContext is way better than any other
+Despite the database provider you have chosen, if you need to access the `DbContext` directly from your code, it will be the best practice to inject the `AutoBackendDbContext` into your services. This way, you can switch between any database providers offered by `AutoBackend.SDK` simply by changing one line in your application config.
