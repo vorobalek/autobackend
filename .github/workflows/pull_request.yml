@@ -1,5 +1,5 @@
-name: Pull Request
-run-name: Run checks initiated by ${{ github.actor }} on ${{ github.ref }}
+name: Pull Request Checks
+run-name: Run Pull Request Checks initiated by ${{ github.actor }} on ${{ github.ref }}
 
 on:
   pull_request:
