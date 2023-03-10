@@ -172,7 +172,6 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Comment Pull Request with the Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}" build's link
-        id: get_release_dev_version
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -181,7 +180,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '✅ Ok. You can find your package v${{ needs.create_release_hot.outputs.created_release_version }} ' +
+              body: '✅ Ok. You can find your hot-test package v${{ needs.create_release_hot.outputs.created_release_version }} ' +
               'here: https://www.myget.org/feed/autobackend-hot/package/nuget/AutoBackend.SDK/' +
               '${{ needs.create_release_hot.outputs.created_release_version }}.\n\n' +
               '❗ Please make sure you have checked it carefully.'
