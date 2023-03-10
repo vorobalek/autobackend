@@ -36,7 +36,7 @@ jobs:
         run: exit 0
 
   test_pull_request:
-    name: Run Unit Tests on Pull Request
+    name: Run Unit Tests
     runs-on: ubuntu-latest
     
     steps:
@@ -136,7 +136,7 @@ jobs:
 
   publish_myget_hot:
     if: github.event_name == 'pull_request'
-    name: Publish MyGet Package Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}"
+    name: Publish MyGet Package Hot Version
     needs:
       - test_pull_request
       - create_release_hot
@@ -161,7 +161,7 @@ jobs:
 
   comment_pull_request:
     if: github.event_name == 'pull_request'
-    name: Comment Pull Request with the build's link
+    name: Comment Pull Request with the Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}" build's link
     needs:
       - test_pull_request
       - create_release_hot
