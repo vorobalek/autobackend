@@ -1,5 +1,5 @@
 name: Release Dev
-run-name: Publish developer build initiated by ${{ github.actor }} from ${{ github.ref }}
+run-name: Publish developer build initiated by ${{ github.actor }} on ${{ github.ref }}
 
 on:
   push:
@@ -153,7 +153,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            github.rest.repos.createComment({
+            github.rest.repos.createCommitComment({
               commit_sha: context.sha,
               owner: context.repo.owner,
               repo: context.repo.repo,
