@@ -101,14 +101,19 @@ internal static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         const string databasesConfigurationSectionName = "Database";
+        const string autoBackendInMemoryDatabaseName = "AutoBackendInMemoryDatabase";
         AutoBackendDbContext.SetAssemblies(typeof(AutoBackendHost<>).Assembly, typeof(TProgram).Assembly);
 
         var databasesConfiguration = configuration
             .GetSection(databasesConfigurationSectionName)
             .Get<DatabaseConfiguration?>();
 
-        if (databasesConfiguration == null)
-            return services.AddSpecificDbContext<InMemoryAutoBackendDbContext>(true);
+        if (databasesConfiguration is null)
+            return services.AddSpecificDbContext<InMemoryAutoBackendDbContext>(true, builder =>
+            {
+                builder
+                    .UseInMemoryDatabase(autoBackendInMemoryDatabaseName);
+            });
 
         var isPrimaryConfigured = false;
         foreach (var databaseConfiguration in databasesConfiguration.Providers)
@@ -122,8 +127,7 @@ internal static class ServiceCollectionExtensions
                         builder
                             .UseInMemoryDatabase(databaseConfiguration.Value);
                     });
-                    if (isPrimary)
-                        isPrimaryConfigured = true;
+                    isPrimaryConfigured |= isPrimary;
                     break;
                 case DatabaseProviderType.SqlServer:
                     services
@@ -138,8 +142,7 @@ internal static class ServiceCollectionExtensions
                                             .MigrationsAssembly(typeof(TProgram).Assembly.FullName);
                                     });
                         });
-                    if (isPrimary)
-                        isPrimaryConfigured = true;
+                    isPrimaryConfigured |= isPrimary;
                     break;
                 case DatabaseProviderType.Postgres:
                     services.AddSpecificDbContext<PostgresAutoBackendDbContext>(isPrimary, builder =>
@@ -153,8 +156,7 @@ internal static class ServiceCollectionExtensions
                                         .MigrationsAssembly(typeof(TProgram).Assembly.FullName);
                                 });
                     });
-                    if (isPrimary)
-                        isPrimaryConfigured = true;
+                    isPrimaryConfigured |= isPrimary;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(databaseConfiguration.Key));

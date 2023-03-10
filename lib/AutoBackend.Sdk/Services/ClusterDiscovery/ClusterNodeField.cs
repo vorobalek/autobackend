@@ -32,14 +32,14 @@ internal record ClusterNodeField<T>
 
     public ClusterNodeField<T> WithValueIfNotNull(T? value, IDateTimeProvider dateTimeProvider)
     {
-        if (value != null)
-            return WithValue(value, dateTimeProvider);
-        return this;
+        return value is not null
+            ? WithValue(value, dateTimeProvider)
+            : this;
     }
 
     public ClusterNodeField<T> WithNewestValueIfNotNull(ClusterNodeField<T> newest)
     {
-        if (newest.UpdatedUtc > UpdatedUtc && newest.Value != null)
+        if (newest.UpdatedUtc > UpdatedUtc && newest.Value is not null)
         {
             Value = newest.Value;
             UpdatedUtc = newest.UpdatedUtc;

@@ -57,7 +57,7 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
 
         Log(remoteClusterNode);
 
-        if (remoteClusterNode != null)
+        if (remoteClusterNode is not null)
         {
             KnownClusterNodes[remoteClusterNode.Id] = FillRemoteNode(remoteClusterNode);
             KnownClusterNodes[remoteClusterNode.Id].LastSeenUtc = _dateTimeProvider.UtcNow();
@@ -152,12 +152,12 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
         Func<ClusterNode, ClusterNodeField<T>> selector,
         ClusterNode remoteClusterNode)
     {
-        if (selector == null) throw new ArgumentNullException(nameof(selector));
+        if (selector is null) throw new ArgumentNullException(nameof(selector));
 
         var existedClusterNode = KnownClusterNodes.GetValueOrDefault(remoteClusterNode.Id);
 
         var newClusterNodeField = selector(remoteClusterNode);
-        if (existedClusterNode != null && selector(existedClusterNode) is { } existedClusterNodeField)
+        if (existedClusterNode is not null && selector(existedClusterNode) is { } existedClusterNodeField)
             return existedClusterNodeField.WithNewestValueIfNotNull(newClusterNodeField);
 
         return newClusterNodeField;

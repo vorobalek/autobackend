@@ -85,7 +85,7 @@ internal class GenericStorage<TEntity> : IGenericStorage<TEntity> where TEntity 
         params object?[]? keys)
     {
         var current = await _db.Set<TEntity>().FindAsync(keys);
-        if (current != null)
+        if (current is not null)
             throw new BadRequestApiException(
                 $"Entity with same key already exists ({string.Join(',', keys?.Select(key => key?.ToString()) ?? Array.Empty<string?>())})");
 
@@ -100,14 +100,14 @@ internal class GenericStorage<TEntity> : IGenericStorage<TEntity> where TEntity 
         params object?[]? keys)
     {
         var current = await _db.Set<TEntity>().FindAsync(keys);
-        if (current == null)
+        if (current is null)
             throw new BadRequestApiException(
                 $"Entity with given key does not exists ({string.Join(',', keys?.Select(key => key?.ToString()) ?? Array.Empty<string?>())})");
 
         foreach (var entryProperty in _db.Entry(current).Properties)
         {
             var entityProperty = typeof(TEntity).GetProperty(entryProperty.Metadata.Name);
-            if (entityProperty == null)
+            if (entityProperty is null)
                 throw new NotFoundApiException(
                     $"Unable to find property with name {entryProperty.Metadata.Name} in object {typeof(TEntity).Name}");
             var newValue = entityProperty.GetValue(entity);
@@ -124,7 +124,7 @@ internal class GenericStorage<TEntity> : IGenericStorage<TEntity> where TEntity 
         params object?[]? keys)
     {
         var current = await _db.Set<TEntity>().FindAsync(keys);
-        if (current == null)
+        if (current is null)
             throw new NotFoundApiException(
                 $"Entity with given key does not exists ({string.Join(',', keys?.Select(key => key?.ToString()) ?? Array.Empty<string?>())})");
 
