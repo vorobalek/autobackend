@@ -32,11 +32,13 @@ jobs:
       - name: Test
         run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
 
-  publish_release_dev:
-    name: Create and Publish Developer Release
-    needs: 
+  create_release_dev:
+    name: Create Release Dev
+    needs:
       - test_release_dev
     runs-on: ubuntu-latest
+    outputs:
+      created_release_version: ${{ steps.get_release_dev_version.outputs.result }}
 
     steps:
       - uses: actions/checkout@v3
@@ -45,11 +47,9 @@ jobs:
         run: |
           echo "BUILD_STAMP=$(date +'%Y%m%d%H%M%S')" >> ${GITHUB_ENV}
 
-      - name: Get Version
-        id: get_version
+      - name: Get Release Dev Version
+        id: get_release_dev_version
         uses: actions/github-script@v6
-        env:
-          BUILD_STAMP: '${{ env.BUILD_STAMP }}'
         with:
           script: |
             var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
@@ -79,9 +79,19 @@ jobs:
             throw latestRelease;
           result-encoding: string
 
-      - name: Set Build Version "${{ steps.get_version.outputs.result }}"
+  build_package_dev:
+    name: Build Package Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}"
+    needs:
+      - test_release_dev
+      - create_release_dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Build Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}"
         run: |
-          echo "BUILD_VERSION=${{ steps.get_version.outputs.result }}" >> ${GITHUB_ENV}
+          echo "BUILD_VERSION=${{ needs.create_release_dev.outputs.created_release_version }}" >> ${GITHUB_ENV}
 
       - name: Setup
         uses: actions/setup-dotnet@v3
@@ -94,8 +104,34 @@ jobs:
       - name: Build Version "${{ env.BUILD_VERSION }}"
         run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
 
-      - name: Pack Version "${{ env.BUILD_VERSION }}"
+      - name: Pack Dev Version "${{ env.BUILD_VERSION }}"
         run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
 
-      - name: Publish MyGet Package Version "${{ env.BUILD_VERSION }}"
+      - uses: actions/upload-artifact@master
+        with:
+          name: release_dev_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+  publish_myget_dev:
+    name: Publish MyGet Package Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}"
+    needs:
+      - test_release_dev
+      - create_release_dev
+      - build_package_dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - uses: actions/download-artifact@master
+        with:
+          name: release_dev_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Publish MyGet Package Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}"
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend-dev/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json
