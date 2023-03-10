@@ -137,7 +137,6 @@ jobs:
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend-dev/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json
 
   comment_commit:
-    if: github.event_name == 'pull_request'
     name: Comment Commit with the Dev Version build's link
     needs:
       - test_release_dev
