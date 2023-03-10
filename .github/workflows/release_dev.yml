@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test_release_dev:
-    name: Run Unit Tests before Developer Release
+    name: Run Unit Tests before Release Dev
     runs-on: ubuntu-latest
 
     steps:
@@ -80,7 +80,7 @@ jobs:
           result-encoding: string
 
   build_package_dev:
-    name: Build Package Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}"
+    name: Build Package Dev Version
     needs:
       - test_release_dev
       - create_release_dev

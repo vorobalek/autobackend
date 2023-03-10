@@ -1,5 +1,5 @@
 name: Pull Request
-run-name: Run Pull Request checks initiated by ${{ github.actor }} from ${{ github.head_ref }} to ${{ github.base_ref }}
+run-name: Run checks initiated by ${{ github.actor }} in ${{ github.ref }}
 
 on:
   pull_request:
@@ -102,7 +102,7 @@ jobs:
 
   build_package_hot:
     if: github.event_name == 'pull_request'
-    name: Build Package Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}"
+    name: Build Package Hot Version
     needs:
       - test_pull_request
       - create_release_hot
@@ -161,7 +161,7 @@ jobs:
 
   comment_pull_request:
     if: github.event_name == 'pull_request'
-    name: Comment Pull Request with the Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}" build's link
+    name: Comment Pull Request with the Hot Version build's link
     needs:
       - test_pull_request
       - create_release_hot
