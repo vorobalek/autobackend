@@ -135,3 +135,31 @@ jobs:
 
       - name: Publish MyGet Package Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}"
         run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend-dev/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json
+
+  comment_commit:
+    if: github.event_name == 'pull_request'
+    name: Comment Commit with the Dev Version build's link
+    needs:
+      - test_release_dev
+      - create_release_dev
+      - build_package_dev
+      - publish_myget_dev
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Comment Commit with the Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}" build's link
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.repos.createComment({
+              commit_sha: context.sha,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Ok. You can find your developer package v${{ needs.create_release_dev.outputs.created_release_version }} ' +
+              'here: https://www.myget.org/feed/autobackend-dev/package/nuget/AutoBackend.SDK/' +
+              '${{ needs.create_release_dev.outputs.created_release_version }}.\n\n' +
+              '❗ Please make sure you have checked it carefully.'
+            })
