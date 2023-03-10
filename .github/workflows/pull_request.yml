@@ -182,7 +182,8 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '✅ Ok. You can find your package v${{ needs.create_release_hot.outputs.created_release_version }}' +
-              ' here: https://www.myget.org/feed/autobackend-hot/package/nuget/AutoBackend.SDK/' +
-              '${{ needs.create_release_hot.outputs.created_release_version }}'
+              body: '✅ Ok. You can find your package v${{ needs.create_release_hot.outputs.created_release_version }} ' +
+              'here: https://www.myget.org/feed/autobackend-hot/package/nuget/AutoBackend.SDK/' +
+              '${{ needs.create_release_hot.outputs.created_release_version }}.\n' +
+              'Please make sure you have checked it carefully.'
             })
