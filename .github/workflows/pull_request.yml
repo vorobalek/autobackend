@@ -1,18 +1,19 @@
-name: Pull Request
-run-name: Run Pull Request checks initiated by ${{ github.actor }} from ${{ github.head_ref }} to ${{ github.base_ref }}
+name: Pull Request Checks
+run-name: Run Pull Request Checks initiated by ${{ github.actor }} on ${{ github.ref }}
 
 on:
   pull_request:
     branches:
       - main
       - develop
-  workflow_dispatch:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   verify_release_notes:
+    if: github.event_name == 'pull_request'
     name: Verify RELEASE_NOTES.md has been changed on Pull Request
     runs-on: ubuntu-latest
     
@@ -34,7 +35,7 @@ jobs:
         run: exit 0
 
   test_pull_request:
-    name: Run Unit Tests on Pull Request
+    name: Run Unit Tests
     runs-on: ubuntu-latest
     
     steps:
@@ -53,3 +54,134 @@ jobs:
 
       - name: Test
         run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
+
+  create_release_hot:
+    if: github.event_name == 'pull_request'
+    name: Create Release Hot Version
+    needs:
+      - test_pull_request
+    runs-on: ubuntu-latest
+    outputs:
+      created_release_version: ${{ steps.get_release_hot_version.outputs.result }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Release Hot Version
+        id: get_release_hot_version
+        uses: actions/github-script@v6
+        with:
+          script: |
+            var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
+            var minor = ${{ vars.DEFAULT_MINOR_VERSION }};
+            var patch = ${{ vars.DEFAULT_PATCH_VERSION }};
+            var latestRelease = { data: { name: `${major}.${minor}.${patch}` } };
+            try {
+              latestRelease = await github.rest.repos.getLatestRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+            } catch {
+              // do nothing
+            }
+            
+            if (/\d+\.\d+\.\d+/.test(latestRelease?.data?.name)) {
+              var latestVersion = latestRelease.data.name.match(/\d+\.\d+\.\d+/)[0];
+              var parsed = latestVersion.split('.');
+              if (parsed.length == 3) {
+                var major_max = Math.max(major, +parsed[0]);
+                var minor_max = Math.max(minor, +parsed[1]);
+                var patch_max = Math.max(patch, +parsed[2]);
+                return `${major_max}.${minor_max}.${patch_max+1}-hot-${ ${{ github.event.pull_request.number }} }`;
+              }
+              throw latestRelease;
+            }
+            throw latestRelease;
+          result-encoding: string
+
+  build_package_hot:
+    if: github.event_name == 'pull_request'
+    name: Build Package Hot Version
+    needs:
+      - test_pull_request
+      - create_release_hot
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Build Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}"
+        run: |
+          echo "BUILD_VERSION=${{ needs.create_release_hot.outputs.created_release_version }}" >> ${GITHUB_ENV}
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore
+        run: dotnet restore lib/AutoBackend.Sdk
+
+      - name: Build Version "${{ env.BUILD_VERSION }}"
+        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+
+      - name: Pack Hot Version "${{ env.BUILD_VERSION }}"
+        run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: release_hot_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+  publish_myget_hot:
+    if: github.event_name == 'pull_request'
+    name: Publish MyGet Package Hot Version
+    needs:
+      - test_pull_request
+      - create_release_hot
+      - build_package_hot
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - uses: actions/download-artifact@master
+        with:
+          name: release_hot_package
+          path: ${{ env.DOTNET_ROOT }}/Package
+
+      - name: Publish MyGet Package Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}"
+        run: dotnet nuget push ${{ env.DOTNET_ROOT }}/Package/*.nupkg --source https://www.myget.org/F/autobackend-hot/auth/${{ secrets.MYGET_API_KEY }}/api/v3/index.json
+
+  comment_pull_request:
+    if: github.event_name == 'pull_request'
+    name: Comment Pull Request with the Hot Version build's link
+    needs:
+      - test_pull_request
+      - create_release_hot
+      - build_package_hot
+      - publish_myget_hot
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Comment Pull Request with the Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}" build's link
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Ok. You can find your hot-test package v${{ needs.create_release_hot.outputs.created_release_version }} ' +
+              'here: https://www.myget.org/feed/autobackend-hot/package/nuget/AutoBackend.SDK/' +
+              '${{ needs.create_release_hot.outputs.created_release_version }}.\n\n' +
+              '❗ Please make sure you have checked it carefully.'
+            })

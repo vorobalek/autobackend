@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace AutoBackend.Sdk.Middleware.RequestTime;
 
-internal class RequestTimeMiddleware
+internal sealed class RequestTimeMiddleware
 {
     public const string RequestStartedOnContextItem = "RequestStartedOn";
 

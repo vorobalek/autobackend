@@ -14,5 +14,5 @@ internal abstract class ApiException : Exception
     {
     }
 
-    public abstract int StatusCode { get; }
+    internal abstract int StatusCode { get; }
 }

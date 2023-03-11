@@ -2,19 +2,19 @@ using Microsoft.AspNetCore.Http;
 
 namespace AutoBackend.Sdk.Exceptions.Api;
 
-internal class BadRequestApiException : ApiException
+internal sealed class BadRequestApiException : ApiException
 {
-    public BadRequestApiException()
+    internal BadRequestApiException()
     {
     }
 
-    public BadRequestApiException(string message) : base(message)
+    internal BadRequestApiException(string message) : base(message)
     {
     }
 
-    public BadRequestApiException(string message, Exception innerException) : base(message, innerException)
+    internal BadRequestApiException(string message, Exception innerException) : base(message, innerException)
     {
     }
 
-    public override int StatusCode => StatusCodes.Status400BadRequest;
+    internal override int StatusCode => StatusCodes.Status400BadRequest;
 }
