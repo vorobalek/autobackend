@@ -5,7 +5,7 @@ namespace AutoBackend.Sdk.Extensions;
 
 internal static class ExceptionExtensions
 {
-    public static int StatusCode(this Exception exception)
+    internal static int StatusCode(this Exception exception)
     {
         return exception switch
         {

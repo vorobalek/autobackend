@@ -20,58 +20,22 @@
         <None Include="../../README.md" Pack="true" PackagePath="">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Include="../../RELEASE_NOTES.md" Pack="true" PackagePath="">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Flurl.Http" Version="3.2.4"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.3"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3"/>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.3"/>
+        <PackageReference Include="Flurl.Http" Version="3.2.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="NSwag.AspNetCore" Version="13.18.2"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.3.cs">
-            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.4.cs">
-            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.5.cs">
-            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.6.cs">
-            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.7.cs">
-            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\IGenericStorageWithComplexKey.8.cs">
-            <DependentUpon>IGenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.3.cs">
-            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.4.cs">
-            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.5.cs">
-            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.6.cs">
-            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.7.cs">
-            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Storage\Generic\GenericStorageWithComplexKey.8.cs">
-            <DependentUpon>GenericStorageWithComplexKey.cs</DependentUpon>
-        </Compile>
+        <PackageReference Include="NSwag.AspNetCore" Version="13.18.2" />
     </ItemGroup>
 
     <Target Name="PrepareReleaseNotes" BeforeTargets="GenerateNuspec">

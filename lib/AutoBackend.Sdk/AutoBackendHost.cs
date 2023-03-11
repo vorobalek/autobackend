@@ -25,7 +25,7 @@ public class AutoBackendHost<T>
 
         var database = asyncScope
             .ServiceProvider
-            .GetRequiredService<AutoBackendDbContext>()
+            .GetRequiredService<GenericDbContext>()
             .Database;
 
         if (database.IsRelational() && migrateRelationalOnStartup)

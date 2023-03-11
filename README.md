@@ -23,11 +23,12 @@ like GraphQL. I dunno. I have already spent much more time trying to express how
 - [Cross-database provider support](#make-sure-you-have-configured-your-application-database-connection-correctly)
 - [Always up-to-date database schema](#make-sure-you-have-configured-your-application-startup-correctly)
 - [Best practices to use](#be-noticed-of-best-practices)
-  - [AutoBackendDbContext](#autobackenddbcontext-is-way-better-than-any-other)
+    - [GenericDbContext](#genericdbcontext-is-way-better-than-any-other)
 
 # Examples
 
-The basic using scenario can be found in [the Api project](https://github.com/vorobalek/autobackend/tree/main/src/Api). Also, here is a copy of that samples.
+The basic using scenario can be found in [the Api project](https://github.com/vorobalek/autobackend/tree/main/src/Api).
+Also, here is a copy of that samples.
 
 ## Initialize AutoBackend from your Program.cs file
 
@@ -47,78 +48,92 @@ public class Album
 {
     public Guid Id { get; set; }
 
-    public string? Title { get; set; }
+    public string Title { get; set; } = null!;
 
     public string? Artist { get; set; }
+
+    public int Score { get; set; } = 0;
 }
 
-public class Book
+public class Song
 {
     public Guid Id { get; set; }
 
-    public string? Title { get; set; }
+    public string Title { get; set; } = null!;
 
     public string? Author { get; set; }
-    
+
+    public string? Text { get; set; }
+
     public decimal Price { get; set; }
 }
 
-public class Book2Albums
+public class AlbumContent
 {
-    [ForeignKey(nameof(Book))]
-    public Guid BookId { get; set; }
-    
-    public Book Book { get; set; }
-
     [ForeignKey(nameof(Album))]
     public Guid AlbumId { get; set; }
-    
-    public Album Album { get; set; }
+
+    [ForeignKey(nameof(Song))]
+    public Guid SongId { get; set; }
+
+    [DeleteBehavior(DeleteBehavior.Cascade)]
+    public Album Album { get; set; } = null!;
+
+    [DeleteBehavior(DeleteBehavior.Cascade)]
+    public Song Song { get; set; } = null!;
 }
 
-public class BookShelve
+public class AlbumSet
 {
-    public string? Name { get; set; }
+    [ForeignKey(nameof(Album1))]
+    public Guid Album1Id { get; set; }
 
-    [ForeignKey(nameof(Book1))]
-    public Guid Book1Id { get; set; }
+    [ForeignKey(nameof(Album2))]
+    public Guid? Album2Id { get; set; }
 
-    public Book Book1 { get; set; }
+    [ForeignKey(nameof(Album3))]
+    public Guid? Album3Id { get; set; }
 
-    [ForeignKey(nameof(Book2))]
-    public Guid Book2Id { get; set; }
+    [ForeignKey(nameof(Album4))]
+    public Guid Album4Id { get; set; }
 
-    public Book Book2 { get; set; }
+    [ForeignKey(nameof(Album5))]
+    public Guid? Album5Id { get; set; }
 
-    [ForeignKey(nameof(Book3))]
-    public Guid Book3Id { get; set; }
+    [ForeignKey(nameof(Album6))]
+    public Guid? Album6Id { get; set; }
 
-    public Book Book3 { get; set; }
+    [ForeignKey(nameof(Album7))]
+    public Guid? Album7Id { get; set; }
 
-    [ForeignKey(nameof(Book4))]
-    public Guid Book4Id { get; set; }
+    [ForeignKey(nameof(Album8))]
+    public Guid? Album8Id { get; set; }
 
-    public Book Book4 { get; set; }
+    [DeleteBehavior(DeleteBehavior.Cascade)]
+    public Album Album1 { get; set; } = null!;
 
-    [ForeignKey(nameof(Book5))]
-    public Guid Book5Id { get; set; }
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    public Album? Album2 { get; set; }
 
-    public Book Book5 { get; set; }
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    public Song? Album3 { get; set; }
 
-    [ForeignKey(nameof(Book6))]
-    public Guid Book6Id { get; set; }
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    public Song? Album4 { get; set; }
 
-    public Book Book6 { get; set; }
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    public Song? Album5 { get; set; }
 
-    [ForeignKey(nameof(Book7))]
-    public Guid Book7Id { get; set; }
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    public Song? Album6 { get; set; }
 
-    public Book Book7 { get; set; }
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    public Song? Album7 { get; set; }
 
-    [ForeignKey(nameof(Book8))]
-    public Guid Book8Id { get; set; }
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    public Song? Album8 { get; set; }
 
-    public Book Book8 { get; set; }
+    public string Name { get; set; } = null!;
 }
 ```
 
@@ -151,7 +166,7 @@ public class Album
 [GenericEntity(
     nameof(Id)
 )]
-public class Book
+public class Song
 {
     public Guid Id { get; set; }
 
@@ -166,55 +181,55 @@ to mark the model as an entity with the primary key displayed as a complex set o
 
 ```csharp
 [GenericEntity(
-    nameof(BookId),
-    nameof(AlbumId)
+    nameof(AlbumId),
+    nameof(SongId)
 )]
-public class Book2Albums
+public class AlbumContent
 {
-    [ForeignKey(nameof(Book))]
-    public Guid BookId { get; set; }
-
     [ForeignKey(nameof(Album))]
     public Guid AlbumId { get; set; }
+
+    [ForeignKey(nameof(Song))]
+    public Guid SongId { get; set; }
     
     // ...
 }
 
 [GenericEntity(
-    nameof(Book1Id),
-    nameof(Book2Id),
-    nameof(Book3Id),
-    nameof(Book4Id),
-    nameof(Book5Id),
-    nameof(Book6Id),
-    nameof(Book7Id),
-    nameof(Book8Id)
+    nameof(Album1Id),
+    nameof(Album2Id),
+    nameof(Album3Id),
+    nameof(Album4Id),
+    nameof(Album5Id),
+    nameof(Album6Id),
+    nameof(Album7Id),
+    nameof(Album8Id)
 )]
-public class BookShelve
+public class AlbumSet
 {
-    [ForeignKey(nameof(Book1))]
-    public Guid Book1Id { get; set; }
+    [ForeignKey(nameof(Album1))]
+    public Guid Album1Id { get; set; }
 
-    [ForeignKey(nameof(Book2))]
-    public Guid Book2Id { get; set; }
+    [ForeignKey(nameof(Album2))]
+    public Guid? Album2Id { get; set; }
 
-    [ForeignKey(nameof(Book3))]
-    public Guid Book3Id { get; set; }
+    [ForeignKey(nameof(Album3))]
+    public Guid? Album3Id { get; set; }
 
-    [ForeignKey(nameof(Book4))]
-    public Guid Book4Id { get; set; }
+    [ForeignKey(nameof(Album4))]
+    public Guid Album4Id { get; set; }
 
-    [ForeignKey(nameof(Book5))]
-    public Guid Book5Id { get; set; }
+    [ForeignKey(nameof(Album5))]
+    public Guid? Album5Id { get; set; }
 
-    [ForeignKey(nameof(Book6))]
-    public Guid Book6Id { get; set; }
+    [ForeignKey(nameof(Album6))]
+    public Guid? Album6Id { get; set; }
 
-    [ForeignKey(nameof(Book7))]
-    public Guid Book7Id { get; set; }
+    [ForeignKey(nameof(Album7))]
+    public Guid? Album7Id { get; set; }
 
-    [ForeignKey(nameof(Book8))]
-    public Guid Book8Id { get; set; }
+    [ForeignKey(nameof(Album8))]
+    public Guid? Album8Id { get; set; }
 
     // ...
 }
@@ -282,7 +297,7 @@ Use `[GenericControllerV1]` to generate for:
       nameof(Id)
   )]
   [GenericControllerV1]
-  public class Book
+  public class Song
   {
       // ...
   }
@@ -303,27 +318,27 @@ Use `[GenericControllerV1]` to generate for:
 
   ```csharp
   [GenericEntity(
-      nameof(BookId),
-      nameof(AlbumId)
+    nameof(AlbumId),
+    nameof(SongId)
   )]
   [GenericControllerV1]
-  public class Book2Albums
+  public class AlbumContent
   {
       // ...
   }
   
   [GenericEntity(
-      nameof(Book1Id),
-      nameof(Book2Id),
-      nameof(Book3Id),
-      nameof(Book4Id),
-      nameof(Book5Id),
-      nameof(Book6Id),
-      nameof(Book7Id),
-      nameof(Book8Id)
+    nameof(Album1Id),
+    nameof(Album2Id),
+    nameof(Album3Id),
+    nameof(Album4Id),
+    nameof(Album5Id),
+    nameof(Album6Id),
+    nameof(Album7Id),
+    nameof(Album8Id)
   )]
   [GenericControllerV1]
-  public class BookShelve
+  public class AlbumSet
   {
       // ...
   }
@@ -342,53 +357,71 @@ public class Album
 {
     [GenericFilter] public Guid Id { get; set; }
 
-    public string? Title { get; set; }
+    [GenericFilter] public string Title { get; set; } = null!;
 
     [GenericFilter] public string? Artist { get; set; }
+
+    [GenericFilter] public int Score { get; set; } = 0;
 }
 ```
 
 As a result, AutoBackend will build a filter model that you can use in the API endpoints, such
 as `/api/v1/<model name>/filter` or `/api/v1/<model name>/filter/count`. For the example above, the filter model looks
-that:
+like that:
 
 ```
 {
   "id": {
-    "equal": "string" | undefined | null,
-    "notEqual": "string" | undefined | null,
-    "isNull": true | undefined | null,
-    "greaterThan": "string" | undefined | null,
-    "greaterThanOrEqual": "string" | undefined | null,
-    "lessThan": "string" | undefined | null,
-    "lessThanOrEqual": "string" | undefined | null,
+    "equal": string | null | undefined,
+    "notEqual": string | null | undefined,
+    "isNull": boolean | null | undefined,
+    "greaterThan": string | null | undefined,
+    "greaterThanOrEqual": string | null | undefined,
+    "lessThan": string | null | undefined,
+    "lessThanOrEqual": string | null | undefined,
     "in": [
-      "string"
-    ] | undefined | null
+      string | null | undefined,
+      string | null | undefined
+    ]
+  },
+  "title": {
+    "equal": string | null | undefined,
+    "notEqual": string | null | undefined,
+    "isNull": boolean | null | undefined,
+    "greaterThan": string | null | undefined,
+    "greaterThanOrEqual": string | null | undefined,
+    "lessThan": string | null | undefined,
+    "lessThanOrEqual": string | null | undefined,
+    "in": [
+      string | null | undefined,
+      string | null | undefined
+    ]
   },
   "artist": {
-    "equal": "string" | undefined | null,
-    "notEqual": "string" | undefined | null,
-    "isNull": true | undefined | null,
-    "greaterThan": "string" | undefined | null,
-    "greaterThanOrEqual": "string" | undefined | null,
-    "lessThan": "string" | undefined | null,
-    "lessThanOrEqual": "string" | undefined | null,
+    "equal": string | null | undefined,
+    "notEqual": string | null | undefined,
+    "isNull": boolean | null | undefined,
+    "greaterThan": string | null | undefined,
+    "greaterThanOrEqual": string | null | undefined,
+    "lessThan": string | null | undefined,
+    "lessThanOrEqual": string | null | undefined,
     "in": [
-      "string"
-    ] | undefined | null
+      string | null | undefined,
+      string | null | undefined
+    ]
   },
   "score": {
-    "equal": 0 | undefined | null,
-    "notEqual": 0 | undefined | null,
-    "isNull": true | undefined | null,
-    "greaterThan": 0 | undefined | null,
-    "greaterThanOrEqual": 0 | undefined | null,
-    "lessThan": 0 | undefined | null,
-    "lessThanOrEqual": 0 | undefined | null,
+    "equal": number | null | undefined,
+    "notEqual": number | null | undefined,
+    "isNull": boolean | null | undefined,
+    "greaterThan": number | null | undefined,
+    "greaterThanOrEqual": number | null | undefined,
+    "lessThan": number | null | undefined,
+    "lessThanOrEqual": number | null | undefined,
     "in": [
-      0
-    ] | undefined | null
+      number | null | undefined,
+      number | null | undefined
+    ]
   }
 }
 ```
@@ -462,16 +495,24 @@ await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args, migrateRelat
 First, you must [install Entity Framework Core Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet). After that,
 you can create a new migration using one of the following commands executed from the root of the project folder.
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerAutoBackendDbContext` - if you use SqlServer.
+`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerAutoBackendDbContext` - if you use
+SqlServer.
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresAutoBackendDbContext` - if you use Postgres.
+`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresAutoBackendDbContext` - if you use
+Postgres.
 
-Or you can create scripts for [adding a new migration](https://github.com/vorobalek/autobackend/blob/main/add_migration.sh) or [removing the last migration](https://github.com/vorobalek/autobackend/blob/main/remove_migration.sh) for both database providers.
+Or you can create scripts
+for [adding a new migration](https://github.com/vorobalek/autobackend/blob/main/add_migration.sh)
+or [removing the last migration](https://github.com/vorobalek/autobackend/blob/main/remove_migration.sh) for both
+database providers.
 
 Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
 migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
 
 ## Be noticed of best practices
 
-### AutoBackendDbContext is way better than any other
-Despite the database provider you have chosen, if you need to access the `DbContext` directly from your code, it will be the best practice to inject the `AutoBackendDbContext` into your services. This way, you can switch between any database providers offered by `AutoBackend.SDK` simply by changing one line in your application config.
+### GenericDbContext is way better than any other
+
+Despite the database provider you have chosen, if you need to access the `DbContext` directly from your code, it will be
+the best practice to inject the `GenericDbContext` into your services. This way, you can switch between any database
+providers offered by `AutoBackend.SDK` simply by changing one line in your application config.

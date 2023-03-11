@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace AutoBackend.Sdk.Services.ExceptionHandler;
 
-internal class ExceptionHandlerFactory : IExceptionHandlerFactory
+internal sealed class ExceptionHandlerFactory : IExceptionHandlerFactory
 {
     public IExceptionHandler? CurrentHandler { get; private set; }
 
@@ -18,7 +18,7 @@ internal class ExceptionHandlerFactory : IExceptionHandlerFactory
             handleExceptionResponseAsync);
     }
 
-    private class ExceptionHandler<TResponse> : IExceptionHandler
+    private sealed class ExceptionHandler<TResponse> : IExceptionHandler
     {
         private readonly HttpContext _httpContext;
         private readonly Func<Exception, Task<TResponse>> _processResponse;

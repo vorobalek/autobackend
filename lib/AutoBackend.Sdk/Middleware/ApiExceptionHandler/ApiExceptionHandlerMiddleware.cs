@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AutoBackend.Sdk.Middleware.ApiExceptionHandler;
 
-internal class ApiExceptionHandlerMiddleware
+internal sealed class ApiExceptionHandlerMiddleware
 {
     private const string DefaultErrorMessage = "Unexpected internal server error out of controller context";
     private readonly RequestDelegate _next;
