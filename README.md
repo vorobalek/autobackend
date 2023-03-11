@@ -495,10 +495,10 @@ await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args, migrateRelat
 First, you must [install Entity Framework Core Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet). After that,
 you can create a new migration using one of the following commands executed from the root of the project folder.
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerAutoBackendDbContext` - if you use
+`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerGenericDbContext` - if you use
 SqlServer.
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresAutoBackendDbContext` - if you use
+`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext` - if you use
 Postgres.
 
 Or you can create scripts

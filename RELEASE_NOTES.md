@@ -9,4 +9,4 @@ and [NuGet](https://www.nuget.org/packages/AutoBackend.SDK).
 
 In this version:
 
-- ...
+- Fix typos in readme file
