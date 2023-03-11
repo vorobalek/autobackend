@@ -1,7 +1,6 @@
-using System.Reflection;
-using AutoBackend.Sdk.Attributes.GenericControllers;
 using AutoBackend.Sdk.Configuration;
-using AutoBackend.Sdk.Controllers.Generic.Infrastructure;
+using AutoBackend.Sdk.Controllers;
+using AutoBackend.Sdk.Controllers.Infrastructure;
 using AutoBackend.Sdk.Data;
 using AutoBackend.Sdk.Enums;
 using AutoBackend.Sdk.Exceptions;
@@ -9,7 +8,7 @@ using AutoBackend.Sdk.NSwag;
 using AutoBackend.Sdk.Services.ClusterDiscovery;
 using AutoBackend.Sdk.Services.DateTimeProvider;
 using AutoBackend.Sdk.Services.ExceptionHandler;
-using AutoBackend.Sdk.Storage.Generic;
+using AutoBackend.Sdk.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,13 +20,12 @@ internal static class ServiceCollectionExtensions
 {
     internal static IServiceCollection AddAutoBackend<TProgram>(
         this IServiceCollection services,
-        Assembly assembly,
         IConfiguration configuration)
     {
         return services
             .AddGenericControllers<TProgram>()
             .AddGenericControllersSwagger(typeof(TProgram).Assembly.FullName!)
-            .AddDbContext<TProgram>(configuration)
+            .AddGenericDbContext<TProgram>(configuration)
             .AddGenericStorage()
             .AddSingleton<IDateTimeProvider, DateTimeProvider>()
             .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>()
@@ -44,7 +42,7 @@ internal static class ServiceCollectionExtensions
                 .Add(new GenericControllerRouteConvention()))
             .ConfigureApplicationPartManager(m => m
                 .FeatureProviders
-                .Add(new GenericTypeControllerFeatureProvider(typeof(AutoBackendHost<>).Assembly,
+                .Add(new GenericControllerTypeFeatureProvider(typeof(AutoBackendHost<>).Assembly,
                     typeof(TProgram).Assembly)));
 
         return services;
@@ -54,27 +52,17 @@ internal static class ServiceCollectionExtensions
         this IServiceCollection services,
         string swaggerTitle)
     {
-        var attributeTypes = typeof(GenericControllerAttribute)
-            .Assembly
-            .GetExportedTypes()
-            .Where(t =>
-                !t.IsAbstract &&
-                t.IsAssignableTo(typeof(GenericControllerAttribute)));
-        foreach (var attributeType in attributeTypes)
+        services.AddSwaggerDocument(settings =>
         {
-            var version = (Activator.CreateInstance(attributeType) as GenericControllerAttribute)!.Version;
-            services.AddSwaggerDocument(settings =>
-            {
-                settings.Title = swaggerTitle;
-                settings.DocumentName = version;
-                settings.PostProcess = document => { document.Info.Version = version; };
-                settings.ApiGroupNames = new[] { version };
-                settings.TypeNameGenerator = new NSwagTypeNameGenerator();
-                settings.SchemaNameGenerator = new NSwagSchemaNameGenerator();
+            settings.Title = swaggerTitle;
+            settings.DocumentName = GenericController.Version;
+            settings.PostProcess = document => { document.Info.Version = GenericController.Version; };
+            settings.ApiGroupNames = new[] { GenericController.Version };
+            settings.TypeNameGenerator = new NSwagTypeNameGenerator();
+            settings.SchemaNameGenerator = new NSwagSchemaNameGenerator();
 
-                settings.OperationProcessors.Replace<OperationTagsProcessor>(new NSwagOperationTagsProcessor());
-            });
-        }
+            settings.OperationProcessors.Replace<OperationTagsProcessor>(new NSwagOperationTagsProcessor());
+        });
 
         return services;
     }
@@ -96,20 +84,20 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddDbContext<TProgram>(
+    private static IServiceCollection AddGenericDbContext<TProgram>(
         this IServiceCollection services,
         IConfiguration configuration)
     {
         const string databasesConfigurationSectionName = "Database";
         const string autoBackendInMemoryDatabaseName = "AutoBackendInMemoryDatabase";
-        AutoBackendDbContext.SetAssemblies(typeof(AutoBackendHost<>).Assembly, typeof(TProgram).Assembly);
+        GenericDbContext.SetAssemblies(typeof(AutoBackendHost<>).Assembly, typeof(TProgram).Assembly);
 
         var databasesConfiguration = configuration
             .GetSection(databasesConfigurationSectionName)
             .Get<DatabaseConfiguration?>();
 
         if (databasesConfiguration is null)
-            return services.AddSpecificDbContext<InMemoryAutoBackendDbContext>(true, builder =>
+            return services.AddSpecificGenericDbContext<InMemoryGenericDbContext>(true, builder =>
             {
                 builder
                     .UseInMemoryDatabase(autoBackendInMemoryDatabaseName);
@@ -122,7 +110,7 @@ internal static class ServiceCollectionExtensions
             switch (databaseConfiguration.Key)
             {
                 case DatabaseProviderType.InMemory:
-                    services.AddSpecificDbContext<InMemoryAutoBackendDbContext>(isPrimary, builder =>
+                    services.AddSpecificGenericDbContext<InMemoryGenericDbContext>(isPrimary, builder =>
                     {
                         builder
                             .UseInMemoryDatabase(databaseConfiguration.Value);
@@ -131,7 +119,7 @@ internal static class ServiceCollectionExtensions
                     break;
                 case DatabaseProviderType.SqlServer:
                     services
-                        .AddSpecificDbContext<SqlServerAutoBackendDbContext>(isPrimary, builder =>
+                        .AddSpecificGenericDbContext<SqlServerGenericDbContext>(isPrimary, builder =>
                         {
                             builder
                                 .UseSqlServer(
@@ -145,7 +133,7 @@ internal static class ServiceCollectionExtensions
                     isPrimaryConfigured |= isPrimary;
                     break;
                 case DatabaseProviderType.Postgres:
-                    services.AddSpecificDbContext<PostgresAutoBackendDbContext>(isPrimary, builder =>
+                    services.AddSpecificGenericDbContext<PostgresGenericDbContext>(isPrimary, builder =>
                     {
                         builder
                             .UseNpgsql(
@@ -161,25 +149,24 @@ internal static class ServiceCollectionExtensions
                 default:
                     throw new ArgumentOutOfRangeException(nameof(databaseConfiguration.Key));
             }
-
-            if (!isPrimaryConfigured)
-                throw new AutoBackendException("No one primary database provider was configured");
         }
+
+        if (!isPrimaryConfigured)
+            throw new AutoBackendException("No one primary database provider was configured");
 
         return services;
     }
 
-    private static IServiceCollection AddSpecificDbContext<TContext>(
+    private static IServiceCollection AddSpecificGenericDbContext<TContext>(
         this IServiceCollection services,
         bool isPrimary,
         Action<DbContextOptionsBuilder>? action = null)
-        where TContext : AutoBackendDbContext<TContext>
+        where TContext : GenericDbContext, IGenericDbContext<TContext>
     {
         services.AddDbContext<TContext>(action);
-        AutoBackendDbContext<TContext>.DesignTimeFactory.Initialize(services);
+        IGenericDbContext<TContext>.DesignTimeFactory.Initialize(services);
 
-        if (isPrimary)
-            services.AddScoped<AutoBackendDbContext, TContext>();
+        if (isPrimary) services.AddScoped<GenericDbContext, TContext>();
 
         return services;
     }

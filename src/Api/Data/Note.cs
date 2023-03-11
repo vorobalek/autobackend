@@ -1,10 +1,9 @@
-using AutoBackend.Sdk.Attributes.GenericControllers.V1;
-using AutoBackend.Sdk.Attributes.GenericEntities;
+using AutoBackend.Sdk.Attributes;
 
 namespace Api.Data;
 
 [GenericEntity]
-[GenericControllerV1]
+[GenericController]
 public class Note
 {
     public string Content { get; set; } = null!;

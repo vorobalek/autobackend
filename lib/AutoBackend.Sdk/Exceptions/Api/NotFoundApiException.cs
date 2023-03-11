@@ -2,19 +2,19 @@ using Microsoft.AspNetCore.Http;
 
 namespace AutoBackend.Sdk.Exceptions.Api;
 
-internal class NotFoundApiException : ApiException
+internal sealed class NotFoundApiException : ApiException
 {
-    public NotFoundApiException()
+    internal NotFoundApiException()
     {
     }
 
-    public NotFoundApiException(string message) : base(message)
+    internal NotFoundApiException(string message) : base(message)
     {
     }
 
-    public NotFoundApiException(string message, Exception innerException) : base(message, innerException)
+    internal NotFoundApiException(string message, Exception innerException) : base(message, innerException)
     {
     }
 
-    public override int StatusCode => StatusCodes.Status404NotFound;
+    internal override int StatusCode => StatusCodes.Status404NotFound;
 }

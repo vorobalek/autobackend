@@ -4,17 +4,17 @@ namespace AutoBackend.Sdk.Helpers;
 
 internal static class PredicateBuilder
 {
-    public static Expression<Func<T, bool>> True<T>()
+    internal static Expression<Func<T, bool>> True<T>()
     {
         return _ => true;
     }
 
-    public static Expression<Func<T, bool>> False<T>()
+    internal static Expression<Func<T, bool>> False<T>()
     {
         return _ => false;
     }
 
-    public static Expression<Func<T, bool>> Or<T>(
+    internal static Expression<Func<T, bool>> Or<T>(
         this Expression<Func<T, bool>> expr1,
         Expression<Func<T, bool>> expr2)
     {
@@ -26,7 +26,7 @@ internal static class PredicateBuilder
             expr1.Parameters);
     }
 
-    public static Expression<Func<T, bool>> And<T>(
+    internal static Expression<Func<T, bool>> And<T>(
         this Expression<Func<T, bool>> expr1,
         Expression<Func<T, bool>> expr2)
     {

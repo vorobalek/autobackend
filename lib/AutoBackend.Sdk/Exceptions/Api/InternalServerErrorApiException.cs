@@ -2,21 +2,21 @@ using Microsoft.AspNetCore.Http;
 
 namespace AutoBackend.Sdk.Exceptions.Api;
 
-internal class InternalServerErrorApiException : ApiException
+internal sealed class InternalServerErrorApiException : ApiException
 {
-    public const string ErrorMessage = "Unexpected internal server error";
+    internal const string ErrorMessage = "Unexpected internal server error";
 
-    public InternalServerErrorApiException()
+    internal InternalServerErrorApiException()
     {
     }
 
-    public InternalServerErrorApiException(string message) : base(message)
+    internal InternalServerErrorApiException(string message) : base(message)
     {
     }
 
-    public InternalServerErrorApiException(string message, Exception innerException) : base(message, innerException)
+    internal InternalServerErrorApiException(string message, Exception innerException) : base(message, innerException)
     {
     }
 
-    public override int StatusCode => StatusCodes.Status500InternalServerError;
+    internal override int StatusCode => StatusCodes.Status500InternalServerError;
 }

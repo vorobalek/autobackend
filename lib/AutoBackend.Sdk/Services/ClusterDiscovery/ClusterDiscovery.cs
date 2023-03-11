@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using AutoBackend.Sdk.Extensions;
-using AutoBackend.Sdk.Models.V1;
+using AutoBackend.Sdk.Models;
 using AutoBackend.Sdk.Services.DateTimeProvider;
 using Flurl.Http;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +11,7 @@ namespace AutoBackend.Sdk.Services.ClusterDiscovery;
 
 internal sealed class ClusterDiscovery : IClusterDiscovery
 {
-    public const string ServiceUrl = "/__discovery";
+    internal const string ServiceUrl = "/__discovery";
 
     private static readonly string? ClusterUrl = Environment.GetEnvironmentVariable("HOST");
     private static ConcurrentDictionary<Guid, ClusterNode>? _knownClusterNodes;
@@ -35,12 +35,10 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
         };
 
     public ClusterNode CurrentClusterNode =>
-        _currentNode ??= new ClusterNode
-        {
-            IsCurrent = true,
-            Id = Guid.NewGuid(),
-            CreatedUtc = _dateTimeProvider.UtcNow()
-        };
+        _currentNode ??= new ClusterNode(
+            true,
+            Guid.NewGuid(),
+            _dateTimeProvider.UtcNow());
 
     public async Task ProcessDiscoveryRequest(
         HttpContext httpContext,
@@ -61,7 +59,7 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
         {
             KnownClusterNodes[remoteClusterNode.Id] = FillRemoteNode(remoteClusterNode);
             KnownClusterNodes[remoteClusterNode.Id].LastSeenUtc = _dateTimeProvider.UtcNow();
-            KnownClusterNodes[remoteClusterNode.Id].LastSeenIp.WithValue(
+            KnownClusterNodes[remoteClusterNode.Id].LastSeenIp.WithValueIfNotNull(
                 httpContext.Request.Headers["X-Forwarded-For"],
                 _dateTimeProvider);
         }
@@ -69,7 +67,7 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
         CurrentClusterNode.LastRequestToUtc.WithValue(utcNow, _dateTimeProvider);
 
         await httpContext.WriteJsonAndCompleteAsync(
-            ApiResponseV1.CreateOk(
+            GenericControllerResponse.CreateOk(
                 httpContext,
                 KnownClusterNodes.Values.ToArray()),
             Formatting.None,
@@ -83,7 +81,7 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
         {
             var response = await serviceUri
                 .PostJsonAsync(CurrentClusterNode, cancellationToken)
-                .ReceiveJson<ApiResponseV1<ClusterNode[]?>?>();
+                .ReceiveJson<GenericControllerResponse<ClusterNode[]?>?>();
 
             if (response is { Ok: true, Result: { } remoteClusterNodes })
                 foreach (var remoteClusterNode in remoteClusterNodes)
@@ -128,7 +126,8 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
 
         foreach (var knownKeyValue in KnownClusterNodes
                      .Where(knownKeyValue =>
-                         (_dateTimeProvider.UtcNow() - knownKeyValue.Value.LastSeenUtc).TotalSeconds
+                         ((_dateTimeProvider.UtcNow() - knownKeyValue.Value.LastSeenUtc)?.TotalSeconds ??
+                          double.MaxValue)
                          > 10
                          && knownKeyValue.Key != CurrentClusterNode.Id))
             KnownClusterNodes.Remove(knownKeyValue.Key, out _);
@@ -136,11 +135,11 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
 
     private ClusterNode FillRemoteNode(ClusterNode remoteClusterNode)
     {
-        return new ClusterNode
+        return new ClusterNode(
+            false,
+            remoteClusterNode.Id,
+            remoteClusterNode.CreatedUtc)
         {
-            IsCurrent = false,
-            Id = remoteClusterNode.Id,
-            CreatedUtc = remoteClusterNode.CreatedUtc,
             LastSeenIp = FillRemoteNodeField(x => x.LastSeenIp, remoteClusterNode),
             LastRequestToUtc = FillRemoteNodeField(x => x.LastRequestToUtc, remoteClusterNode),
             LastRequestFromUtc = FillRemoteNodeField(x => x.LastRequestFromUtc, remoteClusterNode),

@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoBackend.Sdk.Data;
 
-public sealed class InMemoryAutoBackendDbContext : AutoBackendDbContext<InMemoryAutoBackendDbContext>
+public sealed class InMemoryGenericDbContext : GenericDbContext, IGenericDbContext<InMemoryGenericDbContext>
 {
-    public InMemoryAutoBackendDbContext(DbContextOptions<InMemoryAutoBackendDbContext> options) : base(options)
+    public InMemoryGenericDbContext(DbContextOptions<InMemoryGenericDbContext> options) : base(options)
     {
     }
 }

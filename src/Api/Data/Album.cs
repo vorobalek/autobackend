@@ -1,18 +1,16 @@
-using AutoBackend.Sdk.Attributes.GenericControllers.V1;
-using AutoBackend.Sdk.Attributes.GenericEntities;
-using AutoBackend.Sdk.Attributes.GenericFilters;
+using AutoBackend.Sdk.Attributes;
 
 namespace Api.Data;
 
 [GenericEntity(
     nameof(Id)
 )]
-[GenericControllerV1]
+[GenericController]
 public class Album
 {
     [GenericFilter] public Guid Id { get; set; }
 
-    public string? Title { get; set; }
+    [GenericFilter] public string Title { get; set; } = null!;
 
     [GenericFilter] public string? Artist { get; set; }
 
