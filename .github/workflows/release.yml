@@ -246,6 +246,6 @@ jobs:
               '- NuGet https://www.nuget.org/packages/AutoBackend.SDK/' +
               '${{ needs.create_release.outputs.created_release_version }}\n' +
               '- MyGet https://www.myget.org/feed/autobackend/package/nuget/AutoBackend.SDK/' +
-              '${{ needs.create_release.outputs.created_release_version }}.\n\n' +
+              '${{ needs.create_release.outputs.created_release_version }}\n\n' +
               '❗ Please be noticed it may take a few minutes to the verifying.'
             })
