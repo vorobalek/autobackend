@@ -251,9 +251,9 @@ The latest API version is v1. APIv1 supports JSON only, and its output uses cont
 
 For more details, you can always request `/swagger` to get the information about all generated endpoints.
 
-### ❗️❗️❗️ Be noticed that [GenericControllerV1] supports only models also marked with [GenericEntity]
+### ❗️❗️❗️ Be noticed that [GenericController] supports only models also marked with [GenericEntity]
 
-Use `[GenericControllerV1]` to generate for:
+Use `[GenericController]` to generate for:
 
 - Keyless entity:\
   **GET** `/api/v1/<model name>` - returns all entities\
@@ -263,7 +263,7 @@ Use `[GenericControllerV1]` to generate for:
 
   ```csharp
   [GenericEntity]
-  [GenericControllerV1]
+  [GenericController]
   public class Note
   {
       // ...
@@ -287,7 +287,7 @@ Use `[GenericControllerV1]` to generate for:
   [GenericEntity(
       nameof(Id)
   )]
-  [GenericControllerV1]
+  [GenericController]
   public class Album
   {
       // ...
@@ -296,7 +296,7 @@ Use `[GenericControllerV1]` to generate for:
   [GenericEntity(
       nameof(Id)
   )]
-  [GenericControllerV1]
+  [GenericController]
   public class Song
   {
       // ...
@@ -321,7 +321,7 @@ Use `[GenericControllerV1]` to generate for:
     nameof(AlbumId),
     nameof(SongId)
   )]
-  [GenericControllerV1]
+  [GenericController]
   public class AlbumContent
   {
       // ...
@@ -337,7 +337,7 @@ Use `[GenericControllerV1]` to generate for:
     nameof(Album7Id),
     nameof(Album8Id)
   )]
-  [GenericControllerV1]
+  [GenericController]
   public class AlbumSet
   {
       // ...
@@ -352,7 +352,7 @@ Use `[GenericControllerV1]` to generate for:
 [GenericEntity(
     nameof(Id)
 )]
-[GenericControllerV1]
+[GenericController]
 public class Album
 {
     [GenericFilter] public Guid Id { get; set; }
@@ -495,10 +495,10 @@ await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args, migrateRelat
 First, you must [install Entity Framework Core Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet). After that,
 you can create a new migration using one of the following commands executed from the root of the project folder.
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerAutoBackendDbContext` - if you use
+`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerGenericDbContext` - if you use
 SqlServer.
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresAutoBackendDbContext` - if you use
+`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext` - if you use
 Postgres.
 
 Or you can create scripts
