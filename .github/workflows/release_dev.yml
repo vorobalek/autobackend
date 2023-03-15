@@ -7,13 +7,12 @@ on:
       - develop
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   test_release_dev:
     name: Run Unit Tests before Release Dev Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v3
@@ -41,8 +40,6 @@ jobs:
       created_release_version: ${{ steps.get_release_dev_version.outputs.result }}
 
     steps:
-      - uses: actions/checkout@v3
-
       - name: Get Build Stamp
         run: |
           echo "BUILD_STAMP=$(date +'%Y%m%d%H%M%S')" >> ${GITHUB_ENV}
@@ -85,6 +82,8 @@ jobs:
       - test_release_dev
       - create_release_dev
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v3
@@ -121,8 +120,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-
       - name: Setup
         uses: actions/setup-dotnet@v3
         with:
@@ -144,10 +141,10 @@ jobs:
       - build_package_dev
       - publish_myget_dev
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
-      - uses: actions/checkout@v3
-
       - name: Comment Commit with the Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}" build's link
         uses: actions/github-script@v6
         with:
