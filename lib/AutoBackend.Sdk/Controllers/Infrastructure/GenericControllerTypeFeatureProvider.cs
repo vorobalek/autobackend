@@ -36,7 +36,7 @@ internal sealed class GenericControllerTypeFeatureProvider : IApplicationFeature
                 $"Generic controller can be generated only for types marked with {nameof(GenericEntityAttribute)} ({candidate.Name}).");
 
         yield return MakeForCandidate(candidate);
-        
+
         if (genericEntityAttribute.Keys.Any())
             yield return MakeWithKeyTypeForCandidate(candidate, genericEntityAttribute.Keys);
 

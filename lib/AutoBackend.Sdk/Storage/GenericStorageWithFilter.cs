@@ -27,8 +27,8 @@ internal sealed class GenericStorageWithFilter<TEntity, TFilter> :
 
     public Task<TEntity[]> GetSliceByFilterAsync(
         TFilter? filter,
-        int? skipCount, 
-        int? takeCount, 
+        int? skipCount,
+        int? takeCount,
         CancellationToken cancellationToken = default)
     {
         var query = _db.Set<TEntity>().Where(BuildFilterExpression(filter));
@@ -50,9 +50,9 @@ internal sealed class GenericStorageWithFilter<TEntity, TFilter> :
             foreach (var filterProperty in filter.GetType().GetProperties())
             {
                 var filterValue = filterProperty.GetValue(filter);
-                
+
                 if (filterValue is null) continue;
-                
+
                 if (filterValue is not IGenericFilter genericFilter)
                     throw new AutoBackendException(
                         $"The filter properties have to be inherited from {nameof(IGenericFilter)}.");

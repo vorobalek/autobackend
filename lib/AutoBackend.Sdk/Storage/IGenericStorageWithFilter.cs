@@ -6,7 +6,8 @@ internal interface IGenericStorageWithFilter<TEntity, in TFilter> : IGenericStor
 {
     Task<TEntity[]> GetAllByFilterAsync(TFilter? filter, CancellationToken cancellationToken = default);
 
-    Task<TEntity[]> GetSliceByFilterAsync(TFilter? filter, int? skipCount, int? takeCount, CancellationToken cancellationToken = default);
+    Task<TEntity[]> GetSliceByFilterAsync(TFilter? filter, int? skipCount, int? takeCount,
+        CancellationToken cancellationToken = default);
 
     Task<long> GetCountByFilterAsync(TFilter? filter, CancellationToken cancellationToken = default);
 }

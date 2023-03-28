@@ -45,7 +45,7 @@ internal static class GenericGqlQueryTypeBuilder
                              .GetCustomAttribute<GenericGqlQueryAttribute>() is not null))
             {
                 MakeForCandidate(moduleBuilder, queryTypeBuilder, candidate);
-                
+
                 if (GenericFilterModelTypeBuilder.TryBuild(candidate) is { } genericFilterType)
                     MakeWithFilterForCandidate(moduleBuilder, queryTypeBuilder, candidate, genericFilterType);
             }
@@ -57,7 +57,8 @@ internal static class GenericGqlQueryTypeBuilder
         return queryType;
     }
 
-    private static void MakeWithFilterForCandidate(ModuleBuilder moduleBuilder, TypeBuilder queryTypeBuilder, Type candidate, Type genericFilterType)
+    private static void MakeWithFilterForCandidate(ModuleBuilder moduleBuilder, TypeBuilder queryTypeBuilder,
+        Type candidate, Type genericFilterType)
     {
         MakeForCandidateInternal(
             moduleBuilder,
@@ -88,7 +89,7 @@ internal static class GenericGqlQueryTypeBuilder
         ModuleBuilder moduleBuilder,
         TypeBuilder queryTypeBuilder,
         Type candidate,
-        string propertyTypeName, 
+        string propertyTypeName,
         Type propertyTypeParent,
         string propertyGqlName)
     {

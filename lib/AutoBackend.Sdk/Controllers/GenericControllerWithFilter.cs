@@ -22,7 +22,8 @@ internal sealed class GenericControllerWithFilter<
     public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetAllByFilterAsync(
         [FromBody] TFilter filter)
     {
-        return ProcessAsync(cancellationToken => _genericStorageWithFilter.GetAllByFilterAsync(filter, cancellationToken));
+        return ProcessAsync(cancellationToken =>
+            _genericStorageWithFilter.GetAllByFilterAsync(filter, cancellationToken));
     }
 
     [HttpPost("filter/slice")]
@@ -39,6 +40,7 @@ internal sealed class GenericControllerWithFilter<
     public Task<ActionResult<GenericControllerResponse<long>>> GetCountByFilterAsync(
         [FromBody] TFilter filter)
     {
-        return ProcessAsync(cancellationToken => _genericStorageWithFilter.GetCountByFilterAsync(filter, cancellationToken));
+        return ProcessAsync(cancellationToken =>
+            _genericStorageWithFilter.GetCountByFilterAsync(filter, cancellationToken));
     }
 }

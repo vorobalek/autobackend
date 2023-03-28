@@ -9,12 +9,12 @@ internal record GenericFilter<TOriginal, TNullable> : IGenericFilter
 {
     public TNullable? Equal { get; init; }
     public TNullable? NotEqual { get; init; }
-    public bool? IsNull { get; init; }
     public TNullable? GreaterThan { get; init; }
     public TNullable? GreaterThanOrEqual { get; init; }
     public TNullable? LessThan { get; init; }
     public TNullable? LessThanOrEqual { get; init; }
     public IEnumerable<TOriginal>? In { get; init; }
+    public bool? IsNull { get; init; }
 
     object? IGenericFilter.Equal => Equal;
 

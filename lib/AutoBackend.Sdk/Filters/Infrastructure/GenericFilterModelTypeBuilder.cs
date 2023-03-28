@@ -57,7 +57,7 @@ internal static class GenericFilterModelTypeBuilder
                     : candidateProperty.PropertyType;
 
                 var propertyTypeName = $"Generic_{type.Name}_Filter_{propertyName}";
-                
+
                 var propertyTypeBuilder = ModuleBuilder.DefineType(
                     propertyTypeName,
                     TypeAttributes.Public |
@@ -73,13 +73,14 @@ internal static class GenericFilterModelTypeBuilder
                     MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.RTSpecialName);
-                
+
                 var propertyType = propertyTypeBuilder.CreateType();
 
                 var fieldModelBuilder =
                     filterModelTypeBuilder.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
                 var propertyBuilder =
-                    filterModelTypeBuilder.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
+                    filterModelTypeBuilder.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType,
+                        null);
 
                 var getMethod = filterModelTypeBuilder.DefineMethod("get_" + propertyName,
                     MethodAttributes.Public |
