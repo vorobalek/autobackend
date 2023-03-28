@@ -12,7 +12,7 @@ internal sealed class GenericControllerWithComplexKey<
     TKey4,
     TKey5,
     TKey6
-> : GenericController<TEntity>
+> : GenericController
     where TEntity : class
 {
     private readonly IGenericStorageWithComplexKey<
@@ -34,7 +34,7 @@ internal sealed class GenericControllerWithComplexKey<
             TKey4,
             TKey5,
             TKey6
-        > genericStorage) : base(genericStorage)
+        > genericStorage)
     {
         _genericStorage = genericStorage;
     }

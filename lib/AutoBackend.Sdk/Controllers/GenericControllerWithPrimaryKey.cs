@@ -7,13 +7,12 @@ namespace AutoBackend.Sdk.Controllers;
 internal sealed class GenericControllerWithPrimaryKey<
     TEntity,
     TKey
-> : GenericController<TEntity>
+> : GenericController
     where TEntity : class
 {
     private readonly IGenericStorageWithPrimaryKey<TEntity, TKey> _genericStorage;
 
-    public GenericControllerWithPrimaryKey(IGenericStorageWithPrimaryKey<TEntity, TKey> genericStorage) : base(
-        genericStorage)
+    public GenericControllerWithPrimaryKey(IGenericStorageWithPrimaryKey<TEntity, TKey> genericStorage)
     {
         _genericStorage = genericStorage;
     }

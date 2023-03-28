@@ -5,21 +5,21 @@ using AutoBackend.Sdk.Attributes;
 
 namespace AutoBackend.Sdk.Filters.Infrastructure;
 
-internal static class GenericFilterTypeBuilder
+internal static class GenericFilterModelTypeBuilder
 {
-    private const string FiltersAssemblyModuleName = "Main";
+    private const string GenericFilterModelsAssemblyModuleName = "GenericFilterModels";
 
     private static readonly ModuleBuilder ModuleBuilder = AssemblyBuilder
         .DefineDynamicAssembly(
-            new AssemblyName(Guid.NewGuid().ToString()),
+            new AssemblyName("AutoBackend.Sdk.Runtime.Filters"),
             AssemblyBuilderAccess.Run)
-        .DefineDynamicModule(FiltersAssemblyModuleName);
+        .DefineDynamicModule(GenericFilterModelsAssemblyModuleName);
 
-    private static readonly ConcurrentDictionary<Type, Type?> FiltersMap = new();
+    private static readonly ConcurrentDictionary<Type, Type?> FilterModelsMap = new();
 
     internal static Type? TryBuild(Type type)
     {
-        if (FiltersMap.TryGetValue(type, out var filterType))
+        if (FilterModelsMap.TryGetValue(type, out var filterType))
             return filterType;
 
         var candidateProperties = type
@@ -29,10 +29,10 @@ internal static class GenericFilterTypeBuilder
 
         if (candidateProperties.Any())
         {
-            var filterTypeName = $"{type.Name}GenericFilters";
+            var filterModelTypeName = $"Generic_{type.Name}_Filter";
 
-            var filterTypeBuilder = ModuleBuilder.DefineType(
-                filterTypeName,
+            var filterModelTypeBuilder = ModuleBuilder.DefineType(
+                filterModelTypeName,
                 TypeAttributes.Public |
                 TypeAttributes.Class |
                 TypeAttributes.AutoClass |
@@ -41,7 +41,7 @@ internal static class GenericFilterTypeBuilder
                 TypeAttributes.AutoLayout,
                 null);
 
-            filterTypeBuilder.DefineDefaultConstructor(
+            filterModelTypeBuilder.DefineDefaultConstructor(
                 MethodAttributes.Public |
                 MethodAttributes.SpecialName |
                 MethodAttributes.RTSpecialName);
@@ -55,26 +55,43 @@ internal static class GenericFilterTypeBuilder
                         ? typeof(Nullable<>).MakeGenericType(underlyingType)
                         : typeof(Nullable<>).MakeGenericType(candidateProperty.PropertyType)
                     : candidateProperty.PropertyType;
-                var propertyType =
+
+                var propertyTypeName = $"Generic_{type.Name}_Filter_{propertyName}";
+                
+                var propertyTypeBuilder = ModuleBuilder.DefineType(
+                    propertyTypeName,
+                    TypeAttributes.Public |
+                    TypeAttributes.Class |
+                    TypeAttributes.AutoClass |
+                    TypeAttributes.AnsiClass |
+                    TypeAttributes.BeforeFieldInit |
+                    TypeAttributes.AutoLayout,
                     typeof(GenericFilter<,>).MakeGenericType(candidateProperty.PropertyType,
-                        nullableCandidatePropertyType);
+                        nullableCandidatePropertyType));
 
-                var fieldBuilder =
-                    filterTypeBuilder.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
+                propertyTypeBuilder.DefineDefaultConstructor(
+                    MethodAttributes.Public |
+                    MethodAttributes.SpecialName |
+                    MethodAttributes.RTSpecialName);
+                
+                var propertyType = propertyTypeBuilder.CreateType();
+
+                var fieldModelBuilder =
+                    filterModelTypeBuilder.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
                 var propertyBuilder =
-                    filterTypeBuilder.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
+                    filterModelTypeBuilder.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
 
-                var getMethod = filterTypeBuilder.DefineMethod("get_" + propertyName,
+                var getMethod = filterModelTypeBuilder.DefineMethod("get_" + propertyName,
                     MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
 
                 var getMethodIl = getMethod.GetILGenerator();
                 getMethodIl.Emit(OpCodes.Ldarg_0);
-                getMethodIl.Emit(OpCodes.Ldfld, fieldBuilder);
+                getMethodIl.Emit(OpCodes.Ldfld, fieldModelBuilder);
                 getMethodIl.Emit(OpCodes.Ret);
 
-                var setMethod = filterTypeBuilder.DefineMethod("set_" + propertyName,
+                var setMethod = filterModelTypeBuilder.DefineMethod("set_" + propertyName,
                     MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.HideBySig,
@@ -87,7 +104,7 @@ internal static class GenericFilterTypeBuilder
                 setMethodIl.MarkLabel(modifyProperty);
                 setMethodIl.Emit(OpCodes.Ldarg_0);
                 setMethodIl.Emit(OpCodes.Ldarg_1);
-                setMethodIl.Emit(OpCodes.Stfld, fieldBuilder);
+                setMethodIl.Emit(OpCodes.Stfld, fieldModelBuilder);
                 setMethodIl.Emit(OpCodes.Nop);
                 setMethodIl.MarkLabel(exitSet);
                 setMethodIl.Emit(OpCodes.Ret);
@@ -96,10 +113,10 @@ internal static class GenericFilterTypeBuilder
                 propertyBuilder.SetSetMethod(setMethod);
             }
 
-            filterType = filterTypeBuilder.CreateType();
+            filterType = filterModelTypeBuilder.CreateType();
         }
 
-        FiltersMap.TryAdd(type, filterType);
+        FilterModelsMap.TryAdd(type, filterType);
         return filterType;
     }
 }

@@ -5,16 +5,17 @@ using AutoBackend.Sdk.Exceptions;
 
 namespace AutoBackend.Sdk.Filters;
 
-internal sealed record GenericFilter<TOriginal, TNullable>(
-    TNullable? Equal,
-    TNullable? NotEqual,
-    bool? IsNull,
-    TNullable? GreaterThan,
-    TNullable? GreaterThanOrEqual,
-    TNullable? LessThan,
-    TNullable? LessThanOrEqual,
-    IEnumerable<TOriginal>? In) : IGenericFilter
+internal record GenericFilter<TOriginal, TNullable> : IGenericFilter
 {
+    public TNullable? Equal { get; init; }
+    public TNullable? NotEqual { get; init; }
+    public bool? IsNull { get; init; }
+    public TNullable? GreaterThan { get; init; }
+    public TNullable? GreaterThanOrEqual { get; init; }
+    public TNullable? LessThan { get; init; }
+    public TNullable? LessThanOrEqual { get; init; }
+    public IEnumerable<TOriginal>? In { get; init; }
+
     object? IGenericFilter.Equal => Equal;
 
     public Expression<Func<TEntity, bool>> EqualExpr<TEntity>(string propertyName)

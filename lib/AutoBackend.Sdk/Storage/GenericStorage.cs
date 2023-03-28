@@ -26,7 +26,7 @@ internal class GenericStorage<TEntity> : IGenericStorage<TEntity> where TEntity 
         return query.ToArrayAsync(cancellationToken);
     }
 
-    public Task<long> CountAsync(CancellationToken cancellationToken)
+    public Task<long> GetCountAsync(CancellationToken cancellationToken)
     {
         return _db.Set<TEntity>().LongCountAsync(cancellationToken);
     }

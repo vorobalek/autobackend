@@ -1,9 +1,11 @@
+using System.Reflection;
 using AutoBackend.Sdk.Configuration;
 using AutoBackend.Sdk.Controllers;
 using AutoBackend.Sdk.Controllers.Infrastructure;
 using AutoBackend.Sdk.Data;
 using AutoBackend.Sdk.Enums;
 using AutoBackend.Sdk.Exceptions;
+using AutoBackend.Sdk.GraphQL.Infrastructure;
 using AutoBackend.Sdk.NSwag;
 using AutoBackend.Sdk.Services.ClusterDiscovery;
 using AutoBackend.Sdk.Services.DateTimeProvider;
@@ -24,6 +26,7 @@ internal static class ServiceCollectionExtensions
     {
         return services
             .AddGenericControllers<TProgram>()
+            .AddGenericGqlQueries<TProgram>()
             .AddGenericControllersSwagger(typeof(TProgram).Assembly.FullName!)
             .AddGenericDbContext<TProgram>(configuration)
             .AddGenericStorage()
@@ -44,6 +47,31 @@ internal static class ServiceCollectionExtensions
                 .FeatureProviders
                 .Add(new GenericControllerTypeFeatureProvider(typeof(AutoBackendHost<>).Assembly,
                     typeof(TProgram).Assembly)));
+
+        return services;
+    }
+
+    private static IServiceCollection AddGenericGqlQueries<TProgram>(
+        this IServiceCollection services)
+    {
+        var rootQueryType = GenericGqlQueryTypeBuilder.Build(
+            typeof(AutoBackendHost<>).Assembly,
+            typeof(TProgram).Assembly);
+
+        var foo = Activator.CreateInstance(rootQueryType);
+
+        services
+            .AddGraphQLServer()
+            .AddQueryType(rootQueryType)
+            .UseExceptions()
+            .UseTimeout()
+            .UseDocumentCache()
+            .UseDocumentParser()
+            .UseDocumentValidation()
+            .UseOperationCache()
+            .UseOperationResolver()
+            .UseOperationVariableCoercion()
+            .UseOperationExecution();
 
         return services;
     }
@@ -70,7 +98,7 @@ internal static class ServiceCollectionExtensions
     private static IServiceCollection AddGenericStorage(this IServiceCollection services)
     {
         services.AddScoped(typeof(IGenericStorage<>), typeof(GenericStorage<>));
-        services.AddScoped(typeof(IGenericFilteredStorage<,>), typeof(GenericFilteredStorage<,>));
+        services.AddScoped(typeof(IGenericStorageWithFilter<,>), typeof(GenericStorageWithFilter<,>));
         services.AddScoped(typeof(IGenericStorageWithPrimaryKey<,>), typeof(GenericStorageWithPrimaryKey<,>));
         services.AddScoped(typeof(IGenericStorageWithComplexKey<,,>), typeof(GenericStorageWithComplexKey<,,>));
         services.AddScoped(typeof(IGenericStorageWithComplexKey<,,,>), typeof(GenericStorageWithComplexKey<,,,>));

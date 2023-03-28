@@ -2,7 +2,7 @@ using AutoBackend.Sdk.Data;
 
 namespace AutoBackend.Sdk.Storage;
 
-internal class GenericStorageWithComplexKey<
+internal sealed class GenericStorageWithComplexKey<
     TEntity,
     TKey1,
     TKey2

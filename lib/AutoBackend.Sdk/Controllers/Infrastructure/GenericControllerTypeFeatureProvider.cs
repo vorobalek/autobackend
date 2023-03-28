@@ -35,29 +35,34 @@ internal sealed class GenericControllerTypeFeatureProvider : IApplicationFeature
             throw new AutoBackendException(
                 $"Generic controller can be generated only for types marked with {nameof(GenericEntityAttribute)} ({candidate.Name}).");
 
-        yield return MakeGenericControllerTypeForCandidate(candidate, genericEntityAttribute);
+        yield return MakeForCandidate(candidate);
+        
+        if (genericEntityAttribute.Keys.Any())
+            yield return MakeWithKeyTypeForCandidate(candidate, genericEntityAttribute.Keys);
 
-        if (GenericFilterTypeBuilder.TryBuild(candidate) is { } genericFilterType)
-            yield return MakeGenericFilteredControllerTypeForCandidate(candidate, genericFilterType);
+        if (GenericFilterModelTypeBuilder.TryBuild(candidate) is { } genericFilterType)
+            yield return MakeWithFilterForCandidate(candidate, genericFilterType);
     }
 
-    private static Type MakeGenericFilteredControllerTypeForCandidate(Type candidate, Type genericFilterType)
+    private static Type MakeForCandidate(Type candidate)
     {
-        return typeof(GenericFilteredController<,>)
+        return typeof(GenericController<>)
+            .MakeGenericType(
+                candidate);
+    }
+
+    private static Type MakeWithFilterForCandidate(Type candidate, Type genericFilterType)
+    {
+        return typeof(GenericControllerWithFilter<,>)
             .MakeGenericType(
                 candidate,
                 genericFilterType);
     }
 
-    private static Type MakeGenericControllerTypeForCandidate(Type candidate,
-        GenericEntityAttribute genericEntityAttribute)
+    private static Type MakeWithKeyTypeForCandidate(Type candidate, IReadOnlyList<string> keys)
     {
-        var keys = genericEntityAttribute.Keys;
-        return keys.Length switch
+        return keys.Count switch
         {
-            0 => typeof(GenericController<>)
-                .MakeGenericType(
-                    candidate),
             1 => typeof(GenericControllerWithPrimaryKey<,>)
                 .MakeGenericType(
                     candidate,

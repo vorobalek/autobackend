@@ -7,15 +7,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoBackend.Sdk.Storage;
 
-internal class GenericFilteredStorage<TEntity, TFilter> :
+internal sealed class GenericStorageWithFilter<TEntity, TFilter> :
     GenericStorage<TEntity>,
-    IGenericFilteredStorage<TEntity, TFilter>
+    IGenericStorageWithFilter<TEntity, TFilter>
     where TEntity : class
     where TFilter : class
 {
     private readonly GenericDbContext _db;
 
-    public GenericFilteredStorage(GenericDbContext db) : base(db)
+    public GenericStorageWithFilter(GenericDbContext db) : base(db)
     {
         _db = db;
     }
@@ -37,7 +37,7 @@ internal class GenericFilteredStorage<TEntity, TFilter> :
         return query.ToArrayAsync(cancellationToken);
     }
 
-    public Task<long> CountByFilterAsync(TFilter? filter, CancellationToken cancellationToken)
+    public Task<long> GetCountByFilterAsync(TFilter? filter, CancellationToken cancellationToken)
     {
         return _db.Set<TEntity>().Where(BuildFilterExpression(filter)).LongCountAsync(cancellationToken);
     }

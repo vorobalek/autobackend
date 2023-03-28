@@ -9,6 +9,7 @@ namespace Api.Data;
     nameof(SongId)
 )]
 [GenericController]
+[GenericGqlQuery]
 public class AlbumContent
 {
     [GenericFilter]

@@ -4,25 +4,25 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBackend.Sdk.Controllers;
 
-internal sealed class GenericFilteredController<
+internal sealed class GenericControllerWithFilter<
     TEntity,
     TFilter
 > : GenericController
     where TEntity : class
     where TFilter : class
 {
-    private readonly IGenericFilteredStorage<TEntity, TFilter> _genericStorage;
+    private readonly IGenericStorageWithFilter<TEntity, TFilter> _genericStorageWithFilter;
 
-    public GenericFilteredController(IGenericFilteredStorage<TEntity, TFilter> genericStorage)
+    public GenericControllerWithFilter(IGenericStorageWithFilter<TEntity, TFilter> genericStorageWithFilter)
     {
-        _genericStorage = genericStorage;
+        _genericStorageWithFilter = genericStorageWithFilter;
     }
 
     [HttpPost("filter")]
     public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetAllByFilterAsync(
         [FromBody] TFilter filter)
     {
-        return ProcessAsync(cancellationToken => _genericStorage.GetAllByFilterAsync(filter, cancellationToken));
+        return ProcessAsync(cancellationToken => _genericStorageWithFilter.GetAllByFilterAsync(filter, cancellationToken));
     }
 
     [HttpPost("filter/slice")]
@@ -32,13 +32,13 @@ internal sealed class GenericFilteredController<
         [FromQuery(Name = "take")] int? takeCount)
     {
         return ProcessAsync(cancellationToken =>
-            _genericStorage.GetSliceByFilterAsync(filter, skipCount, takeCount, cancellationToken));
+            _genericStorageWithFilter.GetSliceByFilterAsync(filter, skipCount, takeCount, cancellationToken));
     }
 
     [HttpPost("filter/count")]
-    public Task<ActionResult<GenericControllerResponse<long>>> CountByFilterAsync(
+    public Task<ActionResult<GenericControllerResponse<long>>> GetCountByFilterAsync(
         [FromBody] TFilter filter)
     {
-        return ProcessAsync(cancellationToken => _genericStorage.CountByFilterAsync(filter, cancellationToken));
+        return ProcessAsync(cancellationToken => _genericStorageWithFilter.GetCountByFilterAsync(filter, cancellationToken));
     }
 }

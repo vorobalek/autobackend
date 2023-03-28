@@ -58,7 +58,7 @@ internal abstract class GenericController : ControllerBase
     }
 }
 
-internal class GenericController<
+internal sealed class GenericController<
     TEntity
 > : GenericController
     where TEntity : class
@@ -86,8 +86,8 @@ internal class GenericController<
     }
 
     [HttpGet("count")]
-    public Task<ActionResult<GenericControllerResponse<long>>> CountAsync()
+    public Task<ActionResult<GenericControllerResponse<long>>> GetCountAsync()
     {
-        return ProcessAsync(cancellationToken => _genericStorage.CountAsync(cancellationToken));
+        return ProcessAsync(cancellationToken => _genericStorage.GetCountAsync(cancellationToken));
     }
 }
