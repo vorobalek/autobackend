@@ -8,16 +8,17 @@ internal static class TypeExtensions
     {
         return type.IsGenericType &&
                (
-                   type.GetGenericTypeDefinition() == typeof(GenericController<,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithPrimaryKey<,,>) ||
+                   type.GetGenericTypeDefinition() == typeof(GenericController<>) ||
+                   type.GetGenericTypeDefinition() == typeof(GenericFilteredController<,>) ||
+                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithPrimaryKey<,>) ||
+                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,>) ||
                    type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,>) ||
                    type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,>) ||
                    type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,>) ||
                    type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,>) ||
                    type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,>) ||
                    type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,,>)
+                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,>)
                );
     }
 }

@@ -6,7 +6,6 @@ namespace AutoBackend.Sdk.Controllers;
 
 internal sealed class GenericControllerWithComplexKey<
     TEntity,
-    TFilter,
     TKey1,
     TKey2,
     TKey3,
@@ -15,9 +14,8 @@ internal sealed class GenericControllerWithComplexKey<
     TKey6,
     TKey7,
     TKey8
-> : GenericController<TEntity, TFilter>
+> : GenericController<TEntity>
     where TEntity : class
-    where TFilter : class
 {
     private readonly IGenericStorageWithComplexKey<
         TEntity,

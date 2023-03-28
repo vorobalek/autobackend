@@ -70,6 +70,7 @@ internal static class ServiceCollectionExtensions
     private static IServiceCollection AddGenericStorage(this IServiceCollection services)
     {
         services.AddScoped(typeof(IGenericStorage<>), typeof(GenericStorage<>));
+        services.AddScoped(typeof(IGenericFilteredStorage<,>), typeof(GenericFilteredStorage<,>));
         services.AddScoped(typeof(IGenericStorageWithPrimaryKey<,>), typeof(GenericStorageWithPrimaryKey<,>));
         services.AddScoped(typeof(IGenericStorageWithComplexKey<,,>), typeof(GenericStorageWithComplexKey<,,>));
         services.AddScoped(typeof(IGenericStorageWithComplexKey<,,,>), typeof(GenericStorageWithComplexKey<,,,>));
@@ -152,7 +153,7 @@ internal static class ServiceCollectionExtensions
         }
 
         if (!isPrimaryConfigured)
-            throw new AutoBackendException("No one primary database provider was configured");
+            throw new AutoBackendException("No one primary database provider was configured.");
 
         return services;
     }

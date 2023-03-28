@@ -15,86 +15,91 @@ internal static class GenericFilterTypeBuilder
             AssemblyBuilderAccess.Run)
         .DefineDynamicModule(FiltersAssemblyModuleName);
 
-    private static readonly ConcurrentDictionary<Type, Type> FiltersMap = new();
+    private static readonly ConcurrentDictionary<Type, Type?> FiltersMap = new();
 
-    internal static Type Build(Type type)
+    internal static Type? TryBuild(Type type)
     {
         if (FiltersMap.TryGetValue(type, out var filterType))
             return filterType;
 
-        var filterTypeName = $"{type.Name}GenericFilters";
-
-        var filterTypeBuilder = ModuleBuilder.DefineType(
-            filterTypeName,
-            TypeAttributes.Public |
-            TypeAttributes.Class |
-            TypeAttributes.AutoClass |
-            TypeAttributes.AnsiClass |
-            TypeAttributes.BeforeFieldInit |
-            TypeAttributes.AutoLayout,
-            null);
-
-        filterTypeBuilder.DefineDefaultConstructor(
-            MethodAttributes.Public |
-            MethodAttributes.SpecialName |
-            MethodAttributes.RTSpecialName);
-
         var candidateProperties = type
             .GetProperties()
-            .Where(p => p.GetCustomAttributes<GenericFilterAttribute>().Any());
+            .Where(p => p.GetCustomAttributes<GenericFilterAttribute>().Any())
+            .ToArray();
 
-        foreach (var candidateProperty in candidateProperties)
+        if (candidateProperties.Any())
         {
-            var propertyName = candidateProperty.Name;
+            var filterTypeName = $"{type.Name}GenericFilters";
 
-            var nullableCandidatePropertyType = candidateProperty.PropertyType.IsValueType
-                ? Nullable.GetUnderlyingType(candidateProperty.PropertyType) is { } underlyingType
-                    ? typeof(Nullable<>).MakeGenericType(underlyingType)
-                    : typeof(Nullable<>).MakeGenericType(candidateProperty.PropertyType)
-                : candidateProperty.PropertyType;
-            var propertyType =
-                typeof(GenericFilter<,>).MakeGenericType(candidateProperty.PropertyType, nullableCandidatePropertyType);
+            var filterTypeBuilder = ModuleBuilder.DefineType(
+                filterTypeName,
+                TypeAttributes.Public |
+                TypeAttributes.Class |
+                TypeAttributes.AutoClass |
+                TypeAttributes.AnsiClass |
+                TypeAttributes.BeforeFieldInit |
+                TypeAttributes.AutoLayout,
+                null);
 
-            var fieldBuilder = filterTypeBuilder.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
-            var propertyBuilder =
-                filterTypeBuilder.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
-
-            var getMethod = filterTypeBuilder.DefineMethod("get_" + propertyName,
+            filterTypeBuilder.DefineDefaultConstructor(
                 MethodAttributes.Public |
                 MethodAttributes.SpecialName |
-                MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
+                MethodAttributes.RTSpecialName);
 
-            var getMethodIl = getMethod.GetILGenerator();
-            getMethodIl.Emit(OpCodes.Ldarg_0);
-            getMethodIl.Emit(OpCodes.Ldfld, fieldBuilder);
-            getMethodIl.Emit(OpCodes.Ret);
+            foreach (var candidateProperty in candidateProperties)
+            {
+                var propertyName = candidateProperty.Name;
 
-            var setMethod = filterTypeBuilder.DefineMethod("set_" + propertyName,
-                MethodAttributes.Public |
-                MethodAttributes.SpecialName |
-                MethodAttributes.HideBySig,
-                null, new[] { propertyType });
+                var nullableCandidatePropertyType = candidateProperty.PropertyType.IsValueType
+                    ? Nullable.GetUnderlyingType(candidateProperty.PropertyType) is { } underlyingType
+                        ? typeof(Nullable<>).MakeGenericType(underlyingType)
+                        : typeof(Nullable<>).MakeGenericType(candidateProperty.PropertyType)
+                    : candidateProperty.PropertyType;
+                var propertyType =
+                    typeof(GenericFilter<,>).MakeGenericType(candidateProperty.PropertyType,
+                        nullableCandidatePropertyType);
 
-            var setMethodIl = setMethod.GetILGenerator();
-            var modifyProperty = setMethodIl.DefineLabel();
-            var exitSet = setMethodIl.DefineLabel();
+                var fieldBuilder =
+                    filterTypeBuilder.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
+                var propertyBuilder =
+                    filterTypeBuilder.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
 
-            setMethodIl.MarkLabel(modifyProperty);
-            setMethodIl.Emit(OpCodes.Ldarg_0);
-            setMethodIl.Emit(OpCodes.Ldarg_1);
-            setMethodIl.Emit(OpCodes.Stfld, fieldBuilder);
-            setMethodIl.Emit(OpCodes.Nop);
-            setMethodIl.MarkLabel(exitSet);
-            setMethodIl.Emit(OpCodes.Ret);
+                var getMethod = filterTypeBuilder.DefineMethod("get_" + propertyName,
+                    MethodAttributes.Public |
+                    MethodAttributes.SpecialName |
+                    MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
 
-            propertyBuilder.SetGetMethod(getMethod);
-            propertyBuilder.SetSetMethod(setMethod);
+                var getMethodIl = getMethod.GetILGenerator();
+                getMethodIl.Emit(OpCodes.Ldarg_0);
+                getMethodIl.Emit(OpCodes.Ldfld, fieldBuilder);
+                getMethodIl.Emit(OpCodes.Ret);
+
+                var setMethod = filterTypeBuilder.DefineMethod("set_" + propertyName,
+                    MethodAttributes.Public |
+                    MethodAttributes.SpecialName |
+                    MethodAttributes.HideBySig,
+                    null, new[] { propertyType });
+
+                var setMethodIl = setMethod.GetILGenerator();
+                var modifyProperty = setMethodIl.DefineLabel();
+                var exitSet = setMethodIl.DefineLabel();
+
+                setMethodIl.MarkLabel(modifyProperty);
+                setMethodIl.Emit(OpCodes.Ldarg_0);
+                setMethodIl.Emit(OpCodes.Ldarg_1);
+                setMethodIl.Emit(OpCodes.Stfld, fieldBuilder);
+                setMethodIl.Emit(OpCodes.Nop);
+                setMethodIl.MarkLabel(exitSet);
+                setMethodIl.Emit(OpCodes.Ret);
+
+                propertyBuilder.SetGetMethod(getMethod);
+                propertyBuilder.SetSetMethod(setMethod);
+            }
+
+            filterType = filterTypeBuilder.CreateType();
         }
 
-        filterType = filterTypeBuilder.CreateType()!;
-
         FiltersMap.TryAdd(type, filterType);
-
         return filterType;
     }
 }

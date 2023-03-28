@@ -12,49 +12,9 @@ namespace AutoBackend.Sdk.Controllers;
 internal abstract class GenericController : ControllerBase
 {
     internal const string Version = "v1";
-}
 
-internal class GenericController<
-    TEntity,
-    TFilter
-> : GenericController
-    where TEntity : class
-    where TFilter : class
-{
-    private readonly IGenericStorage<TEntity> _genericStorage;
-
-    public GenericController(IGenericStorage<TEntity> genericStorage)
-    {
-        _genericStorage = genericStorage;
-    }
-
-    [HttpGet]
-    public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetAllAsync()
-    {
-        return ProcessAsync(cancellationToken => _genericStorage.GetAllAsync(cancellationToken));
-    }
-
-    [HttpGet("count")]
-    public Task<ActionResult<GenericControllerResponse<int>>> CountAsync()
-    {
-        return ProcessAsync(cancellationToken => _genericStorage.CountByFilterAsync<TFilter>(null, cancellationToken));
-    }
-
-    [HttpPost("filter")]
-    public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetByFilterAsync(
-        [FromBody] TFilter filter)
-    {
-        return ProcessAsync(cancellationToken => _genericStorage.GetByFilterAsync(filter, cancellationToken));
-    }
-
-    [HttpPost("filter/count")]
-    public Task<ActionResult<GenericControllerResponse<int>>> CountByFilterAsync(
-        [FromBody] TFilter filter)
-    {
-        return ProcessAsync(cancellationToken => _genericStorage.CountByFilterAsync(filter, cancellationToken));
-    }
-
-    protected async Task<ActionResult<GenericControllerResponse>> ProcessAsync(Func<CancellationToken, Task> resultAsyncProcessor)
+    protected async Task<ActionResult<GenericControllerResponse>> ProcessAsync(
+        Func<CancellationToken, Task> resultAsyncProcessor)
     {
         SetupExceptionHandler();
         await resultAsyncProcessor(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
@@ -95,5 +55,39 @@ internal class GenericController<
                         ? InternalServerErrorApiException.ErrorMessage
                         : exception.Message)
                 .WithRequestTime(HttpContext));
+    }
+}
+
+internal class GenericController<
+    TEntity
+> : GenericController
+    where TEntity : class
+{
+    private readonly IGenericStorage<TEntity> _genericStorage;
+
+    public GenericController(IGenericStorage<TEntity> genericStorage)
+    {
+        _genericStorage = genericStorage;
+    }
+
+    [HttpGet]
+    public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetAllAsync()
+    {
+        return ProcessAsync(cancellationToken => _genericStorage.GetAllAsync(cancellationToken));
+    }
+
+    [HttpGet("slice")]
+    public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetSliceAsync(
+        [FromQuery(Name = "skip")] int? skipCount,
+        [FromQuery(Name = "take")] int? takeCount)
+    {
+        return ProcessAsync(cancellationToken =>
+            _genericStorage.GetSliceAsync(skipCount, takeCount, cancellationToken));
+    }
+
+    [HttpGet("count")]
+    public Task<ActionResult<GenericControllerResponse<long>>> CountAsync()
+    {
+        return ProcessAsync(cancellationToken => _genericStorage.CountAsync(cancellationToken));
     }
 }

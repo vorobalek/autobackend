@@ -4,9 +4,7 @@ internal interface IGenericStorage<TEntity> where TEntity : class
 {
     Task<TEntity[]> GetAllAsync(CancellationToken cancellationToken = default);
 
-    Task<TEntity[]> GetByFilterAsync<TFilter>(TFilter? filter, CancellationToken cancellationToken)
-        where TFilter : class;
+    Task<TEntity[]> GetSliceAsync(int? skipCount, int? takeCount, CancellationToken cancellationToken = default);
 
-    Task<int> CountByFilterAsync<TFilter>(TFilter? filter, CancellationToken cancellationToken)
-        where TFilter : class;
+    Task<long> CountAsync(CancellationToken cancellationToken);
 }

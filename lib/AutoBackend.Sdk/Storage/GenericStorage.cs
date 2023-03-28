@@ -1,8 +1,5 @@
-using System.Linq.Expressions;
 using AutoBackend.Sdk.Data;
 using AutoBackend.Sdk.Exceptions.Api;
-using AutoBackend.Sdk.Filters;
-using AutoBackend.Sdk.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoBackend.Sdk.Storage;
@@ -11,7 +8,6 @@ internal class GenericStorage<TEntity> : IGenericStorage<TEntity> where TEntity 
 {
     private readonly GenericDbContext _db;
 
-    // ReSharper disable once MemberCanBeProtected.Global
     public GenericStorage(GenericDbContext db)
     {
         _db = db;
@@ -22,54 +18,17 @@ internal class GenericStorage<TEntity> : IGenericStorage<TEntity> where TEntity 
         return _db.Set<TEntity>().ToArrayAsync(cancellationToken);
     }
 
-    public Task<TEntity[]> GetByFilterAsync<TFilter>(TFilter? filter, CancellationToken cancellationToken)
-        where TFilter : class
+    public Task<TEntity[]> GetSliceAsync(int? skipCount, int? takeCount, CancellationToken cancellationToken = default)
     {
-        return _db.Set<TEntity>().Where(BuildFilterExpression(filter)).ToArrayAsync(cancellationToken);
+        var query = _db.Set<TEntity>().AsQueryable();
+        if (skipCount is { } skipCountValue) query = query.Skip(skipCountValue);
+        if (takeCount is { } takeCountValue) query = query.Take(takeCountValue);
+        return query.ToArrayAsync(cancellationToken);
     }
 
-    public Task<int> CountByFilterAsync<TFilter>(TFilter? filter, CancellationToken cancellationToken)
-        where TFilter : class
+    public Task<long> CountAsync(CancellationToken cancellationToken)
     {
-        return _db.Set<TEntity>().Where(BuildFilterExpression(filter)).CountAsync(cancellationToken);
-    }
-
-    private Expression<Func<TEntity, bool>> BuildFilterExpression<TFilter>(TFilter filter)
-    {
-        var predicate = PredicateBuilder.True<TEntity>();
-
-        if (filter is not null)
-            foreach (var filterProperty in filter.GetType().GetProperties())
-            {
-                var filterValue = filterProperty.GetValue(filter);
-                if (filterValue is not IGenericFilter genericFilter) continue;
-
-                if (genericFilter.Equal is not null)
-                    predicate = predicate.And(genericFilter.EqualExpr<TEntity>(filterProperty.Name));
-
-                if (genericFilter.NotEqual is not null)
-                    predicate = predicate.And(genericFilter.NotEqualExpr<TEntity>(filterProperty.Name));
-
-                if (genericFilter.IsNull is not null)
-                    predicate = predicate.And(genericFilter.IsNullExpr<TEntity>(filterProperty.Name));
-
-                if (genericFilter.GreaterThan is not null)
-                    predicate = predicate.And(genericFilter.GreaterThanExpr<TEntity>(filterProperty.Name));
-
-                if (genericFilter.GreaterThanOrEqual is not null)
-                    predicate = predicate.And(genericFilter.GreaterThanOrEqualExpr<TEntity>(filterProperty.Name));
-
-                if (genericFilter.LessThan is not null)
-                    predicate = predicate.And(genericFilter.LessThanExpr<TEntity>(filterProperty.Name));
-
-                if (genericFilter.LessThanOrEqual is not null)
-                    predicate = predicate.And(genericFilter.LessThanOrEqualExpr<TEntity>(filterProperty.Name));
-
-                if (genericFilter.In is not null)
-                    predicate = predicate.And(genericFilter.InExpr<TEntity>(filterProperty.Name));
-            }
-
-        return predicate;
+        return _db.Set<TEntity>().LongCountAsync(cancellationToken);
     }
 
     protected async Task<TEntity?> GetByKeyInternalAsync(
@@ -87,7 +46,7 @@ internal class GenericStorage<TEntity> : IGenericStorage<TEntity> where TEntity 
         var current = await _db.Set<TEntity>().FindAsync(keys);
         if (current is not null)
             throw new BadRequestApiException(
-                $"Entity with same key already exists ({string.Join(',', keys?.Select(key => key?.ToString()) ?? Array.Empty<string?>())})");
+                $"Entity with same key already exists ({string.Join(',', keys?.Select(key => key?.ToString()) ?? Array.Empty<string?>())}).");
 
         await _db.Set<TEntity>().AddAsync(entity, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
@@ -102,14 +61,14 @@ internal class GenericStorage<TEntity> : IGenericStorage<TEntity> where TEntity 
         var current = await _db.Set<TEntity>().FindAsync(keys);
         if (current is null)
             throw new BadRequestApiException(
-                $"Entity with given key does not exists ({string.Join(',', keys?.Select(key => key?.ToString()) ?? Array.Empty<string?>())})");
+                $"Entity with given key does not exists ({string.Join(',', keys?.Select(key => key?.ToString()) ?? Array.Empty<string?>())}).");
 
         foreach (var entryProperty in _db.Entry(current).Properties)
         {
             var entityProperty = typeof(TEntity).GetProperty(entryProperty.Metadata.Name);
             if (entityProperty is null)
                 throw new NotFoundApiException(
-                    $"Unable to find property with name {entryProperty.Metadata.Name} in object {typeof(TEntity).Name}");
+                    $"Unable to find property with name {entryProperty.Metadata.Name} in object {typeof(TEntity).Name}.");
             var newValue = entityProperty.GetValue(entity);
             entityProperty.SetValue(current, newValue);
         }
@@ -126,7 +85,7 @@ internal class GenericStorage<TEntity> : IGenericStorage<TEntity> where TEntity 
         var current = await _db.Set<TEntity>().FindAsync(keys);
         if (current is null)
             throw new NotFoundApiException(
-                $"Entity with given key does not exists ({string.Join(',', keys?.Select(key => key?.ToString()) ?? Array.Empty<string?>())})");
+                $"Entity with given key does not exists ({string.Join(',', keys?.Select(key => key?.ToString()) ?? Array.Empty<string?>())}).");
 
         _db.Set<TEntity>().Remove(current);
         await _db.SaveChangesAsync(cancellationToken);

@@ -24,73 +24,82 @@ internal sealed class GenericControllerTypeFeatureProvider : IApplicationFeature
             foreach (var candidate in candidates
                          .Where(candidate => candidate
                              .GetCustomAttribute<GenericControllerAttribute>() is not null))
-                feature.Controllers.Add(MakeControllerTypeForCandidate(candidate).GetTypeInfo());
+            foreach (var genericControllerType in MakeGenericControllersTypeForCandidate(candidate))
+                feature.Controllers.Add(genericControllerType.GetTypeInfo());
         }
     }
 
-    private static Type MakeControllerTypeForCandidate(Type candidate)
+    private static IEnumerable<Type> MakeGenericControllersTypeForCandidate(Type candidate)
     {
         if (candidate.GetCustomAttribute<GenericEntityAttribute>() is not { Keys: { } } genericEntityAttribute)
             throw new AutoBackendException(
-                $"Generic controller can be generated only for types marked with {nameof(GenericEntityAttribute)} ({candidate.Name})");
+                $"Generic controller can be generated only for types marked with {nameof(GenericEntityAttribute)} ({candidate.Name}).");
 
-        var genericFilterType = GenericFilterTypeBuilder.Build(candidate);
+        yield return MakeGenericControllerTypeForCandidate(candidate, genericEntityAttribute);
+
+        if (GenericFilterTypeBuilder.TryBuild(candidate) is { } genericFilterType)
+            yield return MakeGenericFilteredControllerTypeForCandidate(candidate, genericFilterType);
+    }
+
+    private static Type MakeGenericFilteredControllerTypeForCandidate(Type candidate, Type genericFilterType)
+    {
+        return typeof(GenericFilteredController<,>)
+            .MakeGenericType(
+                candidate,
+                genericFilterType);
+    }
+
+    private static Type MakeGenericControllerTypeForCandidate(Type candidate,
+        GenericEntityAttribute genericEntityAttribute)
+    {
         var keys = genericEntityAttribute.Keys;
         return keys.Length switch
         {
-            0 => typeof(GenericController<,>)
+            0 => typeof(GenericController<>)
+                .MakeGenericType(
+                    candidate),
+            1 => typeof(GenericControllerWithPrimaryKey<,>)
                 .MakeGenericType(
                     candidate,
-                    genericFilterType),
-            1 => typeof(GenericControllerWithPrimaryKey<,,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0])),
-            2 => typeof(GenericControllerWithComplexKey<,,,>)
+            2 => typeof(GenericControllerWithComplexKey<,,>)
                 .MakeGenericType(
                     candidate,
-                    genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1])),
-            3 => typeof(GenericControllerWithComplexKey<,,,,>)
+            3 => typeof(GenericControllerWithComplexKey<,,,>)
                 .MakeGenericType(
                     candidate,
-                    genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
                     GetPropertyTypeOrThrowException(candidate, keys[2])),
-            4 => typeof(GenericControllerWithComplexKey<,,,,,>)
+            4 => typeof(GenericControllerWithComplexKey<,,,,>)
                 .MakeGenericType(
                     candidate,
-                    genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
                     GetPropertyTypeOrThrowException(candidate, keys[2]),
                     GetPropertyTypeOrThrowException(candidate, keys[3])),
-            5 => typeof(GenericControllerWithComplexKey<,,,,,,>)
+            5 => typeof(GenericControllerWithComplexKey<,,,,,>)
                 .MakeGenericType(
                     candidate,
-                    genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
                     GetPropertyTypeOrThrowException(candidate, keys[2]),
                     GetPropertyTypeOrThrowException(candidate, keys[3]),
                     GetPropertyTypeOrThrowException(candidate, keys[4])),
-            6 => typeof(GenericControllerWithComplexKey<,,,,,,,>)
+            6 => typeof(GenericControllerWithComplexKey<,,,,,,>)
                 .MakeGenericType(
                     candidate,
-                    genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
                     GetPropertyTypeOrThrowException(candidate, keys[2]),
                     GetPropertyTypeOrThrowException(candidate, keys[3]),
                     GetPropertyTypeOrThrowException(candidate, keys[4]),
                     GetPropertyTypeOrThrowException(candidate, keys[5])),
-            7 => typeof(GenericControllerWithComplexKey<,,,,,,,,>)
+            7 => typeof(GenericControllerWithComplexKey<,,,,,,,>)
                 .MakeGenericType(
                     candidate,
-                    genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
                     GetPropertyTypeOrThrowException(candidate, keys[2]),
@@ -98,10 +107,9 @@ internal sealed class GenericControllerTypeFeatureProvider : IApplicationFeature
                     GetPropertyTypeOrThrowException(candidate, keys[4]),
                     GetPropertyTypeOrThrowException(candidate, keys[5]),
                     GetPropertyTypeOrThrowException(candidate, keys[6])),
-            8 => typeof(GenericControllerWithComplexKey<,,,,,,,,,>)
+            8 => typeof(GenericControllerWithComplexKey<,,,,,,,,>)
                 .MakeGenericType(
                     candidate,
-                    genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
                     GetPropertyTypeOrThrowException(candidate, keys[2]),

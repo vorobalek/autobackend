@@ -38,6 +38,10 @@
         <PackageReference Include="NSwag.AspNetCore" Version="13.18.2" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Folder Include="GraphQL\Infrastructure" />
+    </ItemGroup>
+
     <Target Name="PrepareReleaseNotes" BeforeTargets="GenerateNuspec">
         <PropertyGroup>
             <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../RELEASE_NOTES.md"))</PackageReleaseNotes>

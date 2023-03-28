@@ -6,11 +6,9 @@ namespace AutoBackend.Sdk.Controllers;
 
 internal sealed class GenericControllerWithPrimaryKey<
     TEntity,
-    TFilter,
     TKey
-> : GenericController<TEntity, TFilter>
+> : GenericController<TEntity>
     where TEntity : class
-    where TFilter : class
 {
     private readonly IGenericStorageWithPrimaryKey<TEntity, TKey> _genericStorage;
 
