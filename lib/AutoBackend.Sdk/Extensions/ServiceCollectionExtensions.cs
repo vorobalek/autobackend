@@ -2,6 +2,8 @@ using AutoBackend.Sdk.Configuration;
 using AutoBackend.Sdk.Controllers;
 using AutoBackend.Sdk.Controllers.Infrastructure;
 using AutoBackend.Sdk.Data;
+using AutoBackend.Sdk.Data.Repositories;
+using AutoBackend.Sdk.Data.Storage;
 using AutoBackend.Sdk.Enums;
 using AutoBackend.Sdk.Exceptions;
 using AutoBackend.Sdk.GraphQL.Infrastructure;
@@ -9,7 +11,6 @@ using AutoBackend.Sdk.NSwag;
 using AutoBackend.Sdk.Services.ClusterDiscovery;
 using AutoBackend.Sdk.Services.DateTimeProvider;
 using AutoBackend.Sdk.Services.ExceptionHandler;
-using AutoBackend.Sdk.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,6 +63,7 @@ internal static class ServiceCollectionExtensions
         services
             .AddGraphQLServer()
             .AddQueryType(rootQueryType)
+            .AddProjections()
             .UseExceptions()
             .UseTimeout()
             .UseDocumentCache()
@@ -96,18 +98,23 @@ internal static class ServiceCollectionExtensions
 
     private static IServiceCollection AddGenericStorage(this IServiceCollection services)
     {
-        services.AddScoped(typeof(IGenericStorage<>), typeof(GenericStorage<>));
-        services.AddScoped(typeof(IGenericStorageWithFilter<,>), typeof(GenericStorageWithFilter<,>));
-        services.AddScoped(typeof(IGenericStorageWithPrimaryKey<,>), typeof(GenericStorageWithPrimaryKey<,>));
-        services.AddScoped(typeof(IGenericStorageWithComplexKey<,,>), typeof(GenericStorageWithComplexKey<,,>));
-        services.AddScoped(typeof(IGenericStorageWithComplexKey<,,,>), typeof(GenericStorageWithComplexKey<,,,>));
-        services.AddScoped(typeof(IGenericStorageWithComplexKey<,,,,>), typeof(GenericStorageWithComplexKey<,,,,>));
-        services.AddScoped(typeof(IGenericStorageWithComplexKey<,,,,,>), typeof(GenericStorageWithComplexKey<,,,,,>));
-        services.AddScoped(typeof(IGenericStorageWithComplexKey<,,,,,,>), typeof(GenericStorageWithComplexKey<,,,,,,>));
-        services.AddScoped(typeof(IGenericStorageWithComplexKey<,,,,,,,>),
-            typeof(GenericStorageWithComplexKey<,,,,,,,>));
-        services.AddScoped(typeof(IGenericStorageWithComplexKey<,,,,,,,,>),
-            typeof(GenericStorageWithComplexKey<,,,,,,,,>));
+        services.AddScoped(typeof(IGenericStorage<,>), typeof(GenericStorage<,>));
+        services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+        services.AddScoped(typeof(IGenericRepositoryWithNoKey<,>), typeof(GenericRepositoryWithNoKey<,>));
+        services.AddScoped(typeof(IGenericRepositoryWithPrimaryKey<,,>), typeof(GenericRepositoryWithPrimaryKey<,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,>), typeof(GenericRepositoryWithComplexKey<,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,,,,,>));
 
         return services;
     }

@@ -1,30 +1,34 @@
-using AutoBackend.Sdk.Data;
+using AutoBackend.Sdk.Data.Storage;
+using AutoBackend.Sdk.Filters;
 
-namespace AutoBackend.Sdk.Storage;
+namespace AutoBackend.Sdk.Data.Repositories;
 
-internal sealed class GenericStorageWithComplexKey<
+internal sealed class GenericRepositoryWithComplexKey<
     TEntity,
+    TFilter,
     TKey1,
     TKey2,
     TKey3,
     TKey4,
     TKey5,
-    TKey6,
-    TKey7
-> : GenericStorage<
-    TEntity
->, IGenericStorageWithComplexKey<
+    TKey6
+> : GenericRepository<
     TEntity,
+    TFilter
+>, IGenericRepositoryWithComplexKey<
+    TEntity,
+    TFilter,
     TKey1,
     TKey2,
     TKey3,
     TKey4,
     TKey5,
-    TKey6,
-    TKey7
-> where TEntity : class
+    TKey6
+>
+    where TEntity : class
+    where TFilter : class, IGenericFilter
 {
-    public GenericStorageWithComplexKey(GenericDbContext db) : base(db)
+    public GenericRepositoryWithComplexKey(IGenericStorage<TEntity, TFilter> genericStorage) : base(genericStorage)
     {
     }
 
@@ -35,7 +39,6 @@ internal sealed class GenericStorageWithComplexKey<
         TKey4 key4,
         TKey5 key5,
         TKey6 key6,
-        TKey7 key7,
         CancellationToken cancellationToken)
     {
         return GetByKeyInternalAsync(
@@ -45,8 +48,7 @@ internal sealed class GenericStorageWithComplexKey<
             key3,
             key4,
             key5,
-            key6,
-            key7);
+            key6);
     }
 
     public Task<TEntity> InsertByComplexKeyAsync(
@@ -56,7 +58,6 @@ internal sealed class GenericStorageWithComplexKey<
         TKey4 key4,
         TKey5 key5,
         TKey6 key6,
-        TKey7 key7,
         TEntity entity,
         CancellationToken cancellationToken)
     {
@@ -68,8 +69,7 @@ internal sealed class GenericStorageWithComplexKey<
             key3,
             key4,
             key5,
-            key6,
-            key7);
+            key6);
     }
 
     public Task<TEntity> UpdateByComplexKeyAsync(
@@ -79,7 +79,6 @@ internal sealed class GenericStorageWithComplexKey<
         TKey4 key4,
         TKey5 key5,
         TKey6 key6,
-        TKey7 key7,
         TEntity entity,
         CancellationToken cancellationToken)
     {
@@ -91,8 +90,7 @@ internal sealed class GenericStorageWithComplexKey<
             key3,
             key4,
             key5,
-            key6,
-            key7);
+            key6);
     }
 
     public Task DeleteByComplexKeyAsync(
@@ -102,7 +100,6 @@ internal sealed class GenericStorageWithComplexKey<
         TKey4 key4,
         TKey5 key5,
         TKey6 key6,
-        TKey7 key7,
         CancellationToken cancellationToken)
     {
         return DeleteInternalAsync(
@@ -112,7 +109,6 @@ internal sealed class GenericStorageWithComplexKey<
             key3,
             key4,
             key5,
-            key6,
-            key7);
+            key6);
     }
 }

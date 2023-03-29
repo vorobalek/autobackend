@@ -9,19 +9,20 @@ namespace AutoBackend.Sdk.GraphQL.Infrastructure;
 
 internal static class GenericGqlQueryTypeBuilder
 {
-    private const string GqlQueriesAssemblyModuleName = "GqlQueries";
+    internal const string AssemblyName = "AutoBackend.Sdk.Runtime.GqlQueries";
+    private const string GqlQueriesAssemblyModuleName = "GenericGqlQueries";
 
     internal static Type Build(params Assembly[] assemblies)
     {
         var assemblyBuilder = AssemblyBuilder
             .DefineDynamicAssembly(
-                new AssemblyName("AutoBackend.Sdk.Runtime.GqlQueries"),
+                new AssemblyName(AssemblyName),
                 AssemblyBuilderAccess.Run);
 
         var moduleBuilder = assemblyBuilder
             .DefineDynamicModule(GqlQueriesAssemblyModuleName);
 
-        var queryTypeName = "GenericGqlQueryRoot";
+        var queryTypeName = "GenericGqlQuery";
         var queryTypeBuilder = moduleBuilder.DefineType(
             queryTypeName,
             TypeAttributes.Public |
@@ -44,10 +45,16 @@ internal static class GenericGqlQueryTypeBuilder
                          .Where(candidate => candidate
                              .GetCustomAttribute<GenericGqlQueryAttribute>() is not null))
             {
-                MakeForCandidate(moduleBuilder, queryTypeBuilder, candidate);
+                var propertyParentType = typeof(GenericGqlQuery<,>)
+                    .MakeGenericType(
+                        candidate,
+                        GenericFilterTypeBuilder.Build(candidate));
 
-                if (GenericFilterModelTypeBuilder.TryBuild(candidate) is { } genericFilterType)
-                    MakeWithFilterForCandidate(moduleBuilder, queryTypeBuilder, candidate, genericFilterType);
+                MakeForCandidate(
+                    moduleBuilder,
+                    queryTypeBuilder,
+                    candidate,
+                    propertyParentType);
             }
         }
 
@@ -57,42 +64,13 @@ internal static class GenericGqlQueryTypeBuilder
         return queryType;
     }
 
-    private static void MakeWithFilterForCandidate(ModuleBuilder moduleBuilder, TypeBuilder queryTypeBuilder,
-        Type candidate, Type genericFilterType)
-    {
-        MakeForCandidateInternal(
-            moduleBuilder,
-            queryTypeBuilder,
-            candidate,
-            $"Generic_{candidate.Name}GqlQuery_WithFilter",
-            typeof(GenericGqlQueryWithFilter<,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType),
-            $"{candidate.Name}WithFilter");
-    }
-
-    private static void MakeForCandidate(ModuleBuilder moduleBuilder, TypeBuilder queryTypeBuilder, Type candidate)
-    {
-        MakeForCandidateInternal(
-            moduleBuilder,
-            queryTypeBuilder,
-            candidate,
-            $"Generic_{candidate.Name}GqlQuery",
-            typeof(GenericGqlQuery<>)
-                .MakeGenericType(
-                    candidate),
-            candidate.Name);
-    }
-
-    private static void MakeForCandidateInternal(
+    private static void MakeForCandidate(
         ModuleBuilder moduleBuilder,
         TypeBuilder queryTypeBuilder,
         Type candidate,
-        string propertyTypeName,
-        Type propertyTypeParent,
-        string propertyGqlName)
+        Type propertyTypeParent)
     {
+        var propertyTypeName = $"{candidate.Name}_GenericGqlQuery";
         var propertyTypeBuilder = moduleBuilder.DefineType(
             propertyTypeName,
             TypeAttributes.Public |
@@ -130,6 +108,6 @@ internal static class GenericGqlQueryTypeBuilder
 
         propertyBuilder.SetGetMethod(getMethod);
 
-        propertyBuilder.SetGraphQLNameAttribute(propertyGqlName);
+        propertyBuilder.SetGraphQLNameAttribute(candidate.Name);
     }
 }

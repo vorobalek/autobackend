@@ -37,9 +37,17 @@ public class GenericDbContext : DbContext
                 var entityBuilder = modelBuilder.Entity(candidateType);
 
                 if (attribute.Keys.Any())
+                {
                     entityBuilder.HasKey(attribute.Keys);
+                }
                 else
-                    entityBuilder.HasNoKey();
+                {
+                    var genericIdPropertyName = "__Generic__Id";
+                    entityBuilder
+                        .Property<int>(genericIdPropertyName)
+                        .ValueGeneratedOnAdd();
+                    entityBuilder.HasKey(genericIdPropertyName);
+                }
 
                 entityBuilder.ToTable(candidateType.Name, GenericEntitySchema);
             }

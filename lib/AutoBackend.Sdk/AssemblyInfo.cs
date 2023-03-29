@@ -1,4 +1,6 @@
 using System.Runtime.CompilerServices;
+using AutoBackend.Sdk.Filters.Infrastructure;
+using AutoBackend.Sdk.GraphQL.Infrastructure;
 
-[assembly: InternalsVisibleTo("AutoBackend.Sdk.Runtime.GqlQueries")]
-[assembly: InternalsVisibleTo("AutoBackend.Sdk.Runtime.Filters")]
+[assembly: InternalsVisibleTo(GenericFilterTypeBuilder.AssemblyName)]
+[assembly: InternalsVisibleTo(GenericGqlQueryTypeBuilder.AssemblyName)]

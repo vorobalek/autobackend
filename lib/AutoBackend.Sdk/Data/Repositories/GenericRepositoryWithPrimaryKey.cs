@@ -1,18 +1,24 @@
-using AutoBackend.Sdk.Data;
+using AutoBackend.Sdk.Data.Storage;
+using AutoBackend.Sdk.Filters;
 
-namespace AutoBackend.Sdk.Storage;
+namespace AutoBackend.Sdk.Data.Repositories;
 
-internal sealed class GenericStorageWithPrimaryKey<
+internal sealed class GenericRepositoryWithPrimaryKey<
     TEntity,
+    TFilter,
     TKey
-> : GenericStorage<
-    TEntity
->, IGenericStorageWithPrimaryKey<
+> : GenericRepository<
     TEntity,
+    TFilter
+>, IGenericRepositoryWithPrimaryKey<
+    TEntity,
+    TFilter,
     TKey
-> where TEntity : class
+>
+    where TEntity : class
+    where TFilter : class, IGenericFilter
 {
-    public GenericStorageWithPrimaryKey(GenericDbContext db) : base(db)
+    public GenericRepositoryWithPrimaryKey(IGenericStorage<TEntity, TFilter> genericStorage) : base(genericStorage)
     {
     }
 

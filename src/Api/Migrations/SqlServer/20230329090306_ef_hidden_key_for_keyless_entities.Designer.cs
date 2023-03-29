@@ -4,6 +4,7 @@ using AutoBackend.Sdk.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations.SqlServer
 {
     [DbContext(typeof(SqlServerGenericDbContext))]
-    partial class SqlServerGenericDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230329090306_ef_hidden_key_for_keyless_entities")]
+    partial class ef_hidden_key_for_keyless_entities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

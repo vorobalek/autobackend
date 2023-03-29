@@ -1,30 +1,32 @@
-using AutoBackend.Sdk.Storage;
+using AutoBackend.Sdk.Data.Repositories;
+using AutoBackend.Sdk.Data.Storage;
+using AutoBackend.Sdk.Filters;
 
 namespace AutoBackend.Sdk.GraphQL;
 
-internal class GenericGqlQuery<TEntity>
+internal class GenericGqlQuery<TEntity, TFilter>
     where TEntity : class
+    where TFilter : class, IGenericFilter
 {
-    [GraphQLName("all")]
-    public Task<TEntity[]> GetAllAsync(
-        [Service] IGenericStorage<TEntity> genericStorage)
+    [GraphQLName("list")]
+    [UseProjection]
+    public IQueryable<TEntity> GetList(
+        [Service(ServiceKind.Resolver)] IGenericStorage<TEntity, TFilter> genericStorage,
+        [GraphQLName("filter")] TFilter? filter)
     {
-        return genericStorage.GetAllAsync();
-    }
-
-    [GraphQLName("slice")]
-    public Task<TEntity[]> GetSliceAsync(
-        [GraphQLName("skip")] int? skipCount,
-        [GraphQLName("take")] int? takeCount,
-        [Service] IGenericStorage<TEntity> genericStorage)
-    {
-        return genericStorage.GetSliceAsync(skipCount, takeCount);
+        return genericStorage.GetQuery(filter);
     }
 
     [GraphQLName("count")]
     public Task<long> GetCountAsync(
-        [Service] IGenericStorage<TEntity> genericStorage)
+        [Service(ServiceKind.Resolver)] IGenericRepository<TEntity, TFilter> genericRepository,
+        [GraphQLName("filter")] TFilter? filter)
     {
-        return genericStorage.GetCountAsync();
+        return genericRepository.GetCountAsync(filter);
     }
+}
+
+internal class GenericGqlMutation<TEntity>
+    where TEntity : class
+{
 }

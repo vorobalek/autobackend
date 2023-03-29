@@ -1,9 +1,17 @@
-namespace AutoBackend.Sdk.Storage;
+using AutoBackend.Sdk.Filters;
 
-internal interface IGenericStorageWithPrimaryKey<
+namespace AutoBackend.Sdk.Data.Repositories;
+
+internal interface IGenericRepositoryWithPrimaryKey<
     TEntity,
+    in TFilter,
     in TKey
-> : IGenericStorage<TEntity> where TEntity : class
+> : IGenericRepository<
+    TEntity,
+    TFilter
+>
+    where TEntity : class
+    where TFilter : class, IGenericFilter
 {
     Task<TEntity?> GetByPrimaryKeyAsync(TKey key, CancellationToken cancellationToken);
     Task<TEntity> InsertByPrimaryKeyAsync(TKey key, TEntity entity, CancellationToken cancellationToken);

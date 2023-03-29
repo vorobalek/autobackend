@@ -1,45 +1,71 @@
 using System.Linq.Expressions;
-using AutoBackend.Sdk.Data;
 using AutoBackend.Sdk.Exceptions;
 using AutoBackend.Sdk.Filters;
 using AutoBackend.Sdk.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace AutoBackend.Sdk.Storage;
+namespace AutoBackend.Sdk.Data.Storage;
 
-internal sealed class GenericStorageWithFilter<TEntity, TFilter> :
-    GenericStorage<TEntity>,
-    IGenericStorageWithFilter<TEntity, TFilter>
+internal interface IGenericStorage<TEntity, in TFilter>
     where TEntity : class
-    where TFilter : class
+    where TFilter : class, IGenericFilter
+{
+    ValueTask<TEntity?> FindAsync(object?[]? keyValues, CancellationToken cancellationToken = default);
+    ValueTask<EntityEntry<TEntity>> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
+    EntityEntry<TEntity> Update(TEntity entity);
+    EntityEntry<TEntity> Remove(TEntity entity);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    IQueryable<TEntity> GetQuery(TFilter? filter);
+    EntityEntry<TEntity> Entry(TEntity entity);
+}
+
+internal class GenericStorage<TEntity, TFilter> : IGenericStorage<TEntity, TFilter>
+    where TEntity : class
+    where TFilter : class, IGenericFilter
 {
     private readonly GenericDbContext _db;
 
-    public GenericStorageWithFilter(GenericDbContext db) : base(db)
+    public GenericStorage(GenericDbContext db)
     {
         _db = db;
     }
 
-    public Task<TEntity[]> GetAllByFilterAsync(TFilter? filter, CancellationToken cancellationToken)
+    private DbSet<TEntity> Set => _db.Set<TEntity>();
+
+    public ValueTask<TEntity?> FindAsync(object?[]? keyValues, CancellationToken cancellationToken = default)
     {
-        return _db.Set<TEntity>().Where(BuildFilterExpression(filter)).ToArrayAsync(cancellationToken);
+        return Set.FindAsync(keyValues, cancellationToken);
     }
 
-    public Task<TEntity[]> GetSliceByFilterAsync(
-        TFilter? filter,
-        int? skipCount,
-        int? takeCount,
-        CancellationToken cancellationToken = default)
+    public ValueTask<EntityEntry<TEntity>> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        var query = _db.Set<TEntity>().Where(BuildFilterExpression(filter));
-        if (skipCount is { } skipCountValue) query = query.Skip(skipCountValue);
-        if (takeCount is { } takeCountValue) query = query.Take(takeCountValue);
-        return query.ToArrayAsync(cancellationToken);
+        return Set.AddAsync(entity, cancellationToken);
     }
 
-    public Task<long> GetCountByFilterAsync(TFilter? filter, CancellationToken cancellationToken)
+    public EntityEntry<TEntity> Update(TEntity entity)
     {
-        return _db.Set<TEntity>().Where(BuildFilterExpression(filter)).LongCountAsync(cancellationToken);
+        return Set.Update(entity);
+    }
+
+    public EntityEntry<TEntity> Remove(TEntity entity)
+    {
+        return Set.Remove(entity);
+    }
+
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return _db.SaveChangesAsync(cancellationToken);
+    }
+
+    public IQueryable<TEntity> GetQuery(TFilter? filter)
+    {
+        return Set.Where(BuildFilterExpression(filter));
+    }
+
+    public EntityEntry<TEntity> Entry(TEntity entity)
+    {
+        return _db.Entry(entity);
     }
 
     private Expression<Func<TEntity, bool>> BuildFilterExpression(TFilter? filter)
@@ -53,9 +79,9 @@ internal sealed class GenericStorageWithFilter<TEntity, TFilter> :
 
                 if (filterValue is null) continue;
 
-                if (filterValue is not IGenericFilter genericFilter)
+                if (filterValue is not IGenericPropertyFilter genericFilter)
                     throw new AutoBackendException(
-                        $"The filter properties have to be inherited from {nameof(IGenericFilter)}.");
+                        $"The filter properties have to be inherited from {nameof(IGenericPropertyFilter)}.");
 
                 if (genericFilter.Equal is not null)
                     predicate = predicate.And(genericFilter.EqualExpr<TEntity>(filterProperty.Name));

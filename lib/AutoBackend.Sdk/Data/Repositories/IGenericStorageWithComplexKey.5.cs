@@ -1,16 +1,16 @@
-namespace AutoBackend.Sdk.Storage;
+using AutoBackend.Sdk.Filters;
 
-internal interface IGenericStorageWithComplexKey<
+namespace AutoBackend.Sdk.Data.Repositories;
+
+internal interface IGenericRepositoryWithComplexKey<
     TEntity,
+    in TFilter,
     in TKey1,
     in TKey2,
     in TKey3,
     in TKey4,
-    in TKey5,
-    in TKey6,
-    in TKey7,
-    in TKey8
-> : IGenericStorage<TEntity> where TEntity : class
+    in TKey5
+> : IGenericRepository<TEntity, TFilter> where TEntity : class where TFilter : class, IGenericFilter
 {
     Task<TEntity?> GetByComplexKeyAsync(
         TKey1 key1,
@@ -18,9 +18,6 @@ internal interface IGenericStorageWithComplexKey<
         TKey3 key3,
         TKey4 key4,
         TKey5 key5,
-        TKey6 key6,
-        TKey7 key7,
-        TKey8 key8,
         CancellationToken cancellationToken);
 
     Task<TEntity> InsertByComplexKeyAsync(
@@ -29,9 +26,6 @@ internal interface IGenericStorageWithComplexKey<
         TKey3 key3,
         TKey4 key4,
         TKey5 key5,
-        TKey6 key6,
-        TKey7 key7,
-        TKey8 key8,
         TEntity entity,
         CancellationToken cancellationToken);
 
@@ -41,9 +35,6 @@ internal interface IGenericStorageWithComplexKey<
         TKey3 key3,
         TKey4 key4,
         TKey5 key5,
-        TKey6 key6,
-        TKey7 key7,
-        TKey8 key8,
         TEntity entity,
         CancellationToken cancellationToken);
 
@@ -53,8 +44,5 @@ internal interface IGenericStorageWithComplexKey<
         TKey3 key3,
         TKey4 key4,
         TKey5 key5,
-        TKey6 key6,
-        TKey7 key7,
-        TKey8 key8,
         CancellationToken cancellationToken);
 }

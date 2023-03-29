@@ -2,22 +2,24 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Reflection.Emit;
 using AutoBackend.Sdk.Attributes;
+using AutoBackend.Sdk.Extensions;
 
 namespace AutoBackend.Sdk.Filters.Infrastructure;
 
-internal static class GenericFilterModelTypeBuilder
+internal static class GenericFilterTypeBuilder
 {
-    private const string GenericFilterModelsAssemblyModuleName = "GenericFilterModels";
+    internal const string AssemblyName = "AutoBackend.Sdk.Runtime.Filters";
+    private const string GenericFilterModelsAssemblyModuleName = "GenericFilters";
 
     private static readonly ModuleBuilder ModuleBuilder = AssemblyBuilder
         .DefineDynamicAssembly(
-            new AssemblyName("AutoBackend.Sdk.Runtime.Filters"),
+            new AssemblyName(AssemblyName),
             AssemblyBuilderAccess.Run)
         .DefineDynamicModule(GenericFilterModelsAssemblyModuleName);
 
-    private static readonly ConcurrentDictionary<Type, Type?> FilterModelsMap = new();
+    private static readonly ConcurrentDictionary<Type, Type> FilterModelsMap = new();
 
-    internal static Type? TryBuild(Type type)
+    internal static Type Build(Type type)
     {
         if (FilterModelsMap.TryGetValue(type, out var filterType))
             return filterType;
@@ -27,25 +29,24 @@ internal static class GenericFilterModelTypeBuilder
             .Where(p => p.GetCustomAttributes<GenericFilterAttribute>().Any())
             .ToArray();
 
+        var filterModelTypeName = $"{type.Name}_GenericFilter";
+
+        var filterModelTypeBuilder = ModuleBuilder.DefineType(
+            filterModelTypeName,
+            TypeAttributes.Public |
+            TypeAttributes.Class |
+            TypeAttributes.AutoClass |
+            TypeAttributes.AnsiClass |
+            TypeAttributes.BeforeFieldInit |
+            TypeAttributes.AutoLayout,
+            typeof(GenericFilter));
+
+        filterModelTypeBuilder.DefineDefaultConstructor(
+            MethodAttributes.Public |
+            MethodAttributes.SpecialName |
+            MethodAttributes.RTSpecialName);
+
         if (candidateProperties.Any())
-        {
-            var filterModelTypeName = $"Generic_{type.Name}_Filter";
-
-            var filterModelTypeBuilder = ModuleBuilder.DefineType(
-                filterModelTypeName,
-                TypeAttributes.Public |
-                TypeAttributes.Class |
-                TypeAttributes.AutoClass |
-                TypeAttributes.AnsiClass |
-                TypeAttributes.BeforeFieldInit |
-                TypeAttributes.AutoLayout,
-                null);
-
-            filterModelTypeBuilder.DefineDefaultConstructor(
-                MethodAttributes.Public |
-                MethodAttributes.SpecialName |
-                MethodAttributes.RTSpecialName);
-
             foreach (var candidateProperty in candidateProperties)
             {
                 var propertyName = candidateProperty.Name;
@@ -56,7 +57,7 @@ internal static class GenericFilterModelTypeBuilder
                         : typeof(Nullable<>).MakeGenericType(candidateProperty.PropertyType)
                     : candidateProperty.PropertyType;
 
-                var propertyTypeName = $"Generic_{type.Name}_Filter_{propertyName}";
+                var propertyTypeName = $"{type.Name}_{propertyName}_GenericFilter";
 
                 var propertyTypeBuilder = ModuleBuilder.DefineType(
                     propertyTypeName,
@@ -66,13 +67,15 @@ internal static class GenericFilterModelTypeBuilder
                     TypeAttributes.AnsiClass |
                     TypeAttributes.BeforeFieldInit |
                     TypeAttributes.AutoLayout,
-                    typeof(GenericFilter<,>).MakeGenericType(candidateProperty.PropertyType,
+                    typeof(GenericPropertyFilter<,>).MakeGenericType(candidateProperty.PropertyType,
                         nullableCandidatePropertyType));
 
                 propertyTypeBuilder.DefineDefaultConstructor(
                     MethodAttributes.Public |
                     MethodAttributes.SpecialName |
                     MethodAttributes.RTSpecialName);
+
+                propertyTypeBuilder.SetGraphQLNameAttribute(propertyTypeName);
 
                 var propertyType = propertyTypeBuilder.CreateType();
 
@@ -112,11 +115,16 @@ internal static class GenericFilterModelTypeBuilder
 
                 propertyBuilder.SetGetMethod(getMethod);
                 propertyBuilder.SetSetMethod(setMethod);
+
+                var propertyNameSnakeCase = propertyName.ToCamelCase();
+                propertyBuilder.SetJsonPropertyAttribute(propertyNameSnakeCase);
+                propertyBuilder.SetJsonPropertyNameAttribute(propertyNameSnakeCase);
+                propertyBuilder.SetGraphQLNameAttribute(propertyNameSnakeCase);
+                propertyBuilder.SetBindPropertyAttribute(propertyNameSnakeCase);
             }
 
-            filterType = filterModelTypeBuilder.CreateType();
-        }
-
+        filterModelTypeBuilder.SetGraphQLNameAttribute(filterModelTypeName);
+        filterType = filterModelTypeBuilder.CreateType();
         FilterModelsMap.TryAdd(type, filterType);
         return filterType;
     }
