@@ -4,4 +4,5 @@ Developer builds are published on the [specific MyGet developer feed](https://ww
 
 In this version:
 
-- ...
+- Added GraphQL with the full filters support
+- Added slice requests

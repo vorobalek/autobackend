@@ -1,5 +1,6 @@
+using AutoBackend.Sdk.Data.Repositories;
+using AutoBackend.Sdk.Filters;
 using AutoBackend.Sdk.Models;
-using AutoBackend.Sdk.Storage;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBackend.Sdk.Controllers;
@@ -8,32 +9,36 @@ internal sealed class GenericControllerWithPrimaryKey<
     TEntity,
     TFilter,
     TKey
-> : GenericController<TEntity, TFilter>
+> : GenericController<
+    TEntity,
+    TFilter
+>
     where TEntity : class
-    where TFilter : class
+    where TFilter : class, IGenericFilter
+    where TKey : notnull
 {
-    private readonly IGenericStorageWithPrimaryKey<TEntity, TKey> _genericStorage;
+    private readonly IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> _genericRepository;
 
-    public GenericControllerWithPrimaryKey(IGenericStorageWithPrimaryKey<TEntity, TKey> genericStorage) : base(
-        genericStorage)
+    public GenericControllerWithPrimaryKey(IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> genericRepository) :
+        base(genericRepository)
     {
-        _genericStorage = genericStorage;
+        _genericRepository = genericRepository;
     }
 
     [HttpGet("{key}")]
     public Task<ActionResult<GenericControllerResponse<TEntity?>>> GetByPrimaryKeyAsync(
         [FromRoute] TKey key)
     {
-        return ProcessAsync(cancellationToken => _genericStorage.GetByPrimaryKeyAsync(key, cancellationToken));
+        return ProcessAsync(cancellationToken => _genericRepository.GetByPrimaryKeyAsync(key, cancellationToken));
     }
 
     [HttpPost("{key}")]
-    public Task<ActionResult<GenericControllerResponse<TEntity>>> InsertByPrimaryKeyAsync(
+    public Task<ActionResult<GenericControllerResponse<TEntity>>> CreateByPrimaryKeyAsync(
         [FromRoute] TKey key,
         [FromBody] TEntity entity)
     {
         return ProcessAsync(
-            cancellationToken => _genericStorage.InsertByPrimaryKeyAsync(key, entity, cancellationToken));
+            cancellationToken => _genericRepository.CreateByPrimaryKeyAsync(key, entity, cancellationToken));
     }
 
     [HttpPut("{key}")]
@@ -42,13 +47,13 @@ internal sealed class GenericControllerWithPrimaryKey<
         [FromBody] TEntity entity)
     {
         return ProcessAsync(
-            cancellationToken => _genericStorage.UpdateByPrimaryKeyAsync(key, entity, cancellationToken));
+            cancellationToken => _genericRepository.UpdateByPrimaryKeyAsync(key, entity, cancellationToken));
     }
 
     [HttpDelete("{key}")]
     public Task<ActionResult<GenericControllerResponse>> DeleteByPrimaryKeyAsync(
         [FromRoute] TKey key)
     {
-        return ProcessAsync(cancellationToken => _genericStorage.DeleteByPrimaryKeyAsync(key, cancellationToken));
+        return ProcessAsync(cancellationToken => _genericRepository.DeleteByPrimaryKeyAsync(key, cancellationToken));
     }
 }

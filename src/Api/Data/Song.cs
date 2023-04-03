@@ -6,6 +6,8 @@ namespace Api.Data;
     nameof(Id)
 )]
 [GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
 public class Song
 {
     [GenericFilter] public Guid Id { get; set; }
