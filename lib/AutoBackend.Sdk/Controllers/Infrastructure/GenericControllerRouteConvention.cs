@@ -15,8 +15,12 @@ internal sealed class GenericControllerRouteConvention : IControllerModelConvent
         controller.Selectors.Add(new SelectorModel
         {
             AttributeRouteModel =
-                new AttributeRouteModel(new RouteAttribute($"api/{GenericController.Version}/{route}"))
+                new AttributeRouteModel(
+                    new RouteAttribute(
+                        string.Format(
+                            Constants.ApiRouteTemplate,
+                            route)))
         });
-        controller.ApiExplorer.GroupName = GenericController.Version;
+        controller.ApiExplorer.GroupName = Constants.ApiGroupName;
     }
 }

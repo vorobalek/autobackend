@@ -1,8 +1,8 @@
-using AutoBackend.Sdk.Exceptions.Api;
+using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Extensions;
+using AutoBackend.Sdk.Filters;
 using AutoBackend.Sdk.Models;
 using AutoBackend.Sdk.Services.ExceptionHandler;
-using AutoBackend.Sdk.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,50 +11,8 @@ namespace AutoBackend.Sdk.Controllers;
 
 internal abstract class GenericController : ControllerBase
 {
-    internal const string Version = "v1";
-}
-
-internal class GenericController<
-    TEntity,
-    TFilter
-> : GenericController
-    where TEntity : class
-    where TFilter : class
-{
-    private readonly IGenericStorage<TEntity> _genericStorage;
-
-    public GenericController(IGenericStorage<TEntity> genericStorage)
-    {
-        _genericStorage = genericStorage;
-    }
-
-    [HttpGet]
-    public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetAllAsync()
-    {
-        return ProcessAsync(cancellationToken => _genericStorage.GetAllAsync(cancellationToken));
-    }
-
-    [HttpGet("count")]
-    public Task<ActionResult<GenericControllerResponse<int>>> CountAsync()
-    {
-        return ProcessAsync(cancellationToken => _genericStorage.CountByFilterAsync<TFilter>(null, cancellationToken));
-    }
-
-    [HttpPost("filter")]
-    public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetByFilterAsync(
-        [FromBody] TFilter filter)
-    {
-        return ProcessAsync(cancellationToken => _genericStorage.GetByFilterAsync(filter, cancellationToken));
-    }
-
-    [HttpPost("filter/count")]
-    public Task<ActionResult<GenericControllerResponse<int>>> CountByFilterAsync(
-        [FromBody] TFilter filter)
-    {
-        return ProcessAsync(cancellationToken => _genericStorage.CountByFilterAsync(filter, cancellationToken));
-    }
-
-    protected async Task<ActionResult<GenericControllerResponse>> ProcessAsync(Func<CancellationToken, Task> resultAsyncProcessor)
+    protected async Task<ActionResult<GenericControllerResponse>> ProcessAsync(
+        Func<CancellationToken, Task> resultAsyncProcessor)
     {
         SetupExceptionHandler();
         await resultAsyncProcessor(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
@@ -81,19 +39,50 @@ internal class GenericController<
 
     private Task<int> HandleExceptionStatusCodeAsync(Exception exception)
     {
-        return Task.FromResult(exception.StatusCode());
+        return Task.FromResult(exception.ToApiException().StatusCode);
     }
 
     private Task<GenericControllerResponse> HandleExceptionResponseAsync(Exception exception)
     {
-        var statusCode = exception.StatusCode();
+        var statusCode = exception.ToApiException().StatusCode;
         return Task.FromResult(
             new GenericControllerResponse(
                     false,
                     statusCode,
                     statusCode == StatusCodes.Status500InternalServerError
-                        ? InternalServerErrorApiException.ErrorMessage
+                        ? Constants.AnUnexpectedInternalServerErrorHasHappened
                         : exception.Message)
                 .WithRequestTime(HttpContext));
+    }
+}
+
+internal abstract class GenericController<
+    TEntity,
+    TFilter
+> : GenericController
+    where TEntity : class
+    where TFilter : class, IGenericFilter
+{
+    private readonly IGenericRepository<TEntity, TFilter> _genericRepository;
+
+    protected GenericController(IGenericRepository<TEntity, TFilter> genericRepository)
+    {
+        _genericRepository = genericRepository;
+    }
+
+    [HttpGet]
+    public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetAllAsync(
+        [FromQuery] TFilter filter)
+    {
+        return ProcessAsync(cancellationToken =>
+            _genericRepository.GetAllAsync(filter, cancellationToken));
+    }
+
+    [HttpGet("count")]
+    public Task<ActionResult<GenericControllerResponse<long>>> GetCountAsync(
+        [FromQuery] TFilter filter)
+    {
+        return ProcessAsync(cancellationToken =>
+            _genericRepository.GetCountAsync(filter, cancellationToken));
     }
 }

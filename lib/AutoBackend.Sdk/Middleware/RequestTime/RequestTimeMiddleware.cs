@@ -6,8 +6,6 @@ namespace AutoBackend.Sdk.Middleware.RequestTime;
 
 internal sealed class RequestTimeMiddleware
 {
-    public const string RequestStartedOnContextItem = "RequestStartedOn";
-
     private readonly RequestDelegate _next;
 
     public RequestTimeMiddleware(RequestDelegate next)
@@ -21,7 +19,7 @@ internal sealed class RequestTimeMiddleware
         IClusterDiscovery clusterDiscovery)
     {
         var requestStartedUtc = dateTimeProvider.UtcNow();
-        httpContext.Items.Add(RequestStartedOnContextItem, requestStartedUtc);
+        httpContext.Items.Add(Constants.RequestStartedOnContextItemName, requestStartedUtc);
         await _next(httpContext);
         clusterDiscovery.CurrentClusterNode
             .LastRequestTimeMs

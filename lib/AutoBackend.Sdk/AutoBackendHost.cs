@@ -14,7 +14,10 @@ public class AutoBackendHost<T>
             .CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(builder =>
             {
-                builder.UseUrls($"http://+:{Environment.GetEnvironmentVariable("PORT")}");
+                builder.UseUrls(
+                    string.Format(
+                        Constants.HostDefaultUrl,
+                        Environment.GetEnvironmentVariable(Constants.PortEnvironmentVariable)));
                 builder.UseStartup<StartupBoilerplate<T>>();
             })
             .Build();

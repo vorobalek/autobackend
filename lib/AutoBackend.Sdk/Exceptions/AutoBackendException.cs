@@ -1,16 +1,16 @@
 namespace AutoBackend.Sdk.Exceptions;
 
-public class AutoBackendException : Exception
+public abstract class AutoBackendException : Exception
 {
-    internal AutoBackendException()
+    protected AutoBackendException()
     {
     }
 
-    internal AutoBackendException(string? message) : base(message)
+    protected AutoBackendException(string? message) : base(message)
     {
     }
 
-    internal AutoBackendException(string? message, Exception? innerException) : base(message, innerException)
+    protected AutoBackendException(string? message, Exception? innerException) : base(message, innerException)
     {
     }
 }
