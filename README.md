@@ -22,8 +22,6 @@ like GraphQL. I dunno. I have already spent much more time trying to express how
 - [Filtering models for API](#mark-model-properties-which-autobackend-has-to-generate-filters-for)
 - [Cross-database provider support](#make-sure-you-have-configured-your-application-database-connection-correctly)
 - [Always up-to-date database schema](#make-sure-you-have-configured-your-application-startup-correctly)
-- [Best practices to use](#be-noticed-of-best-practices)
-    - [GenericDbContext](#genericdbcontext-is-way-better-than-any-other)
 
 # Examples
 
@@ -256,10 +254,8 @@ For more details, you can always request `/swagger` to get the information about
 Use `[GenericController]` to generate for:
 
 - Keyless entity:\
-  **GET** `/api/v1/<model name>` - returns all entities\
-  **GET** `/api/v1/<model name>/count` - returns count of all entities\
-  **POST** `/api/v1/<model name>/filter` - return filtered entities\
-  **POST** `/api/v1/<model name>/filter/count` - return filtered entities count
+  **GET** `/api/v1/<model name>` - returns filtered entities\
+  **GET** `/api/v1/<model name>/count` - returns filtered entities count\
 
   ```csharp
   [GenericEntity]
@@ -272,10 +268,8 @@ Use `[GenericController]` to generate for:
 
 - Entity with a single primary key:
   Same as for keyless entity:\
-  **GET** `/api/v1/<model name>` - returns all entities\
-  **GET** `/api/v1/<model name>/count` - returns count of all entities\
-  **POST** `/api/v1/<model name>/filter` - return filtered entities\
-  **POST** `/api/v1/<model name>/filter/count` - return filtered entities count
+  **GET** `/api/v1/<model name>` - returns filtered entities\
+  **GET** `/api/v1/<model name>/count` - returns filtered entities count\
 
   And extra\
   **GET** `/api/v1/<model name>/{key}` - returns a specific entity by the primary key\
@@ -305,10 +299,8 @@ Use `[GenericController]` to generate for:
 
 - Entity with a complex primary key:
   Same as for keyless entity:\
-  **GET** `/api/v1/<model name>` - returns all entities\
-  **GET** `/api/v1/<model name>/count` - returns count of all entities\
-  **POST** `/api/v1/<model name>/filter` - return filtered entities\
-  **POST** `/api/v1/<model name>/filter/count` - return filtered entities count
+  **GET** `/api/v1/<model name>` - returns filtered entities\
+  **GET** `/api/v1/<model name>/count` - returns filtered entities count\
 
   And extra\
   **GET** `/api/v1/<model name>/{key1}/{key2}/.../{keyN}` - returns a specific entity by the complex primary key\
@@ -508,11 +500,3 @@ database providers.
 
 Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
 migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
-
-## Be noticed of best practices
-
-### GenericDbContext is way better than any other
-
-Despite the database provider you have chosen, if you need to access the `DbContext` directly from your code, it will be
-the best practice to inject the `GenericDbContext` into your services. This way, you can switch between any database
-providers offered by `AutoBackend.SDK` simply by changing one line in your application config.
