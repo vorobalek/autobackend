@@ -16,6 +16,7 @@ namespace Api.Data;
 )]
 [GenericController]
 [GenericGqlQuery]
+[GenericGqlMutation]
 public class AlbumSet
 {
     [GenericFilter]

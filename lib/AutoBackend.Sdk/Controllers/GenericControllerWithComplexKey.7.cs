@@ -21,6 +21,13 @@ internal sealed class GenericControllerWithComplexKey<
 >
     where TEntity : class
     where TFilter : class, IGenericFilter
+    where TKey1 : notnull
+    where TKey2 : notnull
+    where TKey3 : notnull
+    where TKey4 : notnull
+    where TKey5 : notnull
+    where TKey6 : notnull
+    where TKey7 : notnull
 {
     private readonly IGenericRepositoryWithComplexKey<
         TEntity,
@@ -72,7 +79,7 @@ internal sealed class GenericControllerWithComplexKey<
     }
 
     [HttpPost("{key1}/{key2}/{key3}/{key4}/{key5}/{key6}/{key7}")]
-    public Task<ActionResult<GenericControllerResponse<TEntity>>> InsertByComplexKeyAsync(
+    public Task<ActionResult<GenericControllerResponse<TEntity>>> CreateByComplexKeyAsync(
         [FromRoute] TKey1 key1,
         [FromRoute] TKey2 key2,
         [FromRoute] TKey3 key3,
@@ -82,7 +89,7 @@ internal sealed class GenericControllerWithComplexKey<
         [FromRoute] TKey7 key7,
         [FromBody] TEntity entity)
     {
-        return ProcessAsync(cancellationToken => _genericRepository.InsertByComplexKeyAsync(
+        return ProcessAsync(cancellationToken => _genericRepository.CreateByComplexKeyAsync(
             key1,
             key2,
             key3,

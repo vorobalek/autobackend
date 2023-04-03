@@ -7,6 +7,7 @@ namespace Api.Data;
 )]
 [GenericController]
 [GenericGqlQuery]
+[GenericGqlMutation]
 public class Album
 {
     [GenericFilter] public Guid Id { get; set; }

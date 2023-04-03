@@ -12,9 +12,10 @@ internal interface IGenericRepositoryWithPrimaryKey<
 >
     where TEntity : class
     where TFilter : class, IGenericFilter
+    where TKey : notnull
 {
     Task<TEntity?> GetByPrimaryKeyAsync(TKey key, CancellationToken cancellationToken);
-    Task<TEntity> InsertByPrimaryKeyAsync(TKey key, TEntity entity, CancellationToken cancellationToken);
+    Task<TEntity> CreateByPrimaryKeyAsync(TKey key, TEntity entity, CancellationToken cancellationToken);
     Task<TEntity> UpdateByPrimaryKeyAsync(TKey key, TEntity entity, CancellationToken cancellationToken);
     Task DeleteByPrimaryKeyAsync(TKey key, CancellationToken cancellationToken);
 }

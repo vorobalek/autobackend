@@ -1,7 +1,6 @@
 using System.Reflection;
 using AutoBackend.Sdk.Attributes;
-using AutoBackend.Sdk.Exceptions;
-using AutoBackend.Sdk.Filters.Infrastructure;
+using AutoBackend.Sdk.Helpers;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
 
@@ -24,107 +23,7 @@ internal sealed class GenericControllerTypeFeatureProvider : IApplicationFeature
             foreach (var candidate in candidates
                          .Where(candidate => candidate
                              .GetCustomAttribute<GenericControllerAttribute>() is not null))
-            foreach (var genericControllerType in MakeGenericControllersTypeForCandidate(candidate))
-                feature.Controllers.Add(genericControllerType.GetTypeInfo());
+                feature.Controllers.Add(GenericControllerTypeBuilder.BuildForCandidate(candidate).GetTypeInfo());
         }
-    }
-
-    private static IEnumerable<Type> MakeGenericControllersTypeForCandidate(Type candidate)
-    {
-        if (candidate.GetCustomAttribute<GenericEntityAttribute>() is not { Keys: { } } genericEntityAttribute)
-            throw new AutoBackendException(
-                $"Generic controller can be generated only for types marked with {nameof(GenericEntityAttribute)} ({candidate.Name}).");
-
-        yield return MakeForCandidate(candidate, genericEntityAttribute.Keys);
-    }
-
-    private static Type MakeForCandidate(Type candidate, IReadOnlyList<string> keys)
-    {
-        var genericFilterType = GenericFilterTypeBuilder.Build(candidate);
-        return keys.Count switch
-        {
-            0 => typeof(GenericControllerWithNoKey<,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType),
-            1 => typeof(GenericControllerWithPrimaryKey<,,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType,
-                    GetPropertyTypeOrThrowException(candidate, keys[0])),
-            2 => typeof(GenericControllerWithComplexKey<,,,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType,
-                    GetPropertyTypeOrThrowException(candidate, keys[0]),
-                    GetPropertyTypeOrThrowException(candidate, keys[1])),
-            3 => typeof(GenericControllerWithComplexKey<,,,,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType,
-                    GetPropertyTypeOrThrowException(candidate, keys[0]),
-                    GetPropertyTypeOrThrowException(candidate, keys[1]),
-                    GetPropertyTypeOrThrowException(candidate, keys[2])),
-            4 => typeof(GenericControllerWithComplexKey<,,,,,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType,
-                    GetPropertyTypeOrThrowException(candidate, keys[0]),
-                    GetPropertyTypeOrThrowException(candidate, keys[1]),
-                    GetPropertyTypeOrThrowException(candidate, keys[2]),
-                    GetPropertyTypeOrThrowException(candidate, keys[3])),
-            5 => typeof(GenericControllerWithComplexKey<,,,,,,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType,
-                    GetPropertyTypeOrThrowException(candidate, keys[0]),
-                    GetPropertyTypeOrThrowException(candidate, keys[1]),
-                    GetPropertyTypeOrThrowException(candidate, keys[2]),
-                    GetPropertyTypeOrThrowException(candidate, keys[3]),
-                    GetPropertyTypeOrThrowException(candidate, keys[4])),
-            6 => typeof(GenericControllerWithComplexKey<,,,,,,,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType,
-                    GetPropertyTypeOrThrowException(candidate, keys[0]),
-                    GetPropertyTypeOrThrowException(candidate, keys[1]),
-                    GetPropertyTypeOrThrowException(candidate, keys[2]),
-                    GetPropertyTypeOrThrowException(candidate, keys[3]),
-                    GetPropertyTypeOrThrowException(candidate, keys[4]),
-                    GetPropertyTypeOrThrowException(candidate, keys[5])),
-            7 => typeof(GenericControllerWithComplexKey<,,,,,,,,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType,
-                    GetPropertyTypeOrThrowException(candidate, keys[0]),
-                    GetPropertyTypeOrThrowException(candidate, keys[1]),
-                    GetPropertyTypeOrThrowException(candidate, keys[2]),
-                    GetPropertyTypeOrThrowException(candidate, keys[3]),
-                    GetPropertyTypeOrThrowException(candidate, keys[4]),
-                    GetPropertyTypeOrThrowException(candidate, keys[5]),
-                    GetPropertyTypeOrThrowException(candidate, keys[6])),
-            8 => typeof(GenericControllerWithComplexKey<,,,,,,,,,>)
-                .MakeGenericType(
-                    candidate,
-                    genericFilterType,
-                    GetPropertyTypeOrThrowException(candidate, keys[0]),
-                    GetPropertyTypeOrThrowException(candidate, keys[1]),
-                    GetPropertyTypeOrThrowException(candidate, keys[2]),
-                    GetPropertyTypeOrThrowException(candidate, keys[3]),
-                    GetPropertyTypeOrThrowException(candidate, keys[4]),
-                    GetPropertyTypeOrThrowException(candidate, keys[5]),
-                    GetPropertyTypeOrThrowException(candidate, keys[6]),
-                    GetPropertyTypeOrThrowException(candidate, keys[7])),
-            _ => throw new ArgumentOutOfRangeException()
-        };
-    }
-
-    private static Type GetPropertyTypeOrThrowException(Type candidate, string key)
-    {
-        return candidate
-                   .GetProperty(key)
-                   ?.PropertyType
-               ?? throw new AutoBackendException(
-                   $"Unable to build generic controller for type {candidate.FullName}. Unable to determine type of property {key}. Property not found.");
     }
 }

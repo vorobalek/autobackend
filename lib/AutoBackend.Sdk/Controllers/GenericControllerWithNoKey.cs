@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBackend.Sdk.Controllers;
 
-internal class GenericControllerWithNoKey<
+internal sealed class GenericControllerWithNoKey<
     TEntity,
     TFilter
 > : GenericController<
@@ -24,10 +24,10 @@ internal class GenericControllerWithNoKey<
     }
 
     [HttpPost]
-    public Task<ActionResult<GenericControllerResponse<TEntity>>> InsertByPrimaryKeyAsync(
+    public Task<ActionResult<GenericControllerResponse<TEntity>>> CreateAsync(
         [FromBody] TEntity entity)
     {
         return ProcessAsync(
-            cancellationToken => _genericRepository.InsertAsync(entity, cancellationToken));
+            cancellationToken => _genericRepository.CreateAsync(entity, cancellationToken));
     }
 }

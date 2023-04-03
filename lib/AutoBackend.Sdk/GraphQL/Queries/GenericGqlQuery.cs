@@ -1,16 +1,20 @@
 using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Data.Storage;
 using AutoBackend.Sdk.Filters;
+using AutoBackend.Sdk.Services.CancellationTokenProvider;
 
-namespace AutoBackend.Sdk.GraphQL;
+namespace AutoBackend.Sdk.GraphQL.Queries;
 
-internal class GenericGqlQuery<TEntity, TFilter>
+internal abstract class GenericGqlQuery<
+    TEntity,
+    TFilter
+>
     where TEntity : class
     where TFilter : class, IGenericFilter
 {
-    [GraphQLName("list")]
+    [GraphQLName("all")]
     [UseProjection]
-    public IQueryable<TEntity> GetList(
+    public IQueryable<TEntity> GetAllList(
         [Service(ServiceKind.Resolver)] IGenericStorage<TEntity, TFilter> genericStorage,
         [GraphQLName("filter")] TFilter? filter)
     {
@@ -20,13 +24,12 @@ internal class GenericGqlQuery<TEntity, TFilter>
     [GraphQLName("count")]
     public Task<long> GetCountAsync(
         [Service(ServiceKind.Resolver)] IGenericRepository<TEntity, TFilter> genericRepository,
+        [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("filter")] TFilter? filter)
     {
-        return genericRepository.GetCountAsync(filter);
+        return genericRepository
+            .GetCountAsync(
+                filter,
+                cancellationTokenProvider.GlobalCancellationToken);
     }
-}
-
-internal class GenericGqlMutation<TEntity>
-    where TEntity : class
-{
 }

@@ -15,6 +15,7 @@ internal sealed class GenericControllerWithPrimaryKey<
 >
     where TEntity : class
     where TFilter : class, IGenericFilter
+    where TKey : notnull
 {
     private readonly IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> _genericRepository;
 
@@ -32,12 +33,12 @@ internal sealed class GenericControllerWithPrimaryKey<
     }
 
     [HttpPost("{key}")]
-    public Task<ActionResult<GenericControllerResponse<TEntity>>> InsertByPrimaryKeyAsync(
+    public Task<ActionResult<GenericControllerResponse<TEntity>>> CreateByPrimaryKeyAsync(
         [FromRoute] TKey key,
         [FromBody] TEntity entity)
     {
         return ProcessAsync(
-            cancellationToken => _genericRepository.InsertByPrimaryKeyAsync(key, entity, cancellationToken));
+            cancellationToken => _genericRepository.CreateByPrimaryKeyAsync(key, entity, cancellationToken));
     }
 
     [HttpPut("{key}")]

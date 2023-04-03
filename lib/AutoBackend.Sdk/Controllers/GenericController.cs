@@ -1,5 +1,4 @@
 using AutoBackend.Sdk.Data.Repositories;
-using AutoBackend.Sdk.Exceptions.Api;
 using AutoBackend.Sdk.Extensions;
 using AutoBackend.Sdk.Filters;
 using AutoBackend.Sdk.Models;
@@ -12,8 +11,6 @@ namespace AutoBackend.Sdk.Controllers;
 
 internal abstract class GenericController : ControllerBase
 {
-    internal const string Version = "v1";
-
     protected async Task<ActionResult<GenericControllerResponse>> ProcessAsync(
         Func<CancellationToken, Task> resultAsyncProcessor)
     {
@@ -42,18 +39,18 @@ internal abstract class GenericController : ControllerBase
 
     private Task<int> HandleExceptionStatusCodeAsync(Exception exception)
     {
-        return Task.FromResult(exception.StatusCode());
+        return Task.FromResult(exception.ToApiException().StatusCode);
     }
 
     private Task<GenericControllerResponse> HandleExceptionResponseAsync(Exception exception)
     {
-        var statusCode = exception.StatusCode();
+        var statusCode = exception.ToApiException().StatusCode;
         return Task.FromResult(
             new GenericControllerResponse(
                     false,
                     statusCode,
                     statusCode == StatusCodes.Status500InternalServerError
-                        ? InternalServerErrorApiException.ErrorMessage
+                        ? Constants.AnUnexpectedInternalServerErrorHasHappened
                         : exception.Message)
                 .WithRequestTime(HttpContext));
     }

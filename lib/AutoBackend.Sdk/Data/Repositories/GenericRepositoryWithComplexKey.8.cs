@@ -9,7 +9,11 @@ internal sealed class GenericRepositoryWithComplexKey<
     TKey1,
     TKey2,
     TKey3,
-    TKey4
+    TKey4,
+    TKey5,
+    TKey6,
+    TKey7,
+    TKey8
 > : GenericRepository<
     TEntity,
     TFilter
@@ -19,10 +23,22 @@ internal sealed class GenericRepositoryWithComplexKey<
     TKey1,
     TKey2,
     TKey3,
-    TKey4
+    TKey4,
+    TKey5,
+    TKey6,
+    TKey7,
+    TKey8
 >
     where TEntity : class
     where TFilter : class, IGenericFilter
+    where TKey1 : notnull
+    where TKey2 : notnull
+    where TKey3 : notnull
+    where TKey4 : notnull
+    where TKey5 : notnull
+    where TKey6 : notnull
+    where TKey7 : notnull
+    where TKey8 : notnull
 {
     public GenericRepositoryWithComplexKey(IGenericStorage<TEntity, TFilter> genericStorage) : base(genericStorage)
     {
@@ -33,6 +49,10 @@ internal sealed class GenericRepositoryWithComplexKey<
         TKey2 key2,
         TKey3 key3,
         TKey4 key4,
+        TKey5 key5,
+        TKey6 key6,
+        TKey7 key7,
+        TKey8 key8,
         CancellationToken cancellationToken)
     {
         return GetByKeyInternalAsync(
@@ -40,24 +60,36 @@ internal sealed class GenericRepositoryWithComplexKey<
             key1,
             key2,
             key3,
-            key4);
+            key4,
+            key5,
+            key6,
+            key7,
+            key8);
     }
 
-    public Task<TEntity> InsertByComplexKeyAsync(
+    public Task<TEntity> CreateByComplexKeyAsync(
         TKey1 key1,
         TKey2 key2,
         TKey3 key3,
         TKey4 key4,
+        TKey5 key5,
+        TKey6 key6,
+        TKey7 key7,
+        TKey8 key8,
         TEntity entity,
         CancellationToken cancellationToken)
     {
-        return InsertInternalAsync(
+        return CreateInternalAsync(
             entity,
             cancellationToken,
             key1,
             key2,
             key3,
-            key4);
+            key4,
+            key5,
+            key6,
+            key7,
+            key8);
     }
 
     public Task<TEntity> UpdateByComplexKeyAsync(
@@ -65,6 +97,10 @@ internal sealed class GenericRepositoryWithComplexKey<
         TKey2 key2,
         TKey3 key3,
         TKey4 key4,
+        TKey5 key5,
+        TKey6 key6,
+        TKey7 key7,
+        TKey8 key8,
         TEntity entity,
         CancellationToken cancellationToken)
     {
@@ -74,7 +110,11 @@ internal sealed class GenericRepositoryWithComplexKey<
             key1,
             key2,
             key3,
-            key4);
+            key4,
+            key5,
+            key6,
+            key7,
+            key8);
     }
 
     public Task DeleteByComplexKeyAsync(
@@ -82,6 +122,10 @@ internal sealed class GenericRepositoryWithComplexKey<
         TKey2 key2,
         TKey3 key3,
         TKey4 key4,
+        TKey5 key5,
+        TKey6 key6,
+        TKey7 key7,
+        TKey8 key8,
         CancellationToken cancellationToken)
     {
         return DeleteInternalAsync(
@@ -89,6 +133,10 @@ internal sealed class GenericRepositoryWithComplexKey<
             key1,
             key2,
             key3,
-            key4);
+            key4,
+            key5,
+            key6,
+            key7,
+            key8);
     }
 }

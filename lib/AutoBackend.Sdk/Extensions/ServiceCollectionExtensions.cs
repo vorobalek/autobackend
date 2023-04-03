@@ -1,13 +1,13 @@
 using AutoBackend.Sdk.Configuration;
-using AutoBackend.Sdk.Controllers;
 using AutoBackend.Sdk.Controllers.Infrastructure;
 using AutoBackend.Sdk.Data;
 using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Data.Storage;
 using AutoBackend.Sdk.Enums;
-using AutoBackend.Sdk.Exceptions;
-using AutoBackend.Sdk.GraphQL.Infrastructure;
+using AutoBackend.Sdk.Exceptions.Configuration;
+using AutoBackend.Sdk.Helpers;
 using AutoBackend.Sdk.NSwag;
+using AutoBackend.Sdk.Services.CancellationTokenProvider;
 using AutoBackend.Sdk.Services.ClusterDiscovery;
 using AutoBackend.Sdk.Services.DateTimeProvider;
 using AutoBackend.Sdk.Services.ExceptionHandler;
@@ -26,14 +26,11 @@ internal static class ServiceCollectionExtensions
     {
         return services
             .AddGenericControllers<TProgram>()
-            .AddGenericGqlQueries<TProgram>()
-            .AddGenericControllersSwagger(typeof(TProgram).Assembly.FullName!)
+            .AddGenericGql<TProgram>()
+            .AddGenericSwagger(typeof(TProgram).Assembly.FullName!)
             .AddGenericDbContext<TProgram>(configuration)
             .AddGenericStorage()
-            .AddSingleton<IDateTimeProvider, DateTimeProvider>()
-            .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>()
-            .AddScoped<IClusterDiscovery, ClusterDiscovery>()
-            .AddHostedService<ClusterDiscoveryTask>();
+            .AddInternalServices();
     }
 
     private static IServiceCollection AddGenericControllers<TProgram>(
@@ -51,18 +48,21 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddGenericGqlQueries<TProgram>(
+    private static IServiceCollection AddGenericGql<TProgram>(
         this IServiceCollection services)
     {
         var rootQueryType = GenericGqlQueryTypeBuilder.Build(
             typeof(AutoBackendHost<>).Assembly,
             typeof(TProgram).Assembly);
 
-        var foo = Activator.CreateInstance(rootQueryType);
+        var rootMutationType = GenericGqlMutationTypeBuilder.Build(
+            typeof(AutoBackendHost<>).Assembly,
+            typeof(TProgram).Assembly);
 
         services
             .AddGraphQLServer()
             .AddQueryType(rootQueryType)
+            .AddMutationType(rootMutationType)
             .AddProjections()
             .UseExceptions()
             .UseTimeout()
@@ -77,16 +77,16 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddGenericControllersSwagger(
+    private static IServiceCollection AddGenericSwagger(
         this IServiceCollection services,
         string swaggerTitle)
     {
         services.AddSwaggerDocument(settings =>
         {
             settings.Title = swaggerTitle;
-            settings.DocumentName = GenericController.Version;
-            settings.PostProcess = document => { document.Info.Version = GenericController.Version; };
-            settings.ApiGroupNames = new[] { GenericController.Version };
+            settings.DocumentName = Constants.ApiGroupName;
+            settings.PostProcess = document => { document.Info.Version = Constants.ApiVersion; };
+            settings.ApiGroupNames = new[] { Constants.ApiGroupName };
             settings.TypeNameGenerator = new NSwagTypeNameGenerator();
             settings.SchemaNameGenerator = new NSwagSchemaNameGenerator();
 
@@ -96,46 +96,21 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddGenericStorage(this IServiceCollection services)
-    {
-        services.AddScoped(typeof(IGenericStorage<,>), typeof(GenericStorage<,>));
-        services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
-        services.AddScoped(typeof(IGenericRepositoryWithNoKey<,>), typeof(GenericRepositoryWithNoKey<,>));
-        services.AddScoped(typeof(IGenericRepositoryWithPrimaryKey<,,>), typeof(GenericRepositoryWithPrimaryKey<,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,>), typeof(GenericRepositoryWithComplexKey<,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,,,,,>));
-
-        return services;
-    }
-
     private static IServiceCollection AddGenericDbContext<TProgram>(
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        const string databasesConfigurationSectionName = "Database";
-        const string autoBackendInMemoryDatabaseName = "AutoBackendInMemoryDatabase";
         GenericDbContext.SetAssemblies(typeof(AutoBackendHost<>).Assembly, typeof(TProgram).Assembly);
 
         var databasesConfiguration = configuration
-            .GetSection(databasesConfigurationSectionName)
+            .GetSection(Constants.DatabaseConfigurationSectionName)
             .Get<DatabaseConfiguration?>();
 
         if (databasesConfiguration is null)
             return services.AddSpecificGenericDbContext<InMemoryGenericDbContext>(true, builder =>
             {
                 builder
-                    .UseInMemoryDatabase(autoBackendInMemoryDatabaseName);
+                    .UseInMemoryDatabase(Constants.GenericInMemoryDatabaseName);
             });
 
         var isPrimaryConfigured = false;
@@ -187,7 +162,7 @@ internal static class ServiceCollectionExtensions
         }
 
         if (!isPrimaryConfigured)
-            throw new AutoBackendException("No one primary database provider was configured.");
+            throw new InvalidConfigurationException(Constants.NoDatabaseProviderHasBeenChosenAsAPrimaryOne);
 
         return services;
     }
@@ -204,5 +179,37 @@ internal static class ServiceCollectionExtensions
         if (isPrimary) services.AddScoped<GenericDbContext, TContext>();
 
         return services;
+    }
+
+    private static IServiceCollection AddGenericStorage(this IServiceCollection services)
+    {
+        services.AddScoped(typeof(IGenericStorage<,>), typeof(GenericStorage<,>));
+        services.AddScoped(typeof(IGenericRepositoryWithNoKey<,>), typeof(GenericRepositoryWithNoKey<,>));
+        services.AddScoped(typeof(IGenericRepositoryWithPrimaryKey<,,>), typeof(GenericRepositoryWithPrimaryKey<,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,>), typeof(GenericRepositoryWithComplexKey<,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,,,,>));
+        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,,>),
+            typeof(GenericRepositoryWithComplexKey<,,,,,,,,,>));
+
+        return services;
+    }
+
+    private static IServiceCollection AddInternalServices(this IServiceCollection services)
+    {
+        return services
+            .AddSingleton<IDateTimeProvider, DateTimeProvider>()
+            .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>()
+            .AddScoped<IClusterDiscovery, ClusterDiscovery>()
+            .AddHostedService<ClusterDiscoveryTask>()
+            .AddScoped<ICancellationTokenProvider, CancellationTokenProvider>();
     }
 }

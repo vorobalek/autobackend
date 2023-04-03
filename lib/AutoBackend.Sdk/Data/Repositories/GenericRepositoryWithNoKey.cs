@@ -20,8 +20,8 @@ internal sealed class GenericRepositoryWithNoKey<
     {
     }
 
-    public Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken)
+    public Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken)
     {
-        return InsertInternalAsync(entity, cancellationToken);
+        return CreateInternalAsync(entity, cancellationToken);
     }
 }

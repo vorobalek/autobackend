@@ -12,5 +12,5 @@ internal interface IGenericRepositoryWithNoKey<
     where TEntity : class
     where TFilter : class, IGenericFilter
 {
-    Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken);
+    Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken);
 }

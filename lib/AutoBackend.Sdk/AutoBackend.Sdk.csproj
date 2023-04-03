@@ -40,6 +40,99 @@
         <PackageReference Include="NSwag.AspNetCore" Version="13.18.2"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Update="GraphQL\Queries\GenericGqlQueryWithComplexKey.3.cs">
+            <DependentUpon>GenericGqlQueryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Queries\GenericGqlQueryWithComplexKey.4.cs">
+            <DependentUpon>GenericGqlQueryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Queries\GenericGqlQueryWithComplexKey.5.cs">
+            <DependentUpon>GenericGqlQueryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Queries\GenericGqlQueryWithComplexKey.6.cs">
+            <DependentUpon>GenericGqlQueryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Queries\GenericGqlQueryWithComplexKey.7.cs">
+            <DependentUpon>GenericGqlQueryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Queries\GenericGqlQueryWithComplexKey.8.cs">
+            <DependentUpon>GenericGqlQueryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Controllers\GenericControllerWithComplexKey.3.cs">
+            <DependentUpon>GenericControllerWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Controllers\GenericControllerWithComplexKey.4.cs">
+            <DependentUpon>GenericControllerWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Controllers\GenericControllerWithComplexKey.5.cs">
+            <DependentUpon>GenericControllerWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Controllers\GenericControllerWithComplexKey.6.cs">
+            <DependentUpon>GenericControllerWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Controllers\GenericControllerWithComplexKey.7.cs">
+            <DependentUpon>GenericControllerWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Controllers\GenericControllerWithComplexKey.8.cs">
+            <DependentUpon>GenericControllerWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\GenericRepositoryWithComplexKey.3.cs">
+            <DependentUpon>GenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\GenericRepositoryWithComplexKey.4.cs">
+            <DependentUpon>GenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\GenericRepositoryWithComplexKey.5.cs">
+            <DependentUpon>GenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\GenericRepositoryWithComplexKey.6.cs">
+            <DependentUpon>GenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\GenericRepositoryWithComplexKey.7.cs">
+            <DependentUpon>GenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\GenericRepositoryWithComplexKey.8.cs">
+            <DependentUpon>GenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\IGenericRepositoryWithComplexKey.3.cs">
+            <DependentUpon>IGenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\IGenericRepositoryWithComplexKey.4.cs">
+            <DependentUpon>IGenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\IGenericRepositoryWithComplexKey.5.cs">
+            <DependentUpon>IGenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\IGenericRepositoryWithComplexKey.6.cs">
+            <DependentUpon>IGenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\IGenericRepositoryWithComplexKey.7.cs">
+            <DependentUpon>IGenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Data\Repositories\IGenericRepositoryWithComplexKey.8.cs">
+            <DependentUpon>IGenericRepositoryWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Mutations\GenericGqlMutationWithComplexKey.3.cs">
+            <DependentUpon>GenericGqlMutationWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Mutations\GenericGqlMutationWithComplexKey.4.cs">
+            <DependentUpon>GenericGqlMutationWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Mutations\GenericGqlMutationWithComplexKey.5.cs">
+            <DependentUpon>GenericGqlMutationWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Mutations\GenericGqlMutationWithComplexKey.6.cs">
+            <DependentUpon>GenericGqlMutationWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Mutations\GenericGqlMutationWithComplexKey.7.cs">
+            <DependentUpon>GenericGqlMutationWithComplexKey.cs</DependentUpon>
+        </Compile>
+        <Compile Update="GraphQL\Mutations\GenericGqlMutationWithComplexKey.8.cs">
+            <DependentUpon>GenericGqlMutationWithComplexKey.cs</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
     <Target Name="PrepareReleaseNotes" BeforeTargets="GenerateNuspec">
         <PropertyGroup>
             <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../RELEASE_NOTES.md"))</PackageReleaseNotes>

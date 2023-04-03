@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.Json.Serialization;
-using AutoBackend.Sdk.Exceptions;
+using AutoBackend.Sdk.Exceptions.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -19,8 +19,10 @@ internal static class PropertyBuilderExtensions
         var constructorInfo = typeof(GraphQLNameAttribute).GetConstructor(constructorParameters);
 
         var graphQlNameAttributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new AutoBackendException(
-                $"Unable to determine suitable constructor for type {nameof(GraphQLNameAttribute)}"),
+            constructorInfo ?? throw new NotFoundReflectionException(
+                string.Format(
+                    Constants.UnableToFindASuitableConstructorForTheType,
+                    nameof(GraphQLNameAttribute))),
             new object[] { name },
             Array.Empty<PropertyInfo>(),
             Array.Empty<object>());
@@ -37,8 +39,10 @@ internal static class PropertyBuilderExtensions
         var constructorInfo = typeof(JsonPropertyAttribute).GetConstructor(constructorParameters);
 
         var graphQlNameAttributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new AutoBackendException(
-                $"Unable to determine suitable constructor for type {nameof(JsonPropertyAttribute)}"),
+            constructorInfo ?? throw new NotFoundReflectionException(
+                string.Format(
+                    Constants.UnableToFindASuitableConstructorForTheType,
+                    nameof(JsonPropertyAttribute))),
             new object[] { name },
             Array.Empty<PropertyInfo>(),
             Array.Empty<object>());
@@ -55,8 +59,10 @@ internal static class PropertyBuilderExtensions
         var constructorInfo = typeof(JsonPropertyNameAttribute).GetConstructor(constructorParameters);
 
         var graphQlNameAttributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new AutoBackendException(
-                $"Unable to determine suitable constructor for type {nameof(JsonPropertyNameAttribute)}"),
+            constructorInfo ?? throw new NotFoundReflectionException(
+                string.Format(
+                    Constants.UnableToFindASuitableConstructorForTheType,
+                    nameof(JsonPropertyNameAttribute))),
             new object[] { name },
             Array.Empty<PropertyInfo>(),
             Array.Empty<object>());
@@ -72,12 +78,17 @@ internal static class PropertyBuilderExtensions
         var nameProperty = typeof(BindPropertyAttribute).GetProperty(nameof(BindPropertyAttribute.Name));
 
         if (nameProperty is null)
-            throw new AutoBackendException(
-                $"Unable to determine property {nameof(BindPropertyAttribute.Name)} for attribute {nameof(BindPropertyAttribute)}");
+            throw new NotFoundReflectionException(
+                string.Format(
+                    Constants.UnableToFindAPropertyWithNameInObject,
+                    nameof(BindPropertyAttribute.Name),
+                    nameof(BindPropertyAttribute)));
 
         var graphQlNameAttributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new AutoBackendException(
-                $"Unable to determine suitable constructor for type {nameof(JsonPropertyNameAttribute)}"),
+            constructorInfo ?? throw new NotFoundReflectionException(
+                string.Format(
+                    Constants.UnableToFindASuitableConstructorForTheType,
+                    nameof(JsonPropertyNameAttribute))),
             Array.Empty<object>(),
             new[] { nameProperty },
             new object?[] { name });

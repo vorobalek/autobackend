@@ -8,8 +8,8 @@ internal interface IClusterDiscovery
 
     Task ProcessDiscoveryRequest(
         HttpContext httpContext,
-        ClusterNode? remoteClusterNode = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken,
+        ClusterNode? remoteClusterNode = null);
 
     Task Discover(CancellationToken cancellationToken);
 }

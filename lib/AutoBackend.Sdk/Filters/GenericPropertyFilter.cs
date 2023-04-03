@@ -2,7 +2,7 @@ using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using AutoBackend.Sdk.Exceptions;
+using AutoBackend.Sdk.Exceptions.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -64,12 +64,18 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
     {
         if (Equal is null)
             throw new ArgumentNullException(nameof(Equal),
-                $"Method {nameof(EqualExpr)} should be invoked only if {nameof(Equal)} filter was filled.");
+                string.Format(
+                    Constants.MethodCanBeInvokedOnlyIfFilterWasFilled,
+                    nameof(EqualExpr),
+                    nameof(Equal)));
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
         if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
-                $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}.");
+                string.Format(
+                    Constants.UnableToFindAPropertyWithNameInObject,
+                    propertyName,
+                    typeof(TEntity).Name));
 
         var parameter = Expression.Parameter(typeof(TEntity), "entity");
         return Expression.Lambda<Func<TEntity, bool>>(
@@ -87,12 +93,18 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
     {
         if (NotEqual is null)
             throw new ArgumentNullException(nameof(NotEqual),
-                $"Method {nameof(NotEqualExpr)} should be invoked only if {nameof(NotEqual)} filter was filled.");
+                string.Format(
+                    Constants.MethodCanBeInvokedOnlyIfFilterWasFilled,
+                    nameof(NotEqualExpr),
+                    nameof(NotEqual)));
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
         if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
-                $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}.");
+                string.Format(
+                    Constants.UnableToFindAPropertyWithNameInObject,
+                    propertyName,
+                    typeof(TEntity).Name));
 
         var parameter = Expression.Parameter(typeof(TEntity), "entity");
         return Expression.Lambda<Func<TEntity, bool>>(
@@ -108,12 +120,18 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
     {
         if (!IsNull.HasValue)
             throw new ArgumentNullException(nameof(IsNull),
-                $"Method {nameof(IsNullExpr)} should be invoked only if {nameof(IsNull)} filter was filled.");
+                string.Format(
+                    Constants.MethodCanBeInvokedOnlyIfFilterWasFilled,
+                    nameof(IsNullExpr),
+                    nameof(IsNull)));
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
         if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
-                $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}.");
+                string.Format(
+                    Constants.UnableToFindAPropertyWithNameInObject,
+                    propertyName,
+                    typeof(TEntity).Name));
 
         var parameter = Expression.Parameter(typeof(TEntity), "entity");
         return Expression.Lambda<Func<TEntity, bool>>(
@@ -137,12 +155,18 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
     {
         if (GreaterThan is null)
             throw new ArgumentNullException(nameof(GreaterThan),
-                $"Method {nameof(GreaterThanExpr)} should be invoked only if {nameof(GreaterThan)} filter was filled.");
+                string.Format(
+                    Constants.MethodCanBeInvokedOnlyIfFilterWasFilled,
+                    nameof(GreaterThanExpr),
+                    nameof(GreaterThan)));
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
         if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
-                $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}.");
+                string.Format(
+                    Constants.UnableToFindAPropertyWithNameInObject,
+                    propertyName,
+                    typeof(TEntity).Name));
 
         var parameter = Expression.Parameter(typeof(TEntity), "entity");
         return Expression.Lambda<Func<TEntity, bool>>(
@@ -160,12 +184,18 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
     {
         if (GreaterThanOrEqual is null)
             throw new ArgumentNullException(nameof(GreaterThanOrEqual),
-                $"Method {nameof(GreaterThanOrEqualExpr)} should be invoked only if {nameof(GreaterThanOrEqual)} filter was filled.");
+                string.Format(
+                    Constants.MethodCanBeInvokedOnlyIfFilterWasFilled,
+                    nameof(GreaterThanOrEqualExpr),
+                    nameof(GreaterThanOrEqual)));
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
         if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
-                $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}.");
+                string.Format(
+                    Constants.UnableToFindAPropertyWithNameInObject,
+                    propertyName,
+                    typeof(TEntity).Name));
 
         var parameter = Expression.Parameter(typeof(TEntity), "entity");
         return Expression.Lambda<Func<TEntity, bool>>(
@@ -183,12 +213,18 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
     {
         if (LessThan is null)
             throw new ArgumentNullException(nameof(LessThan),
-                $"Method {nameof(LessThanExpr)} should be invoked only if {nameof(LessThan)} filter was filled.");
+                string.Format(
+                    Constants.MethodCanBeInvokedOnlyIfFilterWasFilled,
+                    nameof(LessThanExpr),
+                    nameof(LessThan)));
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
         if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
-                $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}.");
+                string.Format(
+                    Constants.UnableToFindAPropertyWithNameInObject,
+                    propertyName,
+                    typeof(TEntity).Name));
 
         var parameter = Expression.Parameter(typeof(TEntity), "entity");
         return Expression.Lambda<Func<TEntity, bool>>(
@@ -206,12 +242,18 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
     {
         if (LessThanOrEqual is null)
             throw new ArgumentNullException(nameof(LessThanOrEqual),
-                $"Method {nameof(LessThanOrEqualExpr)} should be invoked only if {nameof(LessThanOrEqual)} filter was filled.");
+                string.Format(
+                    Constants.MethodCanBeInvokedOnlyIfFilterWasFilled,
+                    nameof(LessThanOrEqualExpr),
+                    nameof(LessThanOrEqual)));
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
         if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
-                $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}.");
+                string.Format(
+                    Constants.UnableToFindAPropertyWithNameInObject,
+                    propertyName,
+                    typeof(TEntity).Name));
 
         var parameter = Expression.Parameter(typeof(TEntity), "entity");
         return Expression.Lambda<Func<TEntity, bool>>(
@@ -229,12 +271,18 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
     {
         if (In is null)
             throw new ArgumentNullException(nameof(In),
-                $"Method {nameof(InExpr)} should be invoked only if {nameof(In)} filter was filled.");
+                string.Format(
+                    Constants.MethodCanBeInvokedOnlyIfFilterWasFilled,
+                    nameof(InExpr),
+                    nameof(In)));
 
         var entityProperty = typeof(TEntity).GetProperty(propertyName);
         if (entityProperty is null)
             throw new ArgumentNullException(nameof(entityProperty),
-                $"Unable to find property with name {propertyName} in object {typeof(TEntity).Name}.");
+                string.Format(
+                    Constants.UnableToFindAPropertyWithNameInObject,
+                    propertyName,
+                    typeof(TEntity).Name));
 
         var parameter = Expression.Parameter(typeof(TEntity), "entity");
         var member = Expression.Property(parameter, propertyName);
@@ -243,8 +291,12 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
                     .GetMethods(BindingFlags.Static | BindingFlags.Public)
                     .Where(m => m.Name == nameof(Enumerable.Contains))
                     .FirstOrDefault(m => m.GetParameters().Length == 2)
-                ?? throw new AutoBackendException(
-                    $"Unable to find method {nameof(Enumerable.Contains)} with two parameters."))
+                ?? throw new NotFoundReflectionException(
+                    string.Format(
+                        Constants.UnableToFindAMethodWithParametersForTheType,
+                        nameof(Enumerable.Contains),
+                        2,
+                        nameof(Enumerable))))
             .MakeGenericMethod(member.Type);
         return Expression.Lambda<Func<TEntity, bool>>(
             Expression.Call(

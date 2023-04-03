@@ -13,7 +13,17 @@ internal interface IGenericRepositoryWithComplexKey<
     in TKey6,
     in TKey7,
     in TKey8
-> : IGenericRepository<TEntity, TFilter> where TEntity : class where TFilter : class, IGenericFilter
+> : IGenericRepository<TEntity, TFilter>
+    where TEntity : class
+    where TFilter : class, IGenericFilter
+    where TKey1 : notnull
+    where TKey2 : notnull
+    where TKey3 : notnull
+    where TKey4 : notnull
+    where TKey5 : notnull
+    where TKey6 : notnull
+    where TKey7 : notnull
+    where TKey8 : notnull
 {
     Task<TEntity?> GetByComplexKeyAsync(
         TKey1 key1,
@@ -26,7 +36,7 @@ internal interface IGenericRepositoryWithComplexKey<
         TKey8 key8,
         CancellationToken cancellationToken);
 
-    Task<TEntity> InsertByComplexKeyAsync(
+    Task<TEntity> CreateByComplexKeyAsync(
         TKey1 key1,
         TKey2 key2,
         TKey3 key3,

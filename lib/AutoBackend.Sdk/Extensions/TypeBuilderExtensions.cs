@@ -1,6 +1,6 @@
 using System.Reflection;
 using System.Reflection.Emit;
-using AutoBackend.Sdk.Exceptions;
+using AutoBackend.Sdk.Exceptions.Reflection;
 
 namespace AutoBackend.Sdk.Extensions;
 
@@ -16,8 +16,10 @@ internal static class TypeBuilderExtensions
         var constructorInfo = typeof(GraphQLNameAttribute).GetConstructor(constructorParameters);
 
         var graphQlNameAttributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new AutoBackendException(
-                $"Unable to determine suitable constructor for type {nameof(GraphQLNameAttribute)}"),
+            constructorInfo ?? throw new NotFoundReflectionException(
+                string.Format(
+                    Constants.UnableToFindASuitableConstructorForTheType,
+                    nameof(GraphQLNameAttribute))),
             new object[] { name },
             Array.Empty<PropertyInfo>(),
             Array.Empty<object>());

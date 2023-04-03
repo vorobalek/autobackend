@@ -17,6 +17,7 @@ internal sealed class GenericRepositoryWithPrimaryKey<
 >
     where TEntity : class
     where TFilter : class, IGenericFilter
+    where TKey : notnull
 {
     public GenericRepositoryWithPrimaryKey(IGenericStorage<TEntity, TFilter> genericStorage) : base(genericStorage)
     {
@@ -27,9 +28,9 @@ internal sealed class GenericRepositoryWithPrimaryKey<
         return GetByKeyInternalAsync(cancellationToken, key);
     }
 
-    public Task<TEntity> InsertByPrimaryKeyAsync(TKey key, TEntity entity, CancellationToken cancellationToken)
+    public Task<TEntity> CreateByPrimaryKeyAsync(TKey key, TEntity entity, CancellationToken cancellationToken)
     {
-        return InsertInternalAsync(entity, cancellationToken, key);
+        return CreateInternalAsync(entity, cancellationToken, key);
     }
 
     public Task<TEntity> UpdateByPrimaryKeyAsync(TKey key, TEntity entity, CancellationToken cancellationToken)

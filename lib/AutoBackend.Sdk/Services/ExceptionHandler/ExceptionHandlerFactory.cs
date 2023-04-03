@@ -30,8 +30,8 @@ internal sealed class ExceptionHandlerFactory : IExceptionHandlerFactory
             Func<Exception, Task<TResponse>> processResponse)
         {
             _httpContext = httpContext;
-            _processResponse = processResponse;
             _processStatusCode = processStatusCode;
+            _processResponse = processResponse;
         }
 
         public async Task HandleAsync(Exception exception, CancellationToken cancellationToken)
