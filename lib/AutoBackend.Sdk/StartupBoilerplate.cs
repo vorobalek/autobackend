@@ -44,6 +44,7 @@ internal sealed class StartupBoilerplate<TProgram>
                     AllowCachingResponses = false
                 });
                 builder.MapClusterDiscovery();
+                builder.MapGraphQL().AllowAnonymous();
             });
     }
 }

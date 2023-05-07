@@ -7,7 +7,6 @@ namespace AutoBackend.Sdk.Middleware.ApiExceptionHandler;
 
 internal sealed class ApiExceptionHandlerMiddleware
 {
-    private const string DefaultErrorMessage = "Unexpected internal server error out of controller context";
     private readonly RequestDelegate _next;
 
     public ApiExceptionHandlerMiddleware(RequestDelegate next)
@@ -36,15 +35,17 @@ internal sealed class ApiExceptionHandlerMiddleware
 
     private Task<int> HandleExceptionStatusCodeDefaultAsync(Exception exception)
     {
-        return Task.FromResult(exception.StatusCode());
+        return Task.FromResult(exception.ToApiException().StatusCode);
     }
 
     private Func<Exception, Task<string>> HandleExceptionResponseDefaultAsyncProvider(ILogger logger)
     {
         Task<string> HandleExceptionResponseDefaultAsync(Exception exception)
         {
-            logger.LogCritical(exception, DefaultErrorMessage);
-            return Task.FromResult(DefaultErrorMessage);
+            logger.LogCritical(
+                exception,
+                Constants.AnUnexpectedInternalServerErrorHasHappenedOutOfTheControllerContext);
+            return Task.FromResult(Constants.AnUnexpectedInternalServerErrorHasHappened);
         }
 
         return HandleExceptionResponseDefaultAsync;

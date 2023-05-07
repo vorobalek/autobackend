@@ -17,7 +17,7 @@ namespace Api.Migrations.SqlServer
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.3")
+                .HasAnnotation("ProductVersion", "7.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -109,9 +109,17 @@ namespace Api.Migrations.SqlServer
 
             modelBuilder.Entity("Api.Data.Note", b =>
                 {
+                    b.Property<int>("__Generic__Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("__Generic__Id"));
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("__Generic__Id");
 
                     b.ToTable("Note", "generic");
                 });

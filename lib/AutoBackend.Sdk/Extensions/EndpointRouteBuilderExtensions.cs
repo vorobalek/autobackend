@@ -1,3 +1,4 @@
+using AutoBackend.Sdk.Services.CancellationTokenProvider;
 using AutoBackend.Sdk.Services.ClusterDiscovery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -11,17 +12,24 @@ internal static class EndpointRouteBuilderExtensions
 {
     internal static IEndpointRouteBuilder MapClusterDiscovery(this IEndpointRouteBuilder builder)
     {
-        builder.MapGet(ClusterDiscovery.ServiceUrl, async context =>
+        builder.MapGet(Constants.ClusterDiscoveryServiceUrl, async context =>
         {
+            var cancellationTokenProvider = context.RequestServices.GetRequiredService<ICancellationTokenProvider>();
             var discoveryService = context.RequestServices.GetRequiredService<IClusterDiscovery>();
-            await discoveryService.ProcessDiscoveryRequest(context);
+            await discoveryService.ProcessDiscoveryRequest(
+                context,
+                cancellationTokenProvider.GlobalCancellationToken);
         });
-        builder.MapPost(ClusterDiscovery.ServiceUrl, async (
+        builder.MapPost(Constants.ClusterDiscoveryServiceUrl, async (
             HttpContext context,
             [FromBody] ClusterNode? node) =>
         {
+            var cancellationTokenProvider = context.RequestServices.GetRequiredService<ICancellationTokenProvider>();
             var discoveryService = context.RequestServices.GetRequiredService<IClusterDiscovery>();
-            await discoveryService.ProcessDiscoveryRequest(context, node);
+            await discoveryService.ProcessDiscoveryRequest(
+                context,
+                cancellationTokenProvider.GlobalCancellationToken,
+                node);
         });
         return builder;
     }

@@ -6,8 +6,6 @@ namespace AutoBackend.Sdk.Data;
 
 public class GenericDbContext : DbContext
 {
-    private const string GenericEntitySchema = "generic";
-
 #pragma warning disable CA2211
     private static Assembly[] _assemblies = Array.Empty<Assembly>();
 #pragma warning restore CA2211
@@ -37,11 +35,19 @@ public class GenericDbContext : DbContext
                 var entityBuilder = modelBuilder.Entity(candidateType);
 
                 if (attribute.Keys.Any())
+                {
                     entityBuilder.HasKey(attribute.Keys);
+                }
                 else
-                    entityBuilder.HasNoKey();
+                {
+                    var genericIdPropertyName = Constants.GenericIdPropertyName;
+                    entityBuilder
+                        .Property<int>(genericIdPropertyName)
+                        .ValueGeneratedOnAdd();
+                    entityBuilder.HasKey(genericIdPropertyName);
+                }
 
-                entityBuilder.ToTable(candidateType.Name, GenericEntitySchema);
+                entityBuilder.ToTable(candidateType.Name, Constants.GenericDatabaseSchemaName);
             }
         }
     }

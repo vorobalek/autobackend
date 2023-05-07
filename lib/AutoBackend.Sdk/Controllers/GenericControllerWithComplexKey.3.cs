@@ -1,5 +1,6 @@
+using AutoBackend.Sdk.Data.Repositories;
+using AutoBackend.Sdk.Filters;
 using AutoBackend.Sdk.Models;
-using AutoBackend.Sdk.Storage;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBackend.Sdk.Controllers;
@@ -10,26 +11,34 @@ internal sealed class GenericControllerWithComplexKey<
     TKey1,
     TKey2,
     TKey3
-> : GenericController<TEntity, TFilter>
+> : GenericController<
+    TEntity,
+    TFilter
+>
     where TEntity : class
-    where TFilter : class
+    where TFilter : class, IGenericFilter
+    where TKey1 : notnull
+    where TKey2 : notnull
+    where TKey3 : notnull
 {
-    private readonly IGenericStorageWithComplexKey<
+    private readonly IGenericRepositoryWithComplexKey<
         TEntity,
+        TFilter,
         TKey1,
         TKey2,
         TKey3
-    > _genericStorage;
+    > _genericRepository;
 
     public GenericControllerWithComplexKey(
-        IGenericStorageWithComplexKey<
+        IGenericRepositoryWithComplexKey<
             TEntity,
+            TFilter,
             TKey1,
             TKey2,
             TKey3
-        > genericStorage) : base(genericStorage)
+        > genericRepository) : base(genericRepository)
     {
-        _genericStorage = genericStorage;
+        _genericRepository = genericRepository;
     }
 
     [HttpGet("{key1}/{key2}/{key3}")]
@@ -38,7 +47,7 @@ internal sealed class GenericControllerWithComplexKey<
         [FromRoute] TKey2 key2,
         [FromRoute] TKey3 key3)
     {
-        return ProcessAsync(cancellationToken => _genericStorage.GetByComplexKeyAsync(
+        return ProcessAsync(cancellationToken => _genericRepository.GetByComplexKeyAsync(
             key1,
             key2,
             key3,
@@ -46,13 +55,13 @@ internal sealed class GenericControllerWithComplexKey<
     }
 
     [HttpPost("{key1}/{key2}/{key3}")]
-    public Task<ActionResult<GenericControllerResponse<TEntity>>> InsertByComplexKeyAsync(
+    public Task<ActionResult<GenericControllerResponse<TEntity>>> CreateByComplexKeyAsync(
         [FromRoute] TKey1 key1,
         [FromRoute] TKey2 key2,
         [FromRoute] TKey3 key3,
         [FromBody] TEntity entity)
     {
-        return ProcessAsync(cancellationToken => _genericStorage.InsertByComplexKeyAsync(
+        return ProcessAsync(cancellationToken => _genericRepository.CreateByComplexKeyAsync(
             key1,
             key2,
             key3,
@@ -67,7 +76,7 @@ internal sealed class GenericControllerWithComplexKey<
         [FromRoute] TKey3 key3,
         [FromBody] TEntity entity)
     {
-        return ProcessAsync(cancellationToken => _genericStorage.UpdateByComplexKeyAsync(
+        return ProcessAsync(cancellationToken => _genericRepository.UpdateByComplexKeyAsync(
             key1,
             key2,
             key3,
@@ -81,7 +90,7 @@ internal sealed class GenericControllerWithComplexKey<
         [FromRoute] TKey2 key2,
         [FromRoute] TKey3 key3)
     {
-        return ProcessAsync(cancellationToken => _genericStorage.DeleteByComplexKeyAsync(
+        return ProcessAsync(cancellationToken => _genericRepository.DeleteByComplexKeyAsync(
             key1,
             key2,
             key3,

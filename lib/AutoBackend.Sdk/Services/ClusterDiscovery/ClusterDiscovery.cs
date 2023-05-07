@@ -11,9 +11,7 @@ namespace AutoBackend.Sdk.Services.ClusterDiscovery;
 
 internal sealed class ClusterDiscovery : IClusterDiscovery
 {
-    internal const string ServiceUrl = "/__discovery";
-
-    private static readonly string? ClusterUrl = Environment.GetEnvironmentVariable("HOST");
+    private static readonly string? ClusterUrl = Environment.GetEnvironmentVariable(Constants.HostEnvironmentVariable);
     private static ConcurrentDictionary<Guid, ClusterNode>? _knownClusterNodes;
     private static ClusterNode? _currentNode;
 
@@ -42,8 +40,8 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
 
     public async Task ProcessDiscoveryRequest(
         HttpContext httpContext,
-        ClusterNode? remoteClusterNode = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken,
+        ClusterNode? remoteClusterNode = null)
     {
         var utcNow = _dateTimeProvider.UtcNow();
 
@@ -60,7 +58,7 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
             KnownClusterNodes[remoteClusterNode.Id] = FillRemoteNode(remoteClusterNode);
             KnownClusterNodes[remoteClusterNode.Id].LastSeenUtc = _dateTimeProvider.UtcNow();
             KnownClusterNodes[remoteClusterNode.Id].LastSeenIp.WithValueIfNotNull(
-                httpContext.Request.Headers["X-Forwarded-For"],
+                httpContext.Request.Headers[Constants.XForwardedForHeaderName],
                 _dateTimeProvider);
         }
 
@@ -77,7 +75,7 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
     public async Task Discover(CancellationToken cancellationToken)
     {
         if (Uri.TryCreate(ClusterUrl, UriKind.Absolute, out var clusterUri) &&
-            Uri.TryCreate(clusterUri, ServiceUrl, out var serviceUri))
+            Uri.TryCreate(clusterUri, Constants.ClusterDiscoveryServiceUrl, out var serviceUri))
         {
             var response = await serviceUri
                 .PostJsonAsync(CurrentClusterNode, cancellationToken)
@@ -164,8 +162,11 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
 
     private void Log(ClusterNode? remoteClusterNode)
     {
-        _logger.LogDebug(new EventId(42, "discovery request"),
-            "Discover at (node: ({NodeId}, {NodeCreatedUtc}, {NodeLastRequestToUtc}, {NodeLastRequestFromUtc}, {NodeRequestTimeMs})) with params (node: ({RemoteNodeId}, {RemoteNodeCreated}, {RemoteNodeLastRequestTo}, {RemoteNodeLastRequestFrom}, {RemoteNodeRequestTimeMs}))",
+        _logger.LogDebug(
+            new EventId(
+                42,
+                "discovery request"),
+            Constants.ClusterDiscoveryRequestLogMessage,
             CurrentClusterNode.Id,
             CurrentClusterNode.CreatedUtc,
             CurrentClusterNode.LastRequestToUtc.Value,

@@ -13,6 +13,9 @@ internal sealed class NSwagSchemaNameGenerator : ISchemaNameGenerator
         var index = typeName.IndexOf('`');
         var typeNameWithoutGenericArity = index == -1 ? typeName : typeName[..index];
 
-        return $"{typeNameWithoutGenericArity}<{genericArgs}>";
+        return string.Format(
+            Constants.GenericTypeBeautifulName,
+            typeNameWithoutGenericArity,
+            genericArgs);
     }
 }

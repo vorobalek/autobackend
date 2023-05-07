@@ -1,5 +1,4 @@
 using System.Net.Mime;
-using AutoBackend.Sdk.Middleware.RequestTime;
 using AutoBackend.Sdk.Services.DateTimeProvider;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +10,8 @@ internal static class HttpContextExtensions
 {
     internal static DateTimeOffset? TryGetRequestStartedDateTimeOffset(this HttpContext httpContext)
     {
-        if (httpContext.Items.ContainsKey(RequestTimeMiddleware.RequestStartedOnContextItem))
-            if (httpContext.Items[RequestTimeMiddleware.RequestStartedOnContextItem] is DateTimeOffset stamp)
+        if (httpContext.Items.ContainsKey(Constants.RequestStartedOnContextItemName))
+            if (httpContext.Items[Constants.RequestStartedOnContextItemName] is DateTimeOffset stamp)
                 return stamp;
 
         return null;
@@ -30,7 +29,7 @@ internal static class HttpContextExtensions
         this HttpContext httpContext,
         object? value,
         Formatting formatting,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var response = JsonConvert.SerializeObject(value, formatting);
         httpContext.Response.ContentType = MediaTypeNames.Application.Json;
@@ -41,7 +40,7 @@ internal static class HttpContextExtensions
         this HttpContext httpContext,
         object? value,
         Formatting formatting,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         await httpContext.WriteJsonAsync(value, formatting, cancellationToken);
         await httpContext.Response.CompleteAsync();

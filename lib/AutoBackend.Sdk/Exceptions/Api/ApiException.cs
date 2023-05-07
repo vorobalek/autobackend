@@ -1,6 +1,6 @@
 namespace AutoBackend.Sdk.Exceptions.Api;
 
-internal abstract class ApiException : Exception
+internal abstract class ApiException : AutoBackendException
 {
     protected ApiException()
     {
