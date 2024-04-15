@@ -87,8 +87,8 @@ internal static class ServiceCollectionExtensions
             settings.DocumentName = Constants.ApiGroupName;
             settings.PostProcess = document => { document.Info.Version = Constants.ApiVersion; };
             settings.ApiGroupNames = new[] { Constants.ApiGroupName };
-            settings.TypeNameGenerator = new NSwagTypeNameGenerator();
-            settings.SchemaNameGenerator = new NSwagSchemaNameGenerator();
+            settings.SchemaSettings.TypeNameGenerator = new NSwagTypeNameGenerator();
+            settings.SchemaSettings.SchemaNameGenerator = new NSwagSchemaNameGenerator();
 
             settings.OperationProcessors.Replace<OperationTagsProcessor>(new NSwagOperationTagsProcessor());
         });
