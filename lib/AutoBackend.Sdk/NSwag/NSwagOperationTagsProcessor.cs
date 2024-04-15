@@ -19,7 +19,7 @@ internal sealed class NSwagOperationTagsProcessor : OperationTagsProcessor
         var controllerTag = genericType.Name;
         var summary = context.ControllerType.GetXmlDocsSummary(new XmlDocsOptions
         {
-            ResolveExternalXmlDocs = context.Settings.ResolveExternalXmlDocumentation
+            ResolveExternalXmlDocs = context.Settings.SchemaSettings.ResolveExternalXmlDocumentation
         });
         context.OperationDescription.Operation.Tags.Add(controllerTag);
         UpdateDocumentTagDescription(context, controllerTag, summary);
