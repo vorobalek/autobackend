@@ -78,7 +78,7 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
             Uri.TryCreate(clusterUri, Constants.ClusterDiscoveryServiceUrl, out var serviceUri))
         {
             var response = await serviceUri
-                .PostJsonAsync(CurrentClusterNode, cancellationToken)
+                .PostJsonAsync(CurrentClusterNode, cancellationToken: cancellationToken)
                 .ReceiveJson<GenericControllerResponse<ClusterNode[]?>?>();
 
             if (response is { Ok: true, Result: { } remoteClusterNodes })

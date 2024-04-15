@@ -33,7 +33,7 @@ internal sealed class StartupBoilerplate<TProgram>
             .UseRequestTimestamp()
             .UseStaticFiles()
             .UseOpenApi()
-            .UseSwaggerUi3()
+            .UseSwaggerUi()
             .UseHealthChecks(HealthCheckUrl)
             .UseRouting()
             .UseEndpoints(builder =>
