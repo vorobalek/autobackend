@@ -20,7 +20,7 @@ internal static class TypeBuilderExtensions
                 string.Format(
                     Constants.UnableToFindASuitableConstructorForTheType,
                     nameof(GraphQLNameAttribute))),
-            new object[] { name },
+            [name],
             Array.Empty<PropertyInfo>(),
             Array.Empty<object>());
 

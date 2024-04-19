@@ -1,20 +1,24 @@
 using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Filters;
+using AutoBackend.Sdk.Models;
 using AutoBackend.Sdk.Services.CancellationTokenProvider;
 
 namespace AutoBackend.Sdk.GraphQL.Queries;
 
 internal abstract class GenericGqlQueryWithComplexKey<
     TEntity,
+    TResponse,
     TFilter,
     TKey1,
     TKey2,
     TKey3
 > : GenericGqlQuery<
     TEntity,
+    TResponse,
     TFilter
 >
     where TEntity : class
+    where TResponse : class, IGenericResponse, new()
     where TFilter : class, IGenericFilter
     where TKey1 : notnull
     where TKey2 : notnull

@@ -1,24 +1,35 @@
+using AutoBackend.Sdk.Data.Mappers;
 using AutoBackend.Sdk.Data.Repositories;
-using AutoBackend.Sdk.Data.Storage;
 using AutoBackend.Sdk.Filters;
+using AutoBackend.Sdk.Models;
 using AutoBackend.Sdk.Services.CancellationTokenProvider;
 
 namespace AutoBackend.Sdk.GraphQL.Queries;
 
 internal abstract class GenericGqlQuery<
     TEntity,
+    TResponse,
     TFilter
 >
     where TEntity : class
+    where TResponse : class, IGenericResponse, new()
     where TFilter : class, IGenericFilter
 {
     [GraphQLName("all")]
     [UseProjection]
-    public IQueryable<TEntity> GetAllList(
-        [Service(ServiceKind.Resolver)] IGenericStorage<TEntity, TFilter> genericStorage,
+    public async Task<TResponse[]> GetAllAsync(
+        [Service(ServiceKind.Resolver)] IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+        [Service(ServiceKind.Resolver)] IGenericRepository<TEntity, TFilter> genericRepository,
+        [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("filter")] TFilter? filter)
     {
-        return genericStorage.GetQuery(filter);
+        return genericResponseMapper
+            .ToModel(
+                await genericRepository
+                    .GetAllAsync(
+                        filter,
+                        cancellationTokenProvider.GlobalCancellationToken))
+            .ToArray();
     }
 
     [GraphQLName("count")]

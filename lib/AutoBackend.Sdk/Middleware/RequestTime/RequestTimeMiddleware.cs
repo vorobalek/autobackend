@@ -4,15 +4,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace AutoBackend.Sdk.Middleware.RequestTime;
 
-internal sealed class RequestTimeMiddleware
+internal sealed class RequestTimeMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public RequestTimeMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task Invoke(
         HttpContext httpContext,
         IDateTimeProvider dateTimeProvider,
@@ -20,7 +13,7 @@ internal sealed class RequestTimeMiddleware
     {
         var requestStartedUtc = dateTimeProvider.UtcNow();
         httpContext.Items.Add(Constants.RequestStartedOnContextItemName, requestStartedUtc);
-        await _next(httpContext);
+        await next(httpContext);
         clusterDiscovery.CurrentClusterNode
             .LastRequestTimeMs
             .WithValueIfNotNull(

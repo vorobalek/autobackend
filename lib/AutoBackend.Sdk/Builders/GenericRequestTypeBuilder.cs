@@ -2,99 +2,96 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Reflection.Emit;
 using AutoBackend.Sdk.Attributes;
+using AutoBackend.Sdk.Exceptions.Reflection;
 using AutoBackend.Sdk.Extensions;
-using AutoBackend.Sdk.Filters;
+using AutoBackend.Sdk.Models;
 
-namespace AutoBackend.Sdk.Helpers;
+namespace AutoBackend.Sdk.Builders;
 
-internal static class GenericFilterTypeBuilder
+internal static class GenericRequestTypeBuilder
 {
     private static readonly ModuleBuilder ModuleBuilder =
         AssemblyBuilder
             .DefineDynamicAssembly(
-                new AssemblyName(Constants.GenericFiltersAssemblyName),
+                new AssemblyName(Constants.GenericRequestsAssemblyName),
                 AssemblyBuilderAccess.Run)
-            .DefineDynamicModule(Constants.GenericFiltersModuleName);
+            .DefineDynamicModule(Constants.GenericRequestsModuleName);
 
-    private static readonly ConcurrentDictionary<Type, Type> FiltersMap = new();
+    private static readonly ConcurrentDictionary<Type, Type> RequestsMap = new();
 
-    internal static Type BuildForCandidate(Type type)
+    internal static Type BuildForCandidate(Type candidate)
     {
-        if (FiltersMap.TryGetValue(type, out var filterType))
-            return filterType;
+        if (candidate.IsPrimitiveModelType())
+            return candidate;
 
-        var filterTypeName = string.Format(Constants.GenericFilterTypeName, type.Name);
-        var filterTypeBuilder = ModuleBuilder
+        if (candidate.IsEnumerable())
+            return BuildForCandidate(
+                    candidate.GetEnumerableType()
+                    ?? throw new NotFoundReflectionException())
+                .MakeArrayType();
+
+        if (RequestsMap.TryGetValue(candidate, out var requestType))
+            return requestType;
+
+        var requestTypeName = string.Format(Constants.GenericRequestTypeName, candidate.Name);
+        var requestTypeBuilder = ModuleBuilder
             .DefineType(
-                filterTypeName,
+                requestTypeName,
                 TypeAttributes.Public |
                 TypeAttributes.Class |
                 TypeAttributes.AutoClass |
                 TypeAttributes.AnsiClass |
                 TypeAttributes.BeforeFieldInit |
                 TypeAttributes.AutoLayout,
-                typeof(GenericFilter));
+                typeof(GenericRequest));
 
-        filterTypeBuilder.DefineDefaultConstructor(
+        RequestsMap.AddOrUpdate(
+            candidate,
+            _ => requestTypeBuilder,
+            (_, _) => requestTypeBuilder);
+
+        requestTypeBuilder.DefineDefaultConstructor(
             MethodAttributes.Public |
             MethodAttributes.SpecialName |
             MethodAttributes.RTSpecialName);
 
-        var candidateProperties = type
+        var candidatePropertyNames = candidate
+            .GetCustomAttribute<GenericRequestAttribute>()
+            ?.Properties;
+
+        var candidatePropertiesExpression = ExpressionBuilder
+            .True<PropertyInfo>();
+
+        if (candidatePropertyNames is not null)
+            candidatePropertiesExpression = candidatePropertiesExpression
+                .And(p => candidatePropertyNames.Contains(p.Name));
+
+        var candidateProperties = candidate
             .GetProperties()
-            .Where(p => p.GetCustomAttributes<GenericFilterAttribute>().Any())
+            .Where(candidatePropertiesExpression.Compile())
             .ToArray();
 
         if (candidateProperties.Any())
             foreach (var candidateProperty in candidateProperties)
             {
                 var propertyName = candidateProperty.Name;
+                var propertyType = BuildForCandidate(candidateProperty.PropertyType);
 
-                var nullableCandidatePropertyType = candidateProperty.PropertyType.IsValueType
-                    ? Nullable.GetUnderlyingType(candidateProperty.PropertyType) is { } underlyingType
-                        ? typeof(Nullable<>).MakeGenericType(underlyingType)
-                        : typeof(Nullable<>).MakeGenericType(candidateProperty.PropertyType)
-                    : candidateProperty.PropertyType;
-
-                var propertyTypeName = string.Format(Constants.GenericFilterPropertyTypeName, type.Name, propertyName);
-
-                var propertyTypeBuilder = ModuleBuilder
-                    .DefineType(
-                        propertyTypeName,
-                        TypeAttributes.Public |
-                        TypeAttributes.Class |
-                        TypeAttributes.AutoClass |
-                        TypeAttributes.AnsiClass |
-                        TypeAttributes.BeforeFieldInit |
-                        TypeAttributes.AutoLayout,
-                        typeof(GenericPropertyFilter<,>).MakeGenericType(candidateProperty.PropertyType,
-                            nullableCandidatePropertyType));
-
-                propertyTypeBuilder
-                    .DefineDefaultConstructor(
-                        MethodAttributes.Public |
-                        MethodAttributes.SpecialName |
-                        MethodAttributes.RTSpecialName);
-
-                propertyTypeBuilder.SetGraphQLNameAttribute(propertyTypeName);
-
-                var propertyType = propertyTypeBuilder.CreateType();
-
-                var fieldModelBuilder = filterTypeBuilder
+                var fieldModelBuilder = requestTypeBuilder
                     .DefineField(
                         string.Format(
                             Constants.PropertyBackingFieldName,
                             propertyName),
                         propertyType,
                         FieldAttributes.Private);
-                var propertyBuilder = filterTypeBuilder
+                var propertyBuilder = requestTypeBuilder
                     .DefineProperty(
                         propertyName,
                         PropertyAttributes.HasDefault,
                         propertyType,
                         null);
 
-                var getMethod = filterTypeBuilder
+                var getMethod = requestTypeBuilder
                     .DefineMethod(
                         string.Format(
                             Constants.PropertyGetterName,
@@ -108,7 +105,7 @@ internal static class GenericFilterTypeBuilder
                 getMethodIl.Emit(OpCodes.Ldfld, fieldModelBuilder);
                 getMethodIl.Emit(OpCodes.Ret);
 
-                var setMethod = filterTypeBuilder
+                var setMethod = requestTypeBuilder
                     .DefineMethod(
                         string.Format(
                             Constants.PropertySetterName,
@@ -140,9 +137,13 @@ internal static class GenericFilterTypeBuilder
                 propertyBuilder.SetBindPropertyAttribute(propertyNameSnakeCase);
             }
 
-        filterTypeBuilder.SetGraphQLNameAttribute(filterTypeName);
-        filterType = filterTypeBuilder.CreateType();
-        FiltersMap.TryAdd(type, filterType);
-        return filterType;
+        requestTypeBuilder.SetGraphQLNameAttribute(requestTypeName);
+        requestType = requestTypeBuilder.CreateType();
+
+        RequestsMap.AddOrUpdate(
+            candidate,
+            _ => requestTypeBuilder,
+            (_, _) => requestType);
+        return requestType;
     }
 }

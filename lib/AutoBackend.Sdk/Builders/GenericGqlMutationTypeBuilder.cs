@@ -3,24 +3,24 @@ using System.Reflection.Emit;
 using AutoBackend.Sdk.Attributes;
 using AutoBackend.Sdk.Exceptions.Reflection;
 using AutoBackend.Sdk.Extensions;
-using AutoBackend.Sdk.GraphQL.Queries;
+using AutoBackend.Sdk.GraphQL.Mutations;
 
-namespace AutoBackend.Sdk.Helpers;
+namespace AutoBackend.Sdk.Builders;
 
-internal static class GenericGqlQueryTypeBuilder
+internal static class GenericGqlMutationTypeBuilder
 {
     private static readonly ModuleBuilder ModuleBuilder =
         AssemblyBuilder
             .DefineDynamicAssembly(
-                new AssemblyName(Constants.GenericGqlQueriesAssemblyName),
+                new AssemblyName(Constants.GenericGqlMutationsAssemblyName),
                 AssemblyBuilderAccess.Run)
-            .DefineDynamicModule(Constants.GenericGqlQueriesModuleName);
+            .DefineDynamicModule(Constants.GenericGqlMutationsModuleName);
 
     internal static Type Build(params Assembly[] assemblies)
     {
-        var queryTypeName = Constants.GenericGqlQueryTypeName;
-        var queryTypeBuilder = ModuleBuilder.DefineType(
-            queryTypeName,
+        var mutationTypeName = Constants.GenericGqlMutationTypeName;
+        var mutationTypeBuilder = ModuleBuilder.DefineType(
+            mutationTypeName,
             TypeAttributes.Public |
             TypeAttributes.Class |
             TypeAttributes.AutoClass |
@@ -29,7 +29,7 @@ internal static class GenericGqlQueryTypeBuilder
             TypeAttributes.AutoLayout,
             null);
 
-        queryTypeBuilder.DefineDefaultConstructor(
+        mutationTypeBuilder.DefineDefaultConstructor(
             MethodAttributes.Public |
             MethodAttributes.HideBySig |
             MethodAttributes.SpecialName);
@@ -39,26 +39,26 @@ internal static class GenericGqlQueryTypeBuilder
             var candidates = currentAssembly.GetExportedTypes();
             foreach (var candidate in candidates
                          .Where(candidate => candidate
-                             .GetCustomAttribute<GenericGqlQueryAttribute>() is not null))
+                             .GetCustomAttribute<GenericGqlMutationAttribute>() is not null))
                 BuildProperty(
-                    queryTypeBuilder,
+                    mutationTypeBuilder,
                     candidate);
         }
 
-        queryTypeBuilder.SetGraphQLNameAttribute(queryTypeName);
-        var queryType = queryTypeBuilder.CreateType();
+        mutationTypeBuilder.SetGraphQLNameAttribute(mutationTypeName);
+        var mutationType = mutationTypeBuilder.CreateType();
 
-        return queryType;
+        return mutationType;
     }
 
     private static void BuildProperty(
-        TypeBuilder queryTypeBuilder,
+        TypeBuilder mutationTypeBuilder,
         Type propertyCandidateType)
     {
         var propertyTypeParent = GetPropertyTypeForCandidate(propertyCandidateType);
 
         var propertyTypeName = string.Format(
-            Constants.GenericGqlQueryPropertyTypeName,
+            Constants.GenericGqlMutationPropertyTypeName,
             propertyCandidateType.Name);
         var propertyTypeBuilder = ModuleBuilder
             .DefineType(
@@ -81,14 +81,14 @@ internal static class GenericGqlQueryTypeBuilder
         var propertyType = propertyTypeBuilder.CreateType();
 
         var propertyName = propertyCandidateType.Name;
-        var propertyBuilder = queryTypeBuilder
+        var propertyBuilder = mutationTypeBuilder
             .DefineProperty(
                 propertyName,
                 PropertyAttributes.None,
                 propertyType,
                 null);
 
-        var getMethod = queryTypeBuilder
+        var getMethod = mutationTypeBuilder
             .DefineMethod(
                 string.Format(
                     Constants.PropertyGetterName,
@@ -108,45 +108,54 @@ internal static class GenericGqlQueryTypeBuilder
 
         propertyBuilder.SetGetMethod(getMethod);
 
-        propertyBuilder.SetGraphQLNameAttribute(propertyCandidateType.Name);
+        propertyBuilder.SetGraphQLNameAttribute(propertyName.ToCamelCase());
     }
 
     private static Type GetPropertyTypeForCandidate(Type candidate)
     {
-        if (candidate.GetCustomAttribute<GenericEntityAttribute>() is not { Keys: { } } genericEntityAttribute)
+        if (candidate.GetCustomAttribute<GenericEntityAttribute>() is not { Keys: not null } genericEntityAttribute)
             throw new NotFoundReflectionException(
                 string.Format(
-                    Constants.AGenericGraphQlQueryCanBeGeneratedOnlyForTypesMarkedWith,
-                    nameof(GenericEntityAttribute),
-                    candidate.Name));
+                    Constants.AGenericGraphQlMutationCanBeGeneratedOnlyForTypesMarkedWith,
+                    nameof(GenericEntityAttribute), candidate.Name));
 
         var genericFilterType = GenericFilterTypeBuilder.BuildForCandidate(candidate);
+        var genericRequestType = GenericRequestTypeBuilder.BuildForCandidate(candidate);
+        var genericResponseType = GenericResponseTypeBuilder.BuildForCandidate(candidate);
         var keys = genericEntityAttribute.Keys;
         return keys.Length switch
         {
-            0 => typeof(GenericGqlQueryWithNoKey<,>)
+            0 => typeof(GenericGqlMutationWithNoKey<,,,>)
                 .MakeGenericType(
                     candidate,
+                    genericRequestType,
+                    genericResponseType,
                     genericFilterType),
-            1 => typeof(GenericGqlQueryWithPrimaryKey<,,>)
+            1 => typeof(GenericGqlMutationWithPrimaryKey<,,,,>)
                 .MakeGenericType(
                     candidate,
+                    genericRequestType,
+                    genericResponseType,
                     genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0])),
-            2 => typeof(GenericGqlQueryWithComplexKey<,,,>)
+            2 => typeof(GenericGqlMutationWithComplexKey<,,,,,>)
                 .MakeGenericType(
                     candidate,
+                    genericRequestType,
+                    genericResponseType,
                     genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1])),
-            3 => typeof(GenericGqlQueryWithComplexKey<,,,,>)
+            3 => typeof(GenericGqlMutationWithComplexKey<,,,,,,>)
                 .MakeGenericType(
                     candidate,
+                    genericRequestType,
+                    genericResponseType,
                     genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
                     GetPropertyTypeOrThrowException(candidate, keys[2])),
-            4 => typeof(GenericGqlQueryWithComplexKey<,,,,,>)
+            4 => typeof(GenericGqlMutationWithComplexKey<,,,,,,,>)
                 .MakeGenericType(
                     candidate,
                     genericFilterType,
@@ -154,18 +163,22 @@ internal static class GenericGqlQueryTypeBuilder
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
                     GetPropertyTypeOrThrowException(candidate, keys[2]),
                     GetPropertyTypeOrThrowException(candidate, keys[3])),
-            5 => typeof(GenericGqlQueryWithComplexKey<,,,,,,>)
+            5 => typeof(GenericGqlMutationWithComplexKey<,,,,,,,,>)
                 .MakeGenericType(
                     candidate,
+                    genericRequestType,
+                    genericResponseType,
                     genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
                     GetPropertyTypeOrThrowException(candidate, keys[2]),
                     GetPropertyTypeOrThrowException(candidate, keys[3]),
                     GetPropertyTypeOrThrowException(candidate, keys[4])),
-            6 => typeof(GenericGqlQueryWithComplexKey<,,,,,,,>)
+            6 => typeof(GenericGqlMutationWithComplexKey<,,,,,,,,,>)
                 .MakeGenericType(
                     candidate,
+                    genericRequestType,
+                    genericResponseType,
                     genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
@@ -173,9 +186,11 @@ internal static class GenericGqlQueryTypeBuilder
                     GetPropertyTypeOrThrowException(candidate, keys[3]),
                     GetPropertyTypeOrThrowException(candidate, keys[4]),
                     GetPropertyTypeOrThrowException(candidate, keys[5])),
-            7 => typeof(GenericGqlQueryWithComplexKey<,,,,,,,,>)
+            7 => typeof(GenericGqlMutationWithComplexKey<,,,,,,,,,,>)
                 .MakeGenericType(
                     candidate,
+                    genericRequestType,
+                    genericResponseType,
                     genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
@@ -184,9 +199,11 @@ internal static class GenericGqlQueryTypeBuilder
                     GetPropertyTypeOrThrowException(candidate, keys[4]),
                     GetPropertyTypeOrThrowException(candidate, keys[5]),
                     GetPropertyTypeOrThrowException(candidate, keys[6])),
-            8 => typeof(GenericGqlQueryWithComplexKey<,,,,,,,,,>)
+            8 => typeof(GenericGqlMutationWithComplexKey<,,,,,,,,,,,>)
                 .MakeGenericType(
                     candidate,
+                    genericRequestType,
+                    genericResponseType,
                     genericFilterType,
                     GetPropertyTypeOrThrowException(candidate, keys[0]),
                     GetPropertyTypeOrThrowException(candidate, keys[1]),
@@ -207,7 +224,7 @@ internal static class GenericGqlQueryTypeBuilder
                    ?.PropertyType
                ?? throw new NotFoundReflectionException(
                    string.Format(
-                       Constants.UnableToBuildAGenericGraphQlQueryForTypeThePropertyHasNotBeenFound,
+                       Constants.UnableToBuildAGenericGraphQlMutationForTypeThePropertyHasNotBeenFound,
                        candidate.FullName,
                        key));
     }

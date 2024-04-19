@@ -27,22 +27,28 @@ internal static class Constants
     internal const string IdName = "Id";
     internal const string GenericIdPropertyName = $"{GenericInternalsPrefix}{IdName}";
     internal const string GenericAssemblyName = "AutoBackend.Sdk.Runtime";
-    internal const string GenericControllersModuleName = "GenericControllers";
+
+    internal const string GenericRequestsAssemblyName = $"{GenericAssemblyName}.{GenericRequestsModuleName}";
+    internal const string GenericRequestsModuleName = "GenericRequests";
+    internal const string GenericResponsesAssemblyName = $"{GenericAssemblyName}.{GenericResponsesModuleName}";
+    internal const string GenericResponsesModuleName = "GenericResponses";
+    internal const string GenericRequestTypeName = "{0}Request";
+    internal const string GenericResponseTypeName = "{0}Response";
 
     internal const string GenericFiltersAssemblyName = $"{GenericAssemblyName}.{GenericFiltersModuleName}";
     internal const string GenericFiltersModuleName = "GenericFilters";
-    internal const string GenericFilterTypeName = "{0}_GenericFilter";
-    internal const string GenericFilterPropertyTypeName = "{0}_{1}_GenericFilter";
+    internal const string GenericFilterTypeName = "{0}Filter";
+    internal const string GenericFilterPropertyTypeName = "{0}{1}Filter";
 
     internal const string GenericGqlQueriesAssemblyName = $"{GenericAssemblyName}.{GenericGqlQueriesModuleName}";
     internal const string GenericGqlQueriesModuleName = "GenericGqlQueries";
     internal const string GenericGqlQueryTypeName = "GenericGqlQuery";
-    internal const string GenericGqlQueryPropertyTypeName = "{0}_GenericGqlQuery";
+    internal const string GenericGqlQueryPropertyTypeName = "{0}Query";
 
     internal const string GenericGqlMutationsAssemblyName = $"{GenericAssemblyName}.{GenericGqlMutationsModuleName}";
     internal const string GenericGqlMutationsModuleName = "GenericGqlMutations";
     internal const string GenericGqlMutationTypeName = "GenericGqlMutation";
-    internal const string GenericGqlMutationPropertyTypeName = "{0}_GenericGqlMutation";
+    internal const string GenericGqlMutationPropertyTypeName = "{0}Mutation";
 
     internal const string RequestStartedOnContextItemName = "RequestStartedOn";
     internal const string DatabaseConfigurationSectionName = "Database";
@@ -83,14 +89,14 @@ internal static class Constants
     internal const string UnableToFindAMethodWithParametersForTheType =
         "Unable to find a method {0} with {1} parameters for the type {2}.";
 
+    internal const string UnableToFindAMethodWithParametersAndGenericArgumentsForTheType =
+        "Unable to find a method {0} with {1} parameters and {2} generic arguments for the type {3}.";
+
     internal const string TheEntityTypeKeySetDoesNotMatchTheGivenKeys =
         "The entity type key set doesn't match the given keys.";
 
     internal const string TheEntityKeyValuesDoesNotMatchTheGivenKeyValues =
         "The entity key values doesn't match the given key values. ([{0}] != [{1}])";
-
-    internal const string TheEntityKeyValueHasNotBeenPassed =
-        "The entity key value has not been passed. ({0})";
 
     internal const string TheFilterPropertiesHaveToBeInheritedFrom =
         "The filter properties have to be inherited from {0}.";
