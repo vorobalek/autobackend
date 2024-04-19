@@ -1,28 +1,40 @@
+using AutoBackend.Sdk.Data.Mappers;
 using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Filters;
+using AutoBackend.Sdk.Models;
 using AutoBackend.Sdk.Services.CancellationTokenProvider;
 
 namespace AutoBackend.Sdk.GraphQL.Mutations;
 
 internal abstract class GenericGqlMutationWithNoKey<
     TEntity,
+    TRequest,
+    TResponse,
     TFilter
 > : GenericGqlMutation<
     TEntity,
+    TRequest,
+    TResponse,
     TFilter
 >
-    where TEntity : class
+    where TEntity : class, new()
+    where TRequest : class, IGenericRequest
+    where TResponse : class, IGenericResponse, new()
     where TFilter : class, IGenericFilter
 {
     [GraphQLName("create")]
-    public Task<TEntity> CreateAsync(
+    public async Task<TResponse> CreateAsync(
+        [Service(ServiceKind.Resolver)] IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
+        [Service(ServiceKind.Resolver)] IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
         [Service(ServiceKind.Resolver)] IGenericRepositoryWithNoKey<TEntity, TFilter> genericRepository,
         [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
-        [GraphQLName("entity")] TEntity entity)
+        [GraphQLName("request")] TRequest request)
     {
-        return genericRepository
-            .CreateAsync(
-                entity,
-                cancellationTokenProvider.GlobalCancellationToken);
+        return genericResponseMapper
+            .ToModel(
+                await genericRepository
+                    .CreateAsync(
+                        genericRequestMapper.ToEntity(request),
+                        cancellationTokenProvider.GlobalCancellationToken));
     }
 }

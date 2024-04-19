@@ -18,29 +18,19 @@ internal sealed class ExceptionHandlerFactory : IExceptionHandlerFactory
             handleExceptionResponseAsync);
     }
 
-    private sealed class ExceptionHandler<TResponse> : IExceptionHandler
+    private sealed class ExceptionHandler<TResponse>(
+        HttpContext httpContext,
+        Func<Exception, Task<int>> processStatusCode,
+        Func<Exception, Task<TResponse>> processResponse)
+        : IExceptionHandler
     {
-        private readonly HttpContext _httpContext;
-        private readonly Func<Exception, Task<TResponse>> _processResponse;
-        private readonly Func<Exception, Task<int>> _processStatusCode;
-
-        public ExceptionHandler(
-            HttpContext httpContext,
-            Func<Exception, Task<int>> processStatusCode,
-            Func<Exception, Task<TResponse>> processResponse)
-        {
-            _httpContext = httpContext;
-            _processStatusCode = processStatusCode;
-            _processResponse = processResponse;
-        }
-
         public async Task HandleAsync(Exception exception, CancellationToken cancellationToken)
         {
-            var statusCode = await _processStatusCode(exception);
-            var response = await _processResponse(exception);
-            _httpContext.Response.StatusCode = statusCode;
-            _httpContext.Response.ContentType = MediaTypeNames.Application.Json;
-            await _httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+            var statusCode = await processStatusCode(exception);
+            var response = await processResponse(exception);
+            httpContext.Response.StatusCode = statusCode;
+            httpContext.Response.ContentType = MediaTypeNames.Application.Json;
+            await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
         }
     }
 }

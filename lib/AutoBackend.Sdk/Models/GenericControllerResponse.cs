@@ -39,12 +39,12 @@ internal record GenericControllerResponse(
 }
 
 internal sealed record GenericControllerResponse<T>(
-        bool Ok,
-        [property: JsonProperty("result", Order = 1)]
-        [property: JsonPropertyName("result")]
-        T? Result = default,
-        int? ErrorCode = default,
-        string? Description = default)
+    bool Ok,
+    [property: JsonProperty("result", Order = 1)]
+    [property: JsonPropertyName("result")]
+    T? Result = default,
+    int? ErrorCode = default,
+    string? Description = default)
     : GenericControllerResponse(Ok, ErrorCode, Description)
 {
     internal new GenericControllerResponse<T> WithRequestTime(HttpContext httpContext)
