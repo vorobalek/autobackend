@@ -9,20 +9,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoBackend.Sdk;
 
-internal sealed class StartupBoilerplate<TProgram>
+internal sealed class StartupBoilerplate<TProgram>(IConfiguration configuration)
 {
     private const string HealthCheckUrl = "/__health";
-    private readonly IConfiguration _configuration;
-
-    public StartupBoilerplate(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
 
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddAutoBackend<TProgram>(_configuration)
+            .AddAutoBackend<TProgram>(configuration)
             .AddHealthChecks();
     }
 

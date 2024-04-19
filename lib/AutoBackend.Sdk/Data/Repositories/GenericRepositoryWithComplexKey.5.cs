@@ -11,10 +11,10 @@ internal sealed class GenericRepositoryWithComplexKey<
     TKey3,
     TKey4,
     TKey5
-> : GenericRepository<
+>(IGenericStorage<TEntity, TFilter> genericStorage) : GenericRepository<
     TEntity,
     TFilter
->, IGenericRepositoryWithComplexKey<
+>(genericStorage), IGenericRepositoryWithComplexKey<
     TEntity,
     TFilter,
     TKey1,
@@ -31,10 +31,6 @@ internal sealed class GenericRepositoryWithComplexKey<
     where TKey4 : notnull
     where TKey5 : notnull
 {
-    public GenericRepositoryWithComplexKey(IGenericStorage<TEntity, TFilter> genericStorage) : base(genericStorage)
-    {
-    }
-
     public Task<TEntity?> GetByComplexKeyAsync(
         TKey1 key1,
         TKey2 key2,

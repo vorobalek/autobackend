@@ -1,24 +1,19 @@
 using AutoBackend.Sdk.Data.Storage;
 using AutoBackend.Sdk.Exceptions.Data;
+using AutoBackend.Sdk.Exceptions.Reflection;
 using AutoBackend.Sdk.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoBackend.Sdk.Data.Repositories;
 
-internal abstract class GenericRepository<TEntity, TFilter> : IGenericRepository<TEntity, TFilter>
+internal abstract class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFilter> genericStorage)
+    : IGenericRepository<TEntity, TFilter>
     where TEntity : class
     where TFilter : class, IGenericFilter
 {
-    private readonly IGenericStorage<TEntity, TFilter> _genericStorage;
-
-    protected GenericRepository(IGenericStorage<TEntity, TFilter> genericStorage)
-    {
-        _genericStorage = genericStorage;
-    }
-
     public Task<TEntity[]> GetAllAsync(TFilter? filter, CancellationToken cancellationToken)
     {
-        var query = _genericStorage.GetQuery(filter);
+        var query = genericStorage.GetQuery(filter);
         if (filter?.SkipCount is { } skipCountValue) query = query.Skip(skipCountValue);
         if (filter?.TakeCount is { } takeCountValue) query = query.Take(takeCountValue);
         return query.ToArrayAsync(cancellationToken);
@@ -26,14 +21,14 @@ internal abstract class GenericRepository<TEntity, TFilter> : IGenericRepository
 
     public Task<long> GetCountAsync(TFilter? filter, CancellationToken cancellationToken)
     {
-        return _genericStorage.GetQuery(filter).LongCountAsync(cancellationToken);
+        return genericStorage.GetQuery(filter).LongCountAsync(cancellationToken);
     }
 
     protected async Task<TEntity?> GetByKeyInternalAsync(
         CancellationToken cancellationToken,
         params object[] keys)
     {
-        return await _genericStorage.FindAsync(keys, cancellationToken);
+        return await genericStorage.FindAsync(keys, cancellationToken);
     }
 
     protected async Task<TEntity> CreateInternalAsync(
@@ -44,7 +39,7 @@ internal abstract class GenericRepository<TEntity, TFilter> : IGenericRepository
         if (keys?.Any() ?? false)
         {
             ValidateEntityKeys(entity, keys);
-            var current = await _genericStorage.FindAsync(keys, cancellationToken);
+            var current = await genericStorage.FindAsync(keys, cancellationToken);
             if (current is not null)
                 throw new InconsistentDataException(
                     string.Format(
@@ -52,8 +47,8 @@ internal abstract class GenericRepository<TEntity, TFilter> : IGenericRepository
                         string.Join(", ", keys.Select(key => key.ToString()))));
         }
 
-        await _genericStorage.AddAsync(entity, cancellationToken);
-        await _genericStorage.SaveChangesAsync(cancellationToken);
+        await genericStorage.AddAsync(entity, cancellationToken);
+        await genericStorage.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
@@ -63,18 +58,18 @@ internal abstract class GenericRepository<TEntity, TFilter> : IGenericRepository
         params object[] keys)
     {
         ValidateEntityKeys(entity, keys);
-        var current = await _genericStorage.FindAsync(keys, cancellationToken);
+        var current = await genericStorage.FindAsync(keys, cancellationToken);
         if (current is null)
             throw new NotFoundDataException(
                 string.Format(
                     Constants.AnEntityWithTheGivenKeyDoesNotExist,
                     string.Join(", ", keys.Select(key => key.ToString()))));
 
-        foreach (var entryProperty in _genericStorage.Entry(current).Properties)
+        foreach (var entryProperty in genericStorage.Entry(current).Properties)
         {
             var entityProperty = typeof(TEntity).GetProperty(entryProperty.Metadata.Name);
             if (entityProperty is null)
-                throw new InconsistentDataException(
+                throw new NotFoundReflectionException(
                     string.Format(
                         Constants.UnableToFindAPropertyWithNameInObject,
                         entryProperty.Metadata.Name,
@@ -83,8 +78,8 @@ internal abstract class GenericRepository<TEntity, TFilter> : IGenericRepository
             entityProperty.SetValue(current, newValue);
         }
 
-        _genericStorage.Update(current);
-        await _genericStorage.SaveChangesAsync(cancellationToken);
+        genericStorage.Update(current);
+        await genericStorage.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
@@ -92,30 +87,27 @@ internal abstract class GenericRepository<TEntity, TFilter> : IGenericRepository
         CancellationToken cancellationToken,
         params object[] keys)
     {
-        var current = await _genericStorage.FindAsync(keys, cancellationToken);
+        var current = await genericStorage.FindAsync(keys, cancellationToken);
         if (current is null)
             throw new NotFoundDataException(
                 string.Format(
                     Constants.AnEntityWithTheGivenKeyDoesNotExist,
                     string.Join(", ", keys.Select(key => key.ToString()))));
 
-        _genericStorage.Remove(current);
-        await _genericStorage.SaveChangesAsync(cancellationToken);
+        genericStorage.Remove(current);
+        await genericStorage.SaveChangesAsync(cancellationToken);
     }
 
     private void ValidateEntityKeys(
         TEntity entity,
         object[] keys)
     {
-        var entry = _genericStorage.Entry(entity);
+        var entry = genericStorage.Entry(entity);
         var entryProperties = entry
             .Properties
             .ToDictionary(
                 x => x.Metadata.Name,
-                x => x.CurrentValue ?? throw new InconsistentDataException(
-                    string.Format(
-                        Constants.TheEntityKeyValueHasNotBeenPassed,
-                        x.Metadata.Name)));
+                x => x.CurrentValue);
 
         var entityPrimaryKey = entry.Metadata.FindPrimaryKey();
         if (entityPrimaryKey is null ||

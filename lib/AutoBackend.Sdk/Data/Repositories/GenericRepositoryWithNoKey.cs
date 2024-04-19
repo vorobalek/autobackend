@@ -6,20 +6,16 @@ namespace AutoBackend.Sdk.Data.Repositories;
 internal sealed class GenericRepositoryWithNoKey<
     TEntity,
     TFilter
-> : GenericRepository<
+>(IGenericStorage<TEntity, TFilter> genericStorage) : GenericRepository<
     TEntity,
     TFilter
->, IGenericRepositoryWithNoKey<
+>(genericStorage), IGenericRepositoryWithNoKey<
     TEntity,
     TFilter
 >
     where TEntity : class
     where TFilter : class, IGenericFilter
 {
-    public GenericRepositoryWithNoKey(IGenericStorage<TEntity, TFilter> genericStorage) : base(genericStorage)
-    {
-    }
-
     public Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken)
     {
         return CreateInternalAsync(entity, cancellationToken);

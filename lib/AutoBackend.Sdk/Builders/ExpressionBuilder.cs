@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
 
-namespace AutoBackend.Sdk.Helpers;
+namespace AutoBackend.Sdk.Builders;
 
-internal static class PredicateBuilder
+internal static class ExpressionBuilder
 {
     internal static Expression<Func<T, bool>> True<T>()
     {

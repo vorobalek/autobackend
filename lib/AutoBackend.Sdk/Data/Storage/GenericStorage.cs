@@ -1,24 +1,17 @@
 using System.Linq.Expressions;
+using AutoBackend.Sdk.Builders;
 using AutoBackend.Sdk.Exceptions.Reflection;
 using AutoBackend.Sdk.Filters;
-using AutoBackend.Sdk.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace AutoBackend.Sdk.Data.Storage;
 
-internal sealed class GenericStorage<TEntity, TFilter> : IGenericStorage<TEntity, TFilter>
+internal sealed class GenericStorage<TEntity, TFilter>(GenericDbContext db) : IGenericStorage<TEntity, TFilter>
     where TEntity : class
     where TFilter : class, IGenericFilter
 {
-    private readonly GenericDbContext _db;
-
-    public GenericStorage(GenericDbContext db)
-    {
-        _db = db;
-    }
-
-    private DbSet<TEntity> Set => _db.Set<TEntity>();
+    private DbSet<TEntity> Set => db.Set<TEntity>();
 
     public ValueTask<TEntity?> FindAsync(object[] keyValues, CancellationToken cancellationToken)
     {
@@ -42,7 +35,7 @@ internal sealed class GenericStorage<TEntity, TFilter> : IGenericStorage<TEntity
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return _db.SaveChangesAsync(cancellationToken);
+        return db.SaveChangesAsync(cancellationToken);
     }
 
     public IQueryable<TEntity> GetQuery(TFilter? filter)
@@ -52,12 +45,12 @@ internal sealed class GenericStorage<TEntity, TFilter> : IGenericStorage<TEntity
 
     public EntityEntry<TEntity> Entry(TEntity entity)
     {
-        return _db.Entry(entity);
+        return db.Entry(entity);
     }
 
     private Expression<Func<TEntity, bool>> BuildFilterExpression(TFilter? filter)
     {
-        var predicate = PredicateBuilder.True<TEntity>();
+        var predicate = ExpressionBuilder.True<TEntity>();
 
         if (filter is null) return predicate;
 

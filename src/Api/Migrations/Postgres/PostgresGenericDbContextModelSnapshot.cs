@@ -17,97 +17,88 @@ namespace Api.Migrations.Postgres
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Api.Data.Album", b =>
+            modelBuilder.Entity("Api.Data.Budget", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Artist")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<long?>("OwnerId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Album", "generic");
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("Name", "OwnerId");
+
+                    b.ToTable("Budget", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.AlbumContent", b =>
+            modelBuilder.Entity("Api.Data.Participating", b =>
                 {
-                    b.Property<Guid>("AlbumId")
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("BudgetId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("SongId")
-                        .HasColumnType("uuid");
+                    b.HasKey("UserId", "BudgetId");
 
-                    b.HasKey("AlbumId", "SongId");
+                    b.HasIndex("BudgetId");
 
-                    b.HasIndex("SongId");
-
-                    b.ToTable("AlbumContent", "generic");
+                    b.ToTable("Participating", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.AlbumSet", b =>
+            modelBuilder.Entity("Api.Data.Transaction", b =>
                 {
-                    b.Property<Guid>("Album1Id")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("Album2Id")
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(20, 4)
+                        .HasColumnType("numeric(20,4)");
+
+                    b.Property<Guid>("BudgetId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("Album3Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Album4Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("Album5Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("Album6Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("Album7Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("Album8Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("Comment")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
-                    b.HasKey("Album1Id", "Album2Id", "Album3Id", "Album4Id", "Album5Id", "Album6Id", "Album7Id", "Album8Id");
+                    b.Property<DateTime>("DateTimeUtc")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.HasIndex("Album2Id");
+                    b.Property<string>("SecretKey")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
-                    b.HasIndex("Album3Id");
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
 
-                    b.HasIndex("Album4Id");
+                    b.HasKey("Id");
 
-                    b.HasIndex("Album5Id");
+                    b.HasIndex("BudgetId");
 
-                    b.HasIndex("Album6Id");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("Album7Id");
-
-                    b.HasIndex("Album8Id");
-
-                    b.ToTable("AlbumSet", "generic");
+                    b.ToTable("Transaction", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Note", b =>
+            modelBuilder.Entity("Api.Data.TransactionVersion", b =>
                 {
                     b.Property<int>("__Generic__Id")
                         .ValueGeneratedOnAdd()
@@ -115,123 +106,172 @@ namespace Api.Migrations.Postgres
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("__Generic__Id"));
 
-                    b.Property<string>("Content")
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(20, 4)
+                        .HasColumnType("numeric(20,4)");
+
+                    b.Property<Guid>("BudgetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<DateTime>("DateTimeUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OriginalTransactionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("VersionDateTimeUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("__Generic__Id");
 
-                    b.ToTable("Note", "generic");
+                    b.HasIndex("BudgetId");
+
+                    b.HasIndex("TransactionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TransactionVersion", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Song", b =>
+            modelBuilder.Entity("Api.Data.User", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("ActiveBudgetId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Author")
+                    b.Property<string>("FirstName")
                         .HasColumnType("text");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Text")
+                    b.Property<string>("LastName")
                         .HasColumnType("text");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<TimeSpan?>("TimeZone")
+                        .HasColumnType("interval");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Song", "generic");
+                    b.HasIndex("ActiveBudgetId");
+
+                    b.ToTable("User", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.AlbumContent", b =>
+            modelBuilder.Entity("Api.Data.Budget", b =>
                 {
-                    b.HasOne("Api.Data.Album", "Album")
-                        .WithMany()
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Api.Data.User", "Owner")
+                        .WithMany("OwnedBudgets")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Api.Data.Song", "Song")
-                        .WithMany()
-                        .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Album");
-
-                    b.Navigation("Song");
+                    b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Api.Data.AlbumSet", b =>
+            modelBuilder.Entity("Api.Data.Participating", b =>
                 {
-                    b.HasOne("Api.Data.Album", "Album1")
-                        .WithMany()
-                        .HasForeignKey("Album1Id")
+                    b.HasOne("Api.Data.Budget", "Budget")
+                        .WithMany("Participating")
+                        .HasForeignKey("BudgetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.Album", "Album2")
-                        .WithMany()
-                        .HasForeignKey("Album2Id")
-                        .OnDelete(DeleteBehavior.SetNull)
+                    b.HasOne("Api.Data.User", "User")
+                        .WithMany("Participating")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.Song", "Album3")
-                        .WithMany()
-                        .HasForeignKey("Album3Id")
-                        .OnDelete(DeleteBehavior.SetNull)
+                    b.Navigation("Budget");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Api.Data.Transaction", b =>
+                {
+                    b.HasOne("Api.Data.Budget", "Budget")
+                        .WithMany("Transactions")
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.Song", "Album4")
+                    b.HasOne("Api.Data.User", "User")
+                        .WithMany("Transactions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Budget");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Api.Data.TransactionVersion", b =>
+                {
+                    b.HasOne("Api.Data.Budget", "Budget")
                         .WithMany()
-                        .HasForeignKey("Album4Id")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.Song", "Album5")
-                        .WithMany()
-                        .HasForeignKey("Album5Id")
-                        .OnDelete(DeleteBehavior.SetNull)
+                    b.HasOne("Api.Data.Transaction", "Transaction")
+                        .WithMany("Versions")
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.Song", "Album6")
+                    b.HasOne("Api.Data.User", "User")
                         .WithMany()
-                        .HasForeignKey("Album6Id")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Api.Data.Song", "Album7")
-                        .WithMany()
-                        .HasForeignKey("Album7Id")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                    b.Navigation("Budget");
 
-                    b.HasOne("Api.Data.Song", "Album8")
-                        .WithMany()
-                        .HasForeignKey("Album8Id")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                    b.Navigation("Transaction");
 
-                    b.Navigation("Album1");
+                    b.Navigation("User");
+                });
 
-                    b.Navigation("Album2");
+            modelBuilder.Entity("Api.Data.User", b =>
+                {
+                    b.HasOne("Api.Data.Budget", "ActiveBudget")
+                        .WithMany("ActiveUsers")
+                        .HasForeignKey("ActiveBudgetId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Album3");
+                    b.Navigation("ActiveBudget");
+                });
 
-                    b.Navigation("Album4");
+            modelBuilder.Entity("Api.Data.Budget", b =>
+                {
+                    b.Navigation("ActiveUsers");
 
-                    b.Navigation("Album5");
+                    b.Navigation("Participating");
 
-                    b.Navigation("Album6");
+                    b.Navigation("Transactions");
+                });
 
-                    b.Navigation("Album7");
+            modelBuilder.Entity("Api.Data.Transaction", b =>
+                {
+                    b.Navigation("Versions");
+                });
 
-                    b.Navigation("Album8");
+            modelBuilder.Entity("Api.Data.User", b =>
+                {
+                    b.Navigation("OwnedBudgets");
+
+                    b.Navigation("Participating");
+
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

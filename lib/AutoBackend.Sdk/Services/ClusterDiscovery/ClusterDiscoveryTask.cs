@@ -4,18 +4,11 @@ using Microsoft.Extensions.Logging;
 
 namespace AutoBackend.Sdk.Services.ClusterDiscovery;
 
-internal sealed class ClusterDiscoveryTask : BackgroundService
+internal sealed class ClusterDiscoveryTask(IServiceProvider serviceProvider) : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public ClusterDiscoveryTask(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        await using var scope = _serviceProvider.CreateAsyncScope();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var clusterDiscovery = scope.ServiceProvider.GetRequiredService<IClusterDiscovery>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<ClusterDiscoveryTask>>();
         while (!cancellationToken.IsCancellationRequested)
