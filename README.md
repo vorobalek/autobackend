@@ -29,6 +29,7 @@ like GraphQL. I dunno. I have already spent much more time trying to express how
 - [Full CRUD HTTP API](#mark-the-models-which-autobackend-has-to-generate-http-api-endpoints-for)
 - [GraphQL Queries](#mark-the-models-which-autobackend-has-to-generate-graphql-queries-for)
 - [GraphQL Mutations](#mark-the-models-which-autobackend-has-to-generate-graphql-mutations-for)
+- [Customizable API contracts](#customize-the-data-your-api-consumer-will-see)
 - [Filtering models](#mark-the-model-properties-which-autobackend-has-to-generate-filters-for)
 
 # Examples
@@ -330,11 +331,15 @@ public class Participating
 
 ## Mark the models which AutoBackend has to generate GraphQL queries for
 
-TODO
+TODO `[GenericGqlQuery]`
 
 ## Mark the models which AutoBackend has to generate GraphQL mutations for
 
-TODO
+TODO `[GenericGqlMutation]`
+
+## Customize the data your API consumer will see
+
+TODO `[GenericRequest]` & `[GenericResponse]`
 
 ## Mark the model properties which AutoBackend has to generate filters for
 
@@ -423,18 +428,10 @@ SqlServer.
 `dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext` - if you use
 Postgres.
 
-Or you can create scripts
-for [adding a new migration](https://github.com/vorobalek/autobackend/blob/main/add_migration.sh)
-or [removing the last migration](https://github.com/vorobalek/autobackend/blob/main/remove_migration.sh) for both
+Or you can create scripts (like I did)
+for [adding a new migration](add_migration.sh)
+or [removing the last migration](remove_migration.sh) for both
 database providers.
 
 Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
 migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
-
-## Be noticed of best practices
-
-### GenericDbContext is way better than any other
-
-Despite the database provider you have chosen, if you need to access the `DbContext` directly from your code, it will be
-the best practice to inject the `GenericDbContext` into your services. This way, you can switch between any database
-providers offered by `AutoBackend.SDK` simply by changing one line in your application config.
