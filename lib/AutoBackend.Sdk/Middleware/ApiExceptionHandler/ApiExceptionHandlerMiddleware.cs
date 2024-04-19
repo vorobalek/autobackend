@@ -5,15 +5,8 @@ using Microsoft.Extensions.Logging;
 
 namespace AutoBackend.Sdk.Middleware.ApiExceptionHandler;
 
-internal sealed class ApiExceptionHandlerMiddleware
+internal sealed class ApiExceptionHandlerMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public ApiExceptionHandlerMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task Invoke(
         HttpContext httpContext,
         IExceptionHandlerFactory exceptionHandlerFactory,
@@ -25,7 +18,7 @@ internal sealed class ApiExceptionHandlerMiddleware
             HandleExceptionResponseDefaultAsyncProvider(logger));
         try
         {
-            await _next(httpContext);
+            await next(httpContext);
         }
         catch (Exception exception)
         {

@@ -7,10 +7,10 @@ internal sealed class GenericRepositoryWithPrimaryKey<
     TEntity,
     TFilter,
     TKey
-> : GenericRepository<
+>(IGenericStorage<TEntity, TFilter> genericStorage) : GenericRepository<
     TEntity,
     TFilter
->, IGenericRepositoryWithPrimaryKey<
+>(genericStorage), IGenericRepositoryWithPrimaryKey<
     TEntity,
     TFilter,
     TKey
@@ -19,10 +19,6 @@ internal sealed class GenericRepositoryWithPrimaryKey<
     where TFilter : class, IGenericFilter
     where TKey : notnull
 {
-    public GenericRepositoryWithPrimaryKey(IGenericStorage<TEntity, TFilter> genericStorage) : base(genericStorage)
-    {
-    }
-
     public Task<TEntity?> GetByPrimaryKeyAsync(TKey key, CancellationToken cancellationToken)
     {
         return GetByKeyInternalAsync(cancellationToken, key);

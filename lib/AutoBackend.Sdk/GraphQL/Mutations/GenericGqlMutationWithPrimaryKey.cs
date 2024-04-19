@@ -1,47 +1,63 @@
+using AutoBackend.Sdk.Data.Mappers;
 using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Filters;
+using AutoBackend.Sdk.Models;
 using AutoBackend.Sdk.Services.CancellationTokenProvider;
 
 namespace AutoBackend.Sdk.GraphQL.Mutations;
 
 internal abstract class GenericGqlMutationWithPrimaryKey<
     TEntity,
+    TRequest,
+    TResponse,
     TFilter,
     TKey
 > : GenericGqlMutation<
     TEntity,
+    TRequest,
+    TResponse,
     TFilter
 >
-    where TEntity : class
+    where TEntity : class, new()
+    where TRequest : class, IGenericRequest
+    where TResponse : class, IGenericResponse, new()
     where TFilter : class, IGenericFilter
     where TKey : notnull
 {
     [GraphQLName("create")]
-    public Task<TEntity> CreateByPrimaryKeyAsync(
+    public async Task<TResponse> CreateByPrimaryKeyAsync(
+        [Service(ServiceKind.Resolver)] IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
+        [Service(ServiceKind.Resolver)] IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
         [Service(ServiceKind.Resolver)] IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> genericRepository,
         [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("key")] TKey key,
-        [GraphQLName("entity")] TEntity entity)
+        [GraphQLName("request")] TRequest request)
     {
-        return genericRepository
-            .CreateByPrimaryKeyAsync(
-                key,
-                entity,
-                cancellationTokenProvider.GlobalCancellationToken);
+        return genericResponseMapper
+            .ToModel(
+                await genericRepository
+                    .CreateByPrimaryKeyAsync(
+                        key,
+                        genericRequestMapper.ToEntity(request),
+                        cancellationTokenProvider.GlobalCancellationToken));
     }
 
     [GraphQLName("update")]
-    public Task<TEntity> UpdateByPrimaryKeyAsync(
+    public async Task<TResponse> UpdateByPrimaryKeyAsync(
+        [Service(ServiceKind.Resolver)] IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
+        [Service(ServiceKind.Resolver)] IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
         [Service(ServiceKind.Resolver)] IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> genericRepository,
         [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("key")] TKey key,
-        [GraphQLName("entity")] TEntity entity)
+        [GraphQLName("request")] TRequest request)
     {
-        return genericRepository
-            .UpdateByPrimaryKeyAsync(
-                key,
-                entity,
-                cancellationTokenProvider.GlobalCancellationToken);
+        return genericResponseMapper
+            .ToModel(
+                await genericRepository
+                    .UpdateByPrimaryKeyAsync(
+                        key,
+                        genericRequestMapper.ToEntity(request),
+                        cancellationTokenProvider.GlobalCancellationToken));
     }
 
     [GraphQLName("delete")]

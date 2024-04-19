@@ -1,11 +1,15 @@
+using AutoBackend.Sdk.Data.Mappers;
 using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Filters;
+using AutoBackend.Sdk.Models;
 using AutoBackend.Sdk.Services.CancellationTokenProvider;
 
 namespace AutoBackend.Sdk.GraphQL.Mutations;
 
 internal abstract class GenericGqlMutationWithComplexKey<
     TEntity,
+    TRequest,
+    TResponse,
     TFilter,
     TKey1,
     TKey2,
@@ -17,9 +21,13 @@ internal abstract class GenericGqlMutationWithComplexKey<
     TKey8
 > : GenericGqlMutation<
     TEntity,
+    TRequest,
+    TResponse,
     TFilter
 >
-    where TEntity : class
+    where TEntity : class, new()
+    where TRequest : class, IGenericRequest
+    where TResponse : class, IGenericResponse, new()
     where TFilter : class, IGenericFilter
     where TKey1 : notnull
     where TKey2 : notnull
@@ -31,7 +39,9 @@ internal abstract class GenericGqlMutationWithComplexKey<
     where TKey8 : notnull
 {
     [GraphQLName("create")]
-    public Task<TEntity> CreateByComplexKeyAsync(
+    public async Task<TResponse> CreateByComplexKeyAsync(
+        [Service(ServiceKind.Resolver)] IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
+        [Service(ServiceKind.Resolver)] IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
         [Service(ServiceKind.Resolver)] IGenericRepositoryWithComplexKey<
             TEntity,
             TFilter,
@@ -53,24 +63,28 @@ internal abstract class GenericGqlMutationWithComplexKey<
         [GraphQLName("key6")] TKey6 key6,
         [GraphQLName("key7")] TKey7 key7,
         [GraphQLName("key8")] TKey8 key8,
-        [GraphQLName("entity")] TEntity entity)
+        [GraphQLName("request")] TRequest request)
     {
-        return genericRepository
-            .CreateByComplexKeyAsync(
-                key1,
-                key2,
-                key3,
-                key4,
-                key5,
-                key6,
-                key7,
-                key8,
-                entity,
-                cancellationTokenProvider.GlobalCancellationToken);
+        return genericResponseMapper
+            .ToModel(
+                await genericRepository
+                    .CreateByComplexKeyAsync(
+                        key1,
+                        key2,
+                        key3,
+                        key4,
+                        key5,
+                        key6,
+                        key7,
+                        key8,
+                        genericRequestMapper.ToEntity(request),
+                        cancellationTokenProvider.GlobalCancellationToken));
     }
 
     [GraphQLName("update")]
-    public Task<TEntity> UpdateByComplexKeyAsync(
+    public async Task<TResponse> UpdateByComplexKeyAsync(
+        [Service(ServiceKind.Resolver)] IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
+        [Service(ServiceKind.Resolver)] IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
         [Service(ServiceKind.Resolver)] IGenericRepositoryWithComplexKey<
             TEntity,
             TFilter,
@@ -92,20 +106,22 @@ internal abstract class GenericGqlMutationWithComplexKey<
         [GraphQLName("key6")] TKey6 key6,
         [GraphQLName("key7")] TKey7 key7,
         [GraphQLName("key8")] TKey8 key8,
-        [GraphQLName("entity")] TEntity entity)
+        [GraphQLName("request")] TRequest request)
     {
-        return genericRepository
-            .UpdateByComplexKeyAsync(
-                key1,
-                key2,
-                key3,
-                key4,
-                key5,
-                key6,
-                key7,
-                key8,
-                entity,
-                cancellationTokenProvider.GlobalCancellationToken);
+        return genericResponseMapper
+            .ToModel(
+                await genericRepository
+                    .UpdateByComplexKeyAsync(
+                        key1,
+                        key2,
+                        key3,
+                        key4,
+                        key5,
+                        key6,
+                        key7,
+                        key8,
+                        genericRequestMapper.ToEntity(request),
+                        cancellationTokenProvider.GlobalCancellationToken));
     }
 
     [GraphQLName("delete")]

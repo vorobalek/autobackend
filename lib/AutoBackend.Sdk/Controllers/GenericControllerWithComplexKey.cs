@@ -1,77 +1,97 @@
+using AutoBackend.Sdk.Data.Mappers;
 using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Filters;
 using AutoBackend.Sdk.Models;
+using AutoBackend.Sdk.Services.CancellationTokenProvider;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoBackend.Sdk.Controllers;
 
 internal sealed class GenericControllerWithComplexKey<
     TEntity,
+    TRequest,
+    TResponse,
     TFilter,
     TKey1,
     TKey2
-> : GenericController<
-    TEntity,
-    TFilter
->
-    where TEntity : class
-    where TFilter : class, IGenericFilter
-    where TKey1 : notnull
-    where TKey2 : notnull
-{
-    private readonly IGenericRepositoryWithComplexKey<
+>(
+    IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
+    IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+    IGenericRepositoryWithComplexKey<
         TEntity,
         TFilter,
         TKey1,
         TKey2
-    > _genericRepository;
-
-    public GenericControllerWithComplexKey(
-        IGenericRepositoryWithComplexKey<
-            TEntity,
-            TFilter,
-            TKey1,
-            TKey2
-        > genericRepository) : base(genericRepository)
-    {
-        _genericRepository = genericRepository;
-    }
+    > genericRepository,
+    ICancellationTokenProvider cancellationTokenProvider)
+    : GenericController<
+        TEntity,
+        TResponse,
+        TFilter
+    >(
+        genericResponseMapper,
+        genericRepository,
+        cancellationTokenProvider)
+    where TEntity : class, new()
+    where TRequest : class, IGenericRequest
+    where TResponse : class, IGenericResponse, new()
+    where TFilter : class, IGenericFilter
+    where TKey1 : notnull
+    where TKey2 : notnull
+{
+    private readonly ICancellationTokenProvider _cancellationTokenProvider = cancellationTokenProvider;
+    private readonly IGenericResponseMapper<TEntity, TResponse> _genericResponseMapper = genericResponseMapper;
 
     [HttpGet("{key1}/{key2}")]
-    public Task<ActionResult<GenericControllerResponse<TEntity?>>> GetByComplexKeyAsync(
+    public Task<ActionResult<GenericControllerResponse<TResponse?>>> GetByComplexKeyAsync(
         [FromRoute] TKey1 key1,
         [FromRoute] TKey2 key2)
     {
-        return ProcessAsync(cancellationToken => _genericRepository.GetByComplexKeyAsync(
-            key1,
-            key2,
-            cancellationToken));
+        return ProcessAsync(async cancellationToken =>
+                await genericRepository
+                    .GetByComplexKeyAsync(
+                        key1,
+                        key2,
+                        cancellationToken) is { } entity
+                    ? _genericResponseMapper.ToModel(entity)
+                    : null,
+            _cancellationTokenProvider.GlobalCancellationToken);
     }
 
     [HttpPost("{key1}/{key2}")]
-    public Task<ActionResult<GenericControllerResponse<TEntity>>> CreateByComplexKeyAsync(
+    public Task<ActionResult<GenericControllerResponse<TResponse>>> CreateByComplexKeyAsync(
         [FromRoute] TKey1 key1,
         [FromRoute] TKey2 key2,
-        [FromBody] TEntity entity)
+        [FromBody] TRequest request)
     {
-        return ProcessAsync(cancellationToken => _genericRepository.CreateByComplexKeyAsync(
-            key1,
-            key2,
-            entity,
-            cancellationToken));
+        return ProcessAsync(async cancellationToken =>
+                _genericResponseMapper
+                    .ToModel(
+                        await genericRepository
+                            .CreateByComplexKeyAsync(
+                                key1,
+                                key2,
+                                genericRequestMapper.ToEntity(request),
+                                cancellationToken)),
+            _cancellationTokenProvider.GlobalCancellationToken);
     }
 
     [HttpPut("{key1}/{key2}")]
-    public Task<ActionResult<GenericControllerResponse<TEntity>>> UpdateByComplexKeyAsync(
+    public Task<ActionResult<GenericControllerResponse<TResponse>>> UpdateByComplexKeyAsync(
         [FromRoute] TKey1 key1,
         [FromRoute] TKey2 key2,
-        [FromBody] TEntity entity)
+        [FromBody] TRequest request)
     {
-        return ProcessAsync(cancellationToken => _genericRepository.UpdateByComplexKeyAsync(
-            key1,
-            key2,
-            entity,
-            cancellationToken));
+        return ProcessAsync(async cancellationToken =>
+                _genericResponseMapper
+                    .ToModel(
+                        await genericRepository
+                            .UpdateByComplexKeyAsync(
+                                key1,
+                                key2,
+                                genericRequestMapper.ToEntity(request),
+                                cancellationToken)),
+            _cancellationTokenProvider.GlobalCancellationToken);
     }
 
     [HttpDelete("{key1}/{key2}")]
@@ -79,9 +99,12 @@ internal sealed class GenericControllerWithComplexKey<
         [FromRoute] TKey1 key1,
         [FromRoute] TKey2 key2)
     {
-        return ProcessAsync(cancellationToken => _genericRepository.DeleteByComplexKeyAsync(
-            key1,
-            key2,
-            cancellationToken));
+        return ProcessAsync(cancellationToken =>
+                genericRepository
+                    .DeleteByComplexKeyAsync(
+                        key1,
+                        key2,
+                        cancellationToken),
+            _cancellationTokenProvider.GlobalCancellationToken);
     }
 }

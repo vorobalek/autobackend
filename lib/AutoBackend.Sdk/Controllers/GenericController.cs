@@ -1,7 +1,9 @@
+using AutoBackend.Sdk.Data.Mappers;
 using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Extensions;
 using AutoBackend.Sdk.Filters;
 using AutoBackend.Sdk.Models;
+using AutoBackend.Sdk.Services.CancellationTokenProvider;
 using AutoBackend.Sdk.Services.ExceptionHandler;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,18 +14,20 @@ namespace AutoBackend.Sdk.Controllers;
 internal abstract class GenericController : ControllerBase
 {
     protected async Task<ActionResult<GenericControllerResponse>> ProcessAsync(
-        Func<CancellationToken, Task> resultAsyncProcessor)
+        Func<CancellationToken, Task> resultAsyncProcessor,
+        CancellationToken cancellationToken)
     {
         SetupExceptionHandler();
-        await resultAsyncProcessor(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+        await resultAsyncProcessor(cancellationToken);
         return Ok(new GenericControllerResponse(true).WithRequestTime(HttpContext));
     }
 
     protected async Task<ActionResult<GenericControllerResponse<TResult>>> ProcessAsync<TResult>(
-        Func<CancellationToken, Task<TResult>> resultAsyncProcessor)
+        Func<CancellationToken, Task<TResult>> resultAsyncProcessor,
+        CancellationToken cancellationToken)
     {
         SetupExceptionHandler();
-        var result = await resultAsyncProcessor(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+        var result = await resultAsyncProcessor(cancellationToken);
         return new GenericControllerResponse<TResult>(true, result).WithRequestTime(HttpContext);
     }
 
@@ -58,24 +62,29 @@ internal abstract class GenericController : ControllerBase
 
 internal abstract class GenericController<
     TEntity,
+    TResponse,
     TFilter
-> : GenericController
+>(
+    IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+    IGenericRepository<TEntity, TFilter> genericRepository,
+    ICancellationTokenProvider cancellationTokenProvider) : GenericController
     where TEntity : class
+    where TResponse : class, IGenericResponse, new()
     where TFilter : class, IGenericFilter
 {
-    private readonly IGenericRepository<TEntity, TFilter> _genericRepository;
-
-    protected GenericController(IGenericRepository<TEntity, TFilter> genericRepository)
-    {
-        _genericRepository = genericRepository;
-    }
-
     [HttpGet]
-    public Task<ActionResult<GenericControllerResponse<TEntity[]>>> GetAllAsync(
+    public Task<ActionResult<GenericControllerResponse<TResponse[]>>> GetAllAsync(
         [FromQuery] TFilter filter)
     {
-        return ProcessAsync(cancellationToken =>
-            _genericRepository.GetAllAsync(filter, cancellationToken));
+        return ProcessAsync(async cancellationToken =>
+                genericResponseMapper
+                    .ToModel(
+                        await genericRepository
+                            .GetAllAsync(
+                                filter,
+                                cancellationToken))
+                    .ToArray(),
+            cancellationTokenProvider.GlobalCancellationToken);
     }
 
     [HttpGet("count")]
@@ -83,6 +92,10 @@ internal abstract class GenericController<
         [FromQuery] TFilter filter)
     {
         return ProcessAsync(cancellationToken =>
-            _genericRepository.GetCountAsync(filter, cancellationToken));
+                genericRepository
+                    .GetCountAsync(
+                        filter,
+                        cancellationToken),
+            cancellationTokenProvider.GlobalCancellationToken);
     }
 }

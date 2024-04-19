@@ -9,22 +9,14 @@ using Newtonsoft.Json;
 
 namespace AutoBackend.Sdk.Services.ClusterDiscovery;
 
-internal sealed class ClusterDiscovery : IClusterDiscovery
+internal sealed class ClusterDiscovery(
+    IDateTimeProvider dateTimeProvider,
+    ILogger<ClusterDiscovery> logger)
+    : IClusterDiscovery
 {
     private static readonly string? ClusterUrl = Environment.GetEnvironmentVariable(Constants.HostEnvironmentVariable);
     private static ConcurrentDictionary<Guid, ClusterNode>? _knownClusterNodes;
     private static ClusterNode? _currentNode;
-
-    private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly ILogger<ClusterDiscovery> _logger;
-
-    public ClusterDiscovery(
-        IDateTimeProvider dateTimeProvider,
-        ILogger<ClusterDiscovery> logger)
-    {
-        _dateTimeProvider = dateTimeProvider;
-        _logger = logger;
-    }
 
     private ConcurrentDictionary<Guid, ClusterNode> KnownClusterNodes =>
         _knownClusterNodes ??= new ConcurrentDictionary<Guid, ClusterNode>
@@ -36,14 +28,14 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
         _currentNode ??= new ClusterNode(
             true,
             Guid.NewGuid(),
-            _dateTimeProvider.UtcNow());
+            dateTimeProvider.UtcNow());
 
     public async Task ProcessDiscoveryRequest(
         HttpContext httpContext,
         CancellationToken cancellationToken,
         ClusterNode? remoteClusterNode = null)
     {
-        var utcNow = _dateTimeProvider.UtcNow();
+        var utcNow = dateTimeProvider.UtcNow();
 
         if (remoteClusterNode?.Id == CurrentClusterNode.Id)
         {
@@ -56,13 +48,13 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
         if (remoteClusterNode is not null)
         {
             KnownClusterNodes[remoteClusterNode.Id] = FillRemoteNode(remoteClusterNode);
-            KnownClusterNodes[remoteClusterNode.Id].LastSeenUtc = _dateTimeProvider.UtcNow();
+            KnownClusterNodes[remoteClusterNode.Id].LastSeenUtc = dateTimeProvider.UtcNow();
             KnownClusterNodes[remoteClusterNode.Id].LastSeenIp.WithValueIfNotNull(
                 httpContext.Request.Headers[Constants.XForwardedForHeaderName],
-                _dateTimeProvider);
+                dateTimeProvider);
         }
 
-        CurrentClusterNode.LastRequestToUtc.WithValue(utcNow, _dateTimeProvider);
+        CurrentClusterNode.LastRequestToUtc.WithValue(utcNow, dateTimeProvider);
 
         await httpContext.WriteJsonAndCompleteAsync(
             GenericControllerResponse.CreateOk(
@@ -110,21 +102,21 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
                         KnownClusterNodes[remoteClusterNode.Id]
                             .LastRequestFromUtc
                             .WithValueIfNotNull(
-                                _dateTimeProvider.UtcNow(),
-                                _dateTimeProvider);
+                                dateTimeProvider.UtcNow(),
+                                dateTimeProvider);
                         KnownClusterNodes[remoteClusterNode.Id]
                             .LastRequestTimeMs
                             .WithValueIfNotNull(
                                 response.RequestTimeMs,
-                                _dateTimeProvider);
-                        KnownClusterNodes[remoteClusterNode.Id].LastSeenUtc = _dateTimeProvider.UtcNow();
+                                dateTimeProvider);
+                        KnownClusterNodes[remoteClusterNode.Id].LastSeenUtc = dateTimeProvider.UtcNow();
                     }
                 }
         }
 
         foreach (var knownKeyValue in KnownClusterNodes
                      .Where(knownKeyValue =>
-                         ((_dateTimeProvider.UtcNow() - knownKeyValue.Value.LastSeenUtc)?.TotalSeconds ??
+                         ((dateTimeProvider.UtcNow() - knownKeyValue.Value.LastSeenUtc)?.TotalSeconds ??
                           double.MaxValue)
                          > 10
                          && knownKeyValue.Key != CurrentClusterNode.Id))
@@ -162,7 +154,7 @@ internal sealed class ClusterDiscovery : IClusterDiscovery
 
     private void Log(ClusterNode? remoteClusterNode)
     {
-        _logger.LogDebug(
+        logger.LogDebug(
             new EventId(
                 42,
                 "discovery request"),

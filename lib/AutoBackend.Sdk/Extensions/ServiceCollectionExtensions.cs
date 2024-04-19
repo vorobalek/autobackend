@@ -1,11 +1,12 @@
+using AutoBackend.Sdk.Builders;
 using AutoBackend.Sdk.Configuration;
 using AutoBackend.Sdk.Controllers.Infrastructure;
 using AutoBackend.Sdk.Data;
+using AutoBackend.Sdk.Data.Mappers;
 using AutoBackend.Sdk.Data.Repositories;
 using AutoBackend.Sdk.Data.Storage;
 using AutoBackend.Sdk.Enums;
 using AutoBackend.Sdk.Exceptions.Configuration;
-using AutoBackend.Sdk.Helpers;
 using AutoBackend.Sdk.NSwag;
 using AutoBackend.Sdk.Services.CancellationTokenProvider;
 using AutoBackend.Sdk.Services.ClusterDiscovery;
@@ -25,6 +26,8 @@ internal static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         return services
+            .AddGenericRequests()
+            .AddGenericResponses()
             .AddGenericControllers<TProgram>()
             .AddGenericGql<TProgram>()
             .AddGenericSwagger(typeof(TProgram).Assembly.FullName!)
@@ -45,6 +48,20 @@ internal static class ServiceCollectionExtensions
                 .Add(new GenericControllerTypeFeatureProvider(typeof(AutoBackendHost<>).Assembly,
                     typeof(TProgram).Assembly)));
 
+        return services;
+    }
+
+    private static IServiceCollection AddGenericRequests(
+        this IServiceCollection services)
+    {
+        services.AddScoped(typeof(IGenericRequestMapper<,>), typeof(GenericRequestMapper<,>));
+        return services;
+    }
+
+    private static IServiceCollection AddGenericResponses(
+        this IServiceCollection services)
+    {
+        services.AddScoped(typeof(IGenericResponseMapper<,>), typeof(GenericResponseMapper<,>));
         return services;
     }
 
