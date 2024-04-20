@@ -24,7 +24,7 @@ internal abstract class GenericGqlQuery<
         [GraphQLName("filter")] TFilter? filter)
     {
         return genericResponseMapper
-            .ToModelEnumerable<TEntity, TResponse>(
+            .ToModel<TEntity, TResponse>(
                 await genericRepository
                     .GetAllAsync(
                         filter,

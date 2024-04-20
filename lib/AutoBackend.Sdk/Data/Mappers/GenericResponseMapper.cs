@@ -8,23 +8,34 @@ namespace AutoBackend.Sdk.Data.Mappers;
 
 internal class GenericResponseMapper(IMapperExpressionsCache cache) : IGenericResponseMapper
 {
-    public TResponse? ToModel<TEntity, TResponse>(TEntity? entity)
+    public TResponse ToModel<TEntity, TResponse>(TEntity entity)
         where TEntity : class
         where TResponse : class, IGenericResponse, new()
     {
-        if (entity is null) return null;
-
         var func = cache.GetOrAddAndCompile(MapExpr<TEntity, TResponse>());
         return func(entity);
     }
 
-    public IEnumerable<TResponse>? ToModelEnumerable<TEntity, TResponse>(IEnumerable<TEntity>? entities)
+    IEnumerable<TResponse> IGenericResponseMapper.ToModel<TEntity, TResponse>(IEnumerable<TEntity> entities)
+    {
+        return entities.Select(ToModel<TEntity, TResponse>);
+    }
+
+    public TResponse? ToModelNullable<TEntity, TResponse>(TEntity? entity)
+        where TEntity : class
+        where TResponse : class, IGenericResponse, new()
+    {
+        return entity is null ? null : ToModel<TEntity, TResponse>(entity);
+    }
+
+    public ICollection<TResponse> ToModelCollectionNullable<TEntity, TResponse>(ICollection<TEntity>? entities)
         where TEntity : class
         where TResponse : class, IGenericResponse, new()
     {
         return entities?.Select(entity => 
-            ToModel<TEntity, TResponse>(entity) 
-            ?? throw new InconsistentDataException()) 
+                   ToModel<TEntity, TResponse>(entity) 
+                   ?? throw new InconsistentDataException())
+                .ToArray()
                ?? Array.Empty<TResponse>();
     }
 
@@ -46,7 +57,7 @@ internal class GenericResponseMapper(IMapperExpressionsCache cache) : IGenericRe
 
             if (destinationProperty.PropertyType.IsAssignableTo(typeof(IGenericResponse)))
             {
-                var mapMethodInfo = GetType().GetMethod(nameof(ToModel)) 
+                var mapMethodInfo = GetType().GetMethod(nameof(ToModelNullable)) 
                                     ?? throw new InheritanceReflectionException();
 
                 var genericMapMethodInfo = mapMethodInfo.MakeGenericMethod(
@@ -63,15 +74,15 @@ internal class GenericResponseMapper(IMapperExpressionsCache cache) : IGenericRe
                 continue;
             }
 
-            if (destinationProperty.PropertyType.IsEnumerable())
+            if (destinationProperty.PropertyType.IsCollection())
             {
-                if (sourceProperty.PropertyType.GetEnumerableType() is not { } sourceEnumType ||
-                    destinationProperty.PropertyType.GetEnumerableType() is not { } destinationEnumType)
+                if (sourceProperty.PropertyType.GetCollectionType() is not { } sourceEnumType ||
+                    destinationProperty.PropertyType.GetCollectionType() is not { } destinationEnumType)
                     throw new NotFoundReflectionException();
                 
                 if (destinationEnumType.IsAssignableTo(typeof(IGenericResponse)))
                 {
-                    var mapMethodInfo = GetType().GetMethod(nameof(ToModelEnumerable))
+                    var mapMethodInfo = GetType().GetMethod(nameof(ToModelCollectionNullable))
                                         ?? throw new NotFoundReflectionException();
 
                     var genericMapMethodInfo = mapMethodInfo.MakeGenericMethod(
