@@ -54,14 +54,14 @@ internal static class ServiceCollectionExtensions
     private static IServiceCollection AddGenericRequests(
         this IServiceCollection services)
     {
-        services.AddScoped(typeof(IGenericRequestMapper<,>), typeof(GenericRequestMapper<,>));
+        services.AddScoped<IGenericRequestMapper, GenericRequestMapper>();
         return services;
     }
 
     private static IServiceCollection AddGenericResponses(
         this IServiceCollection services)
     {
-        services.AddScoped(typeof(IGenericResponseMapper<,>), typeof(GenericResponseMapper<,>));
+        services.AddScoped<IGenericResponseMapper, GenericResponseMapper>();
         return services;
     }
 
@@ -201,6 +201,7 @@ internal static class ServiceCollectionExtensions
     private static IServiceCollection AddGenericStorage(this IServiceCollection services)
     {
         services.AddScoped(typeof(IGenericStorage<,>), typeof(GenericStorage<,>));
+        services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
         services.AddScoped(typeof(IGenericRepositoryWithNoKey<,>), typeof(GenericRepositoryWithNoKey<,>));
         services.AddScoped(typeof(IGenericRepositoryWithPrimaryKey<,,>), typeof(GenericRepositoryWithPrimaryKey<,,>));
         services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,>), typeof(GenericRepositoryWithComplexKey<,,,>));

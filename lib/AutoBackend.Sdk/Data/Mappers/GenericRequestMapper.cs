@@ -4,19 +4,20 @@ using AutoBackend.Sdk.Models;
 
 namespace AutoBackend.Sdk.Data.Mappers;
 
-internal class GenericRequestMapper<TEntity, TRequest>
-    : IGenericRequestMapper<TEntity, TRequest>
-    where TEntity : class, new()
-    where TRequest : class, IGenericRequest
+internal class GenericRequestMapper : IGenericRequestMapper
 {
-    public TEntity ToEntity(TRequest model)
+    public TEntity ToEntity<TEntity, TRequest>(TRequest model)
+        where TEntity : class, new()
+        where TRequest : class, IGenericRequest
     {
-        var expr = MapExpr();
+        var expr = MapExpr<TEntity, TRequest>();
         var func = expr.Compile();
         return func(model);
     }
 
-    private Expression<Func<TRequest, TEntity>> MapExpr()
+    private Expression<Func<TRequest, TEntity>> MapExpr<TEntity, TRequest>()
+        where TEntity : class, new()
+        where TRequest : class, IGenericRequest
     {
         var parameter = Expression.Parameter(typeof(TRequest));
 
@@ -28,24 +29,28 @@ internal class GenericRequestMapper<TEntity, TRequest>
             var destinationProperty = typeof(TEntity).GetProperty(sourceProperty.Name)
                                       ?? throw new InheritanceReflectionException();
 
-            var propertyExpr = Expression.Property(parameter, sourceProperty);
+            var sourceExpr = Expression.Property(parameter, sourceProperty);
 
-            if (!sourceProperty.PropertyType.IsAssignableTo(typeof(IGenericRequest)))
+            if (sourceProperty.PropertyType.IsAssignableTo(typeof(IGenericResponse)))
             {
-                bindings.Add(Expression.Bind(destinationProperty, propertyExpr));
+                var mapMethodInfo = typeof(GenericRequestMapper).GetMethod(nameof(ToEntity)) 
+                                    ?? throw new InheritanceReflectionException();
+
+                var genericMapMethodInfo = mapMethodInfo.MakeGenericMethod(
+                    destinationProperty.PropertyType, 
+                    sourceProperty.PropertyType);
+
+                bindings.Add(Expression.Bind(
+                    destinationProperty,
+                    Expression.Call(
+                        Expression.Constant(this), 
+                        genericMapMethodInfo, 
+                        sourceExpr)));
+                
                 continue;
             }
 
-            var mapMethodInfo = GetType().GetMethod(nameof(ToEntity)) ?? throw new InheritanceReflectionException();
-
-            bindings.Add(Expression.Bind(
-                destinationProperty,
-                Expression.Condition(
-                    Expression.NotEqual(
-                        propertyExpr,
-                        Expression.Constant(null)),
-                    Expression.Call(Expression.Constant(this), mapMethodInfo, propertyExpr),
-                    Expression.Default(destinationProperty.PropertyType))));
+            bindings.Add(Expression.Bind(destinationProperty, sourceExpr));
         }
 
         return Expression.Lambda<Func<TRequest, TEntity>>(

@@ -13,8 +13,8 @@ internal sealed class GenericControllerWithNoKey<
     TResponse,
     TFilter
 >(
-    IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
-    IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+    IGenericRequestMapper genericRequestMapper,
+    IGenericResponseMapper genericResponseMapper,
     IGenericRepositoryWithNoKey<TEntity, TFilter> genericRepository,
     ICancellationTokenProvider cancellationTokenProvider)
     : GenericController<
@@ -31,7 +31,7 @@ internal sealed class GenericControllerWithNoKey<
     where TFilter : class, IGenericFilter
 {
     private readonly ICancellationTokenProvider _cancellationTokenProvider = cancellationTokenProvider;
-    private readonly IGenericResponseMapper<TEntity, TResponse> _genericResponseMapper = genericResponseMapper;
+    private readonly IGenericResponseMapper _genericResponseMapper = genericResponseMapper;
 
     [HttpPost]
     public Task<ActionResult<GenericControllerResponse<TResponse>>> CreateAsync(
@@ -40,10 +40,10 @@ internal sealed class GenericControllerWithNoKey<
         return ProcessAsync(
             async cancellationToken =>
                 _genericResponseMapper
-                    .ToModel(
+                    .ToModel<TEntity, TResponse>(
                         await genericRepository
                             .CreateAsync(
-                                genericRequestMapper.ToEntity(request),
+                                genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
             _cancellationTokenProvider.GlobalCancellationToken);
     }

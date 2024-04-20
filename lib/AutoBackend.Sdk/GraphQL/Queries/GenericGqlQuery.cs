@@ -18,13 +18,13 @@ internal abstract class GenericGqlQuery<
     [GraphQLName("all")]
     [UseProjection]
     public async Task<TResponse[]> GetAllAsync(
-        [Service(ServiceKind.Resolver)] IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+        [Service(ServiceKind.Resolver)] IGenericResponseMapper genericResponseMapper,
         [Service(ServiceKind.Resolver)] IGenericRepository<TEntity, TFilter> genericRepository,
         [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("filter")] TFilter? filter)
     {
         return genericResponseMapper
-            .ToModel(
+            .ToModelEnumerable<TEntity, TResponse>(
                 await genericRepository
                     .GetAllAsync(
                         filter,

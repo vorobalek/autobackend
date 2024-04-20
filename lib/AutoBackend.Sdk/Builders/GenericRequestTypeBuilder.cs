@@ -25,10 +25,11 @@ internal static class GenericRequestTypeBuilder
             return candidate;
 
         if (candidate.IsEnumerable())
-            return BuildForCandidate(
-                    candidate.GetEnumerableType()
-                    ?? throw new NotFoundReflectionException())
-                .MakeArrayType();
+            return typeof(IEnumerable<>)
+                .MakeGenericType(
+                    BuildForCandidate(
+                        candidate.GetEnumerableType()
+                        ?? throw new NotFoundReflectionException()));
 
         if (RequestsMap.TryGetValue(candidate, out var requestType))
             return requestType;

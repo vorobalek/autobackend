@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations.Postgres
 {
     [DbContext(typeof(PostgresGenericDbContext))]
-    [Migration("20240419150013_ef_init")]
+    [Migration("20240420073932_ef_init")]
     partial class ef_init
     {
         /// <inheritdoc />
@@ -138,11 +138,7 @@ namespace Api.Migrations.Postgres
 
                     b.HasKey("__Generic__Id");
 
-                    b.HasIndex("BudgetId");
-
                     b.HasIndex("TransactionId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("TransactionVersion", "generic");
                 });
@@ -220,28 +216,13 @@ namespace Api.Migrations.Postgres
 
             modelBuilder.Entity("Api.Data.TransactionVersion", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "Budget")
-                        .WithMany()
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Api.Data.Transaction", "Transaction")
                         .WithMany("Versions")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Budget");
-
                     b.Navigation("Transaction");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Api.Data.User", b =>

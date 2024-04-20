@@ -45,18 +45,10 @@ public class TransactionVersion
     public DateTime VersionDateTimeUtc { get; set; }
 
     [GenericFilter]
-    [ForeignKey(nameof(User))]
     public long? UserId { get; set; }
 
-    [DeleteBehavior(DeleteBehavior.SetNull)]
-    public User? User { get; set; }
-
     [GenericFilter]
-    [ForeignKey(nameof(Budget))]
     public Guid BudgetId { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.Cascade)]
-    public Budget Budget { get; set; } = null!;
 
     [GenericFilter]
     [Precision(20,4)]
