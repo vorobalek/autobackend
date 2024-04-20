@@ -25,10 +25,11 @@ internal static class GenericResponseTypeBuilder
             return candidate;
 
         if (candidate.IsEnumerable())
-            return BuildForCandidate(
-                    candidate.GetEnumerableType()
-                    ?? throw new NotFoundReflectionException())
-                .MakeArrayType();
+            return typeof(IEnumerable<>)
+                .MakeGenericType(
+                    BuildForCandidate(
+                        candidate.GetEnumerableType()
+                        ?? throw new NotFoundReflectionException()));
 
         if (ResponsesMap.TryGetValue(candidate, out var responseType))
             return responseType;

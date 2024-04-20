@@ -17,8 +17,8 @@ internal sealed class GenericControllerWithComplexKey<
     TKey3,
     TKey4
 >(
-    IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
-    IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+    IGenericRequestMapper genericRequestMapper,
+    IGenericResponseMapper genericResponseMapper,
     IGenericRepositoryWithComplexKey<
         TEntity,
         TFilter,
@@ -46,7 +46,7 @@ internal sealed class GenericControllerWithComplexKey<
     where TKey4 : notnull
 {
     private readonly ICancellationTokenProvider _cancellationTokenProvider = cancellationTokenProvider;
-    private readonly IGenericResponseMapper<TEntity, TResponse> _genericResponseMapper = genericResponseMapper;
+    private readonly IGenericResponseMapper _genericResponseMapper = genericResponseMapper;
 
     [HttpGet("{key1}/{key2}/{key3}/{key4}")]
     public Task<ActionResult<GenericControllerResponse<TResponse?>>> GetByComplexKeyAsync(
@@ -63,7 +63,7 @@ internal sealed class GenericControllerWithComplexKey<
                         key3,
                         key4,
                         cancellationToken) is { } entity
-                    ? _genericResponseMapper.ToModel(entity)
+                    ? _genericResponseMapper.ToModel<TEntity, TResponse>(entity)
                     : null,
             _cancellationTokenProvider.GlobalCancellationToken);
     }
@@ -78,14 +78,14 @@ internal sealed class GenericControllerWithComplexKey<
     {
         return ProcessAsync(async cancellationToken =>
                 _genericResponseMapper
-                    .ToModel(
+                    .ToModel<TEntity, TResponse>(
                         await genericRepository
                             .CreateByComplexKeyAsync(
                                 key1,
                                 key2,
                                 key3,
                                 key4,
-                                genericRequestMapper.ToEntity(request),
+                                genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
             _cancellationTokenProvider.GlobalCancellationToken);
     }
@@ -100,14 +100,14 @@ internal sealed class GenericControllerWithComplexKey<
     {
         return ProcessAsync(async cancellationToken =>
                 _genericResponseMapper
-                    .ToModel(
+                    .ToModel<TEntity, TResponse>(
                         await genericRepository
                             .UpdateByComplexKeyAsync(
                                 key1,
                                 key2,
                                 key3,
                                 key4,
-                                genericRequestMapper.ToEntity(request),
+                                genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
             _cancellationTokenProvider.GlobalCancellationToken);
     }

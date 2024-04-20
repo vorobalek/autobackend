@@ -2,9 +2,9 @@ using AutoBackend.Sdk.Models;
 
 namespace AutoBackend.Sdk.Data.Mappers;
 
-internal interface IGenericRequestMapper<out TEntity, in TModel>
-    where TEntity : class, new()
-    where TModel : class, IGenericRequest
+internal interface IGenericRequestMapper
 {
-    TEntity ToEntity(TModel model);
+    TEntity ToEntity<TEntity, TRequest>(TRequest model)
+        where TEntity : class, new()
+        where TRequest : class, IGenericRequest;
 }

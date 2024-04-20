@@ -1,26 +1,36 @@
 using System.Linq.Expressions;
+using AutoBackend.Sdk.Exceptions.Data;
 using AutoBackend.Sdk.Exceptions.Reflection;
+using AutoBackend.Sdk.Extensions;
 using AutoBackend.Sdk.Models;
 
 namespace AutoBackend.Sdk.Data.Mappers;
 
-internal class GenericResponseMapper<TEntity, TModel> : IGenericResponseMapper<TEntity, TModel>
-    where TEntity : class
-    where TModel : class, IGenericResponse, new()
+internal class GenericResponseMapper(IMapperExpressionsCache cache) : IGenericResponseMapper
 {
-    public TModel ToModel(TEntity entity)
+    public TResponse? ToModel<TEntity, TResponse>(TEntity? entity)
+        where TEntity : class
+        where TResponse : class, IGenericResponse, new()
     {
-        var expr = MapExpr();
-        var func = expr.Compile();
+        if (entity is null) return null;
+
+        var func = cache.GetOrAddAndCompile(MapExpr<TEntity, TResponse>());
         return func(entity);
     }
 
-    public IEnumerable<TModel> ToModel(IEnumerable<TEntity> entities)
+    public IEnumerable<TResponse>? ToModelEnumerable<TEntity, TResponse>(IEnumerable<TEntity>? entities)
+        where TEntity : class
+        where TResponse : class, IGenericResponse, new()
     {
-        foreach (var entity in entities) yield return ToModel(entity);
+        return entities?.Select(entity => 
+            ToModel<TEntity, TResponse>(entity) 
+            ?? throw new InconsistentDataException()) 
+               ?? Array.Empty<TResponse>();
     }
 
-    private Expression<Func<TEntity, TModel>> MapExpr()
+    private Expression<Func<TEntity, TModel>> MapExpr<TEntity, TModel>()
+        where TEntity : class
+        where TModel : class, IGenericResponse, new()
     {
         var parameter = Expression.Parameter(typeof(TEntity));
 
@@ -32,24 +42,54 @@ internal class GenericResponseMapper<TEntity, TModel> : IGenericResponseMapper<T
             var sourceProperty = typeof(TEntity).GetProperty(destinationProperty.Name)
                                  ?? throw new InheritanceReflectionException();
 
-            var propertyExpr = Expression.Property(parameter, sourceProperty);
+            var sourceExpr = Expression.Property(parameter, sourceProperty);
 
-            if (!destinationProperty.PropertyType.IsAssignableTo(typeof(IGenericResponse)))
+            if (destinationProperty.PropertyType.IsAssignableTo(typeof(IGenericResponse)))
             {
-                bindings.Add(Expression.Bind(destinationProperty, propertyExpr));
+                var mapMethodInfo = GetType().GetMethod(nameof(ToModel)) 
+                                    ?? throw new InheritanceReflectionException();
+
+                var genericMapMethodInfo = mapMethodInfo.MakeGenericMethod(
+                    sourceProperty.PropertyType, 
+                    destinationProperty.PropertyType);
+
+                bindings.Add(Expression.Bind(
+                    destinationProperty,
+                    Expression.Call(
+                        Expression.Constant(this), 
+                        genericMapMethodInfo, 
+                        sourceExpr)));
+                
                 continue;
             }
 
-            var mapMethodInfo = GetType().GetMethod(nameof(ToModel)) ?? throw new InheritanceReflectionException();
+            if (destinationProperty.PropertyType.IsEnumerable())
+            {
+                if (sourceProperty.PropertyType.GetEnumerableType() is not { } sourceEnumType ||
+                    destinationProperty.PropertyType.GetEnumerableType() is not { } destinationEnumType)
+                    throw new NotFoundReflectionException();
+                
+                if (destinationEnumType.IsAssignableTo(typeof(IGenericResponse)))
+                {
+                    var mapMethodInfo = GetType().GetMethod(nameof(ToModelEnumerable))
+                                        ?? throw new NotFoundReflectionException();
 
-            bindings.Add(Expression.Bind(
-                destinationProperty,
-                Expression.Condition(
-                    Expression.NotEqual(
-                        propertyExpr,
-                        Expression.Constant(null)),
-                    Expression.Call(Expression.Constant(this), mapMethodInfo, propertyExpr),
-                    Expression.Default(destinationProperty.PropertyType))));
+                    var genericMapMethodInfo = mapMethodInfo.MakeGenericMethod(
+                        sourceEnumType,
+                        destinationEnumType);
+
+                    bindings.Add(Expression.Bind(
+                        destinationProperty,
+                        Expression.Call(
+                            Expression.Constant(this),
+                            genericMapMethodInfo,
+                            sourceExpr)));
+
+                    continue;
+                }
+            }
+
+            bindings.Add(Expression.Bind(destinationProperty, sourceExpr));
         }
 
         return Expression.Lambda<Func<TEntity, TModel>>(
