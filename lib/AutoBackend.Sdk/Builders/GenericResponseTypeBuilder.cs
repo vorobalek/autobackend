@@ -24,11 +24,11 @@ internal static class GenericResponseTypeBuilder
         if (candidate.IsPrimitiveModelType())
             return candidate;
 
-        if (candidate.IsEnumerable())
-            return typeof(IEnumerable<>)
+        if (candidate.IsCollection())
+            return typeof(ICollection<>)
                 .MakeGenericType(
                     BuildForCandidate(
-                        candidate.GetEnumerableType()
+                        candidate.GetCollectionType()
                         ?? throw new NotFoundReflectionException()));
 
         if (ResponsesMap.TryGetValue(candidate, out var responseType))

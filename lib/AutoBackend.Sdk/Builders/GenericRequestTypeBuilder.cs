@@ -24,11 +24,11 @@ internal static class GenericRequestTypeBuilder
         if (candidate.IsPrimitiveModelType())
             return candidate;
 
-        if (candidate.IsEnumerable())
-            return typeof(IEnumerable<>)
+        if (candidate.IsCollection())
+            return typeof(ICollection<>)
                 .MakeGenericType(
                     BuildForCandidate(
-                        candidate.GetEnumerableType()
+                        candidate.GetCollectionType()
                         ?? throw new NotFoundReflectionException()));
 
         if (RequestsMap.TryGetValue(candidate, out var requestType))
