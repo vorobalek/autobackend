@@ -65,7 +65,7 @@ internal abstract class GenericController<
     TResponse,
     TFilter
 >(
-    IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+    IGenericResponseMapper genericResponseMapper,
     IGenericRepository<TEntity, TFilter> genericRepository,
     ICancellationTokenProvider cancellationTokenProvider) : GenericController
     where TEntity : class
@@ -78,7 +78,7 @@ internal abstract class GenericController<
     {
         return ProcessAsync(async cancellationToken =>
                 genericResponseMapper
-                    .ToModel(
+                    .ToModelEnumerable<TEntity, TResponse>(
                         await genericRepository
                             .GetAllAsync(
                                 filter,

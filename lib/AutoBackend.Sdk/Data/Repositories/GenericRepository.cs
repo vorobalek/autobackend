@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AutoBackend.Sdk.Data.Repositories;
 
-internal abstract class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFilter> genericStorage)
+internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFilter> genericStorage)
     : IGenericRepository<TEntity, TFilter>
     where TEntity : class
     where TFilter : class, IGenericFilter

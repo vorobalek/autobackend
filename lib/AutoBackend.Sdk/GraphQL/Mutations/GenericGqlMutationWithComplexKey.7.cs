@@ -38,8 +38,8 @@ internal abstract class GenericGqlMutationWithComplexKey<
 {
     [GraphQLName("create")]
     public async Task<TResponse> CreateByComplexKeyAsync(
-        [Service(ServiceKind.Resolver)] IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
-        [Service(ServiceKind.Resolver)] IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+        [Service(ServiceKind.Resolver)] IGenericRequestMapper genericRequestMapper,
+        [Service(ServiceKind.Resolver)] IGenericResponseMapper genericResponseMapper,
         [Service(ServiceKind.Resolver)] IGenericRepositoryWithComplexKey<
             TEntity,
             TFilter,
@@ -62,7 +62,7 @@ internal abstract class GenericGqlMutationWithComplexKey<
         [GraphQLName("request")] TRequest request)
     {
         return genericResponseMapper
-            .ToModel(
+            .ToModel<TEntity, TResponse>(
                 await genericRepository
                     .CreateByComplexKeyAsync(
                         key1,
@@ -72,14 +72,14 @@ internal abstract class GenericGqlMutationWithComplexKey<
                         key5,
                         key6,
                         key7,
-                        genericRequestMapper.ToEntity(request),
+                        genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                         cancellationTokenProvider.GlobalCancellationToken));
     }
 
     [GraphQLName("update")]
     public async Task<TResponse> UpdateByComplexKeyAsync(
-        [Service(ServiceKind.Resolver)] IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
-        [Service(ServiceKind.Resolver)] IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+        [Service(ServiceKind.Resolver)] IGenericRequestMapper genericRequestMapper,
+        [Service(ServiceKind.Resolver)] IGenericResponseMapper genericResponseMapper,
         [Service(ServiceKind.Resolver)] IGenericRepositoryWithComplexKey<
             TEntity,
             TFilter,
@@ -102,7 +102,7 @@ internal abstract class GenericGqlMutationWithComplexKey<
         [GraphQLName("request")] TRequest request)
     {
         return genericResponseMapper
-            .ToModel(
+            .ToModel<TEntity, TResponse>(
                 await genericRepository
                     .UpdateByComplexKeyAsync(
                         key1,
@@ -112,7 +112,7 @@ internal abstract class GenericGqlMutationWithComplexKey<
                         key5,
                         key6,
                         key7,
-                        genericRequestMapper.ToEntity(request),
+                        genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                         cancellationTokenProvider.GlobalCancellationToken));
     }
 

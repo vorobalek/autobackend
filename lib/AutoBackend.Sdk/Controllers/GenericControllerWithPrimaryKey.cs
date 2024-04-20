@@ -14,8 +14,8 @@ internal sealed class GenericControllerWithPrimaryKey<
     TFilter,
     TKey
 >(
-    IGenericRequestMapper<TEntity, TRequest> genericRequestMapper,
-    IGenericResponseMapper<TEntity, TResponse> genericResponseMapper,
+    IGenericRequestMapper genericRequestMapper,
+    IGenericResponseMapper genericResponseMapper,
     IGenericRepositoryWithPrimaryKey<
         TEntity,
         TFilter,
@@ -37,7 +37,7 @@ internal sealed class GenericControllerWithPrimaryKey<
     where TKey : notnull
 {
     private readonly ICancellationTokenProvider _cancellationTokenProvider = cancellationTokenProvider;
-    private readonly IGenericResponseMapper<TEntity, TResponse> _genericResponseMapper = genericResponseMapper;
+    private readonly IGenericResponseMapper _genericResponseMapper = genericResponseMapper;
 
     [HttpGet("{key}")]
     public Task<ActionResult<GenericControllerResponse<TResponse?>>> GetByPrimaryKeyAsync(
@@ -48,7 +48,7 @@ internal sealed class GenericControllerWithPrimaryKey<
                     .GetByPrimaryKeyAsync(
                         key,
                         cancellationToken) is { } entity
-                    ? _genericResponseMapper.ToModel(entity)
+                    ? _genericResponseMapper.ToModel<TEntity, TResponse>(entity)
                     : null,
             _cancellationTokenProvider.GlobalCancellationToken);
     }
@@ -60,11 +60,11 @@ internal sealed class GenericControllerWithPrimaryKey<
     {
         return ProcessAsync(async cancellationToken =>
                 _genericResponseMapper
-                    .ToModel(
+                    .ToModel<TEntity, TResponse>(
                         await genericRepository
                             .CreateByPrimaryKeyAsync(
                                 key,
-                                genericRequestMapper.ToEntity(request),
+                                genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
             _cancellationTokenProvider.GlobalCancellationToken);
     }
@@ -76,11 +76,11 @@ internal sealed class GenericControllerWithPrimaryKey<
     {
         return ProcessAsync(async cancellationToken =>
                 _genericResponseMapper
-                    .ToModel(
+                    .ToModel<TEntity, TResponse>(
                         await genericRepository
                             .UpdateByPrimaryKeyAsync(
                                 key,
-                                genericRequestMapper.ToEntity(request),
+                                genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
             _cancellationTokenProvider.GlobalCancellationToken);
     }
