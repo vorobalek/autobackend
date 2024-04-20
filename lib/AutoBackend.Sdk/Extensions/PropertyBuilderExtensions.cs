@@ -1,7 +1,6 @@
-using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.Json.Serialization;
-using AutoBackend.Sdk.Exceptions.Reflection;
+using AutoBackend.Sdk.Builders;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using GraphQLIgnoreAttribute = HotChocolate.GraphQLIgnoreAttribute;
@@ -14,138 +13,51 @@ internal static class PropertyBuilderExtensions
     // ReSharper disable once InconsistentNaming
     internal static void SetGraphQLNameAttribute(this PropertyBuilder propertyBuilder, string name)
     {
-        var constructorParameters = new[]
-        {
-            typeof(string)
-        };
-        var constructorInfo = typeof(GraphQLNameAttribute).GetConstructor(constructorParameters);
-
-        var attributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new NotFoundReflectionException(
-                string.Format(
-                    Constants.UnableToFindASuitableConstructorForTheType,
-                    nameof(GraphQLNameAttribute))),
-            [name],
-            Array.Empty<PropertyInfo>(),
-            Array.Empty<object>());
-
-        propertyBuilder.SetCustomAttribute(attributeBuilder);
+        propertyBuilder.SetAttribute<GraphQLNameAttribute>(args: name);
     }
 
     internal static void SetGraphQLIgnoreAttribute(this PropertyBuilder propertyBuilder)
     {
-        var constructorParameters = Array.Empty<Type>();
-        var constructorInfo = typeof(GraphQLIgnoreAttribute).GetConstructor(constructorParameters);
-
-        var attributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new NotFoundReflectionException(
-                string.Format(
-                    Constants.UnableToFindASuitableConstructorForTheType,
-                    nameof(GraphQLIgnoreAttribute))),
-            Array.Empty<object>(),
-            Array.Empty<PropertyInfo>(),
-            Array.Empty<object>());
-
-        propertyBuilder.SetCustomAttribute(attributeBuilder);
+        propertyBuilder.SetAttribute<GraphQLIgnoreAttribute>();
     }
 
     internal static void SetJsonPropertyAttribute(this PropertyBuilder propertyBuilder, string name)
     {
-        var constructorParameters = new[]
-        {
-            typeof(string)
-        };
-        var constructorInfo = typeof(JsonPropertyAttribute).GetConstructor(constructorParameters);
-
-        var attributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new NotFoundReflectionException(
-                string.Format(
-                    Constants.UnableToFindASuitableConstructorForTheType,
-                    nameof(JsonPropertyAttribute))),
-            [name],
-            Array.Empty<PropertyInfo>(),
-            Array.Empty<object>());
-
-        propertyBuilder.SetCustomAttribute(attributeBuilder);
+        propertyBuilder.SetAttribute<JsonPropertyAttribute>(args: name);
     }
 
     internal static void SetSystemTextJsonIgnoreAttribute(this PropertyBuilder propertyBuilder)
     {
-        var constructorParameters = Array.Empty<Type>();
-        var constructorInfo = typeof(JsonIgnoreAttribute).GetConstructor(constructorParameters);
-
-        var attributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new NotFoundReflectionException(
-                string.Format(
-                    Constants.UnableToFindASuitableConstructorForTheType,
-                    nameof(JsonIgnoreAttribute))),
-            Array.Empty<object>(),
-            Array.Empty<PropertyInfo>(),
-            Array.Empty<object>());
-
-        propertyBuilder.SetCustomAttribute(attributeBuilder);
+        propertyBuilder.SetAttribute<JsonIgnoreAttribute>();
     }
 
     internal static void SetNewtonsoftJsonIgnoreAttribute(this PropertyBuilder propertyBuilder)
     {
-        var constructorParameters = Array.Empty<Type>();
-        var constructorInfo = typeof(Newtonsoft.Json.JsonIgnoreAttribute).GetConstructor(constructorParameters);
-
-        var attributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new NotFoundReflectionException(
-                string.Format(
-                    Constants.UnableToFindASuitableConstructorForTheType,
-                    nameof(Newtonsoft.Json.JsonIgnoreAttribute))),
-            Array.Empty<object>(),
-            Array.Empty<PropertyInfo>(),
-            Array.Empty<object>());
-
-        propertyBuilder.SetCustomAttribute(attributeBuilder);
+        propertyBuilder.SetAttribute<Newtonsoft.Json.JsonIgnoreAttribute>();
     }
 
     internal static void SetJsonPropertyNameAttribute(this PropertyBuilder propertyBuilder, string name)
     {
-        var constructorParameters = new[]
-        {
-            typeof(string)
-        };
-        var constructorInfo = typeof(JsonPropertyNameAttribute).GetConstructor(constructorParameters);
-
-        var attributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new NotFoundReflectionException(
-                string.Format(
-                    Constants.UnableToFindASuitableConstructorForTheType,
-                    nameof(JsonPropertyNameAttribute))),
-            [name],
-            Array.Empty<PropertyInfo>(),
-            Array.Empty<object>());
-
-        propertyBuilder.SetCustomAttribute(attributeBuilder);
+        propertyBuilder.SetAttribute<JsonPropertyNameAttribute>(args: name);
     }
 
     internal static void SetBindPropertyAttribute(this PropertyBuilder propertyBuilder, string name)
     {
-        var constructorParameters = Array.Empty<Type>();
-        var constructorInfo = typeof(BindPropertyAttribute).GetConstructor(constructorParameters);
+        propertyBuilder.SetAttribute<BindPropertyAttribute>(
+            new Dictionary<string, object?>
+            {
+                [nameof(BindPropertyAttribute.Name)] = name
+            });
+    }
 
-        var nameProperty = typeof(BindPropertyAttribute).GetProperty(nameof(BindPropertyAttribute.Name));
-
-        if (nameProperty is null)
-            throw new NotFoundReflectionException(
-                string.Format(
-                    Constants.UnableToFindAPropertyWithNameInObject,
-                    nameof(BindPropertyAttribute.Name),
-                    nameof(BindPropertyAttribute)));
-
-        var attributeBuilder = new CustomAttributeBuilder(
-            constructorInfo ?? throw new NotFoundReflectionException(
-                string.Format(
-                    Constants.UnableToFindASuitableConstructorForTheType,
-                    nameof(JsonPropertyNameAttribute))),
-            Array.Empty<object>(),
-            [nameProperty],
-            [name]);
-
-        propertyBuilder.SetCustomAttribute(attributeBuilder);
+    // ReSharper disable once MemberCanBePrivate.Global
+    internal static void SetAttribute<TAttribute>(
+        this PropertyBuilder propertyBuilder, 
+        IReadOnlyDictionary<string, object?>? properties = null,
+        IReadOnlyDictionary<string, object?>? fields = null,
+        params object[] args)
+        where TAttribute: Attribute
+    {
+        propertyBuilder.SetCustomAttribute(AttributeBuilder.Create<TAttribute>(properties, fields, args));
     }
 }

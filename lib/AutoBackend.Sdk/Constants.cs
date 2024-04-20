@@ -83,6 +83,9 @@ internal static class Constants
     internal const string UnableToFindAPropertyWithNameInObject =
         "Unable to find a property with name {0} in object {1}.";
 
+    internal const string UnableToFindAFieldWithNameInObject =
+        "Unable to find a field with name {0} in object {1}.";
+
     internal const string UnableToFindASuitableConstructorForTheType =
         "Unable to find a suitable constructor for the type {0}.";
 

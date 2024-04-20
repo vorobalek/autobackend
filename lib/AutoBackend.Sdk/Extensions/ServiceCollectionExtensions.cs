@@ -83,7 +83,9 @@ internal static class ServiceCollectionExtensions
             .UseOperationCache()
             .UseOperationResolver()
             .UseOperationVariableCoercion()
-            .UseOperationExecution();
+            .UseOperationExecution()
+            
+            .AddType(new TimeSpanType(TimeSpanFormat.DotNet));
 
         return services;
     }

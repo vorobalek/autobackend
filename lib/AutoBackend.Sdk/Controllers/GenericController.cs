@@ -78,7 +78,7 @@ internal abstract class GenericController<
     {
         return ProcessAsync(async cancellationToken =>
                 genericResponseMapper
-                    .ToModelEnumerable<TEntity, TResponse>(
+                    .ToModel<TEntity, TResponse>(
                         await genericRepository
                             .GetAllAsync(
                                 filter,

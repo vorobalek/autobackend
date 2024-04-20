@@ -71,20 +71,20 @@ internal static class TypeExtensions
         return false;
     }
 
-    internal static bool IsEnumerable(this Type type)
+    internal static bool IsCollection(this Type type)
     {
-        return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>)) ||
+        return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>)) ||
                type.GetTypeInfo().ImplementedInterfaces.Any(i =>
-                   i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+                   i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
     }
 
-    internal static Type? GetEnumerableType(this Type type)
+    internal static Type? GetCollectionType(this Type type)
     {
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>))
             return type.GetGenericArguments()[0];
 
         if (type.GetTypeInfo().ImplementedInterfaces.SingleOrDefault(i =>
-                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)) is { } iEnumerableGeneric)
+                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>)) is { } iEnumerableGeneric)
             return iEnumerableGeneric.GetGenericArguments()[0];
 
         return null;
