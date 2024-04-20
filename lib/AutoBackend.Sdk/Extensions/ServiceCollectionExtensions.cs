@@ -26,8 +26,7 @@ internal static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         return services
-            .AddGenericRequests()
-            .AddGenericResponses()
+            .AddGenericRequestResponse()
             .AddGenericControllers<TProgram>()
             .AddGenericGql<TProgram>()
             .AddGenericSwagger(typeof(TProgram).Assembly.FullName!)
@@ -51,17 +50,12 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddGenericRequests(
+    private static IServiceCollection AddGenericRequestResponse(
         this IServiceCollection services)
     {
-        services.AddScoped(typeof(IGenericRequestMapper<,>), typeof(GenericRequestMapper<,>));
-        return services;
-    }
-
-    private static IServiceCollection AddGenericResponses(
-        this IServiceCollection services)
-    {
-        services.AddScoped(typeof(IGenericResponseMapper<,>), typeof(GenericResponseMapper<,>));
+        services.AddSingleton<IMapperExpressionsCache, MapperExpressionsCache>();
+        services.AddScoped<IGenericRequestMapper, GenericRequestMapper>();
+        services.AddScoped<IGenericResponseMapper, GenericResponseMapper>();
         return services;
     }
 
@@ -201,6 +195,7 @@ internal static class ServiceCollectionExtensions
     private static IServiceCollection AddGenericStorage(this IServiceCollection services)
     {
         services.AddScoped(typeof(IGenericStorage<,>), typeof(GenericStorage<,>));
+        services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
         services.AddScoped(typeof(IGenericRepositoryWithNoKey<,>), typeof(GenericRepositoryWithNoKey<,>));
         services.AddScoped(typeof(IGenericRepositoryWithPrimaryKey<,,>), typeof(GenericRepositoryWithPrimaryKey<,,>));
         services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,>), typeof(GenericRepositoryWithComplexKey<,,,>));

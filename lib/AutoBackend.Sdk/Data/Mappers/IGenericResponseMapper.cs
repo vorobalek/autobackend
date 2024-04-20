@@ -2,10 +2,13 @@ using AutoBackend.Sdk.Models;
 
 namespace AutoBackend.Sdk.Data.Mappers;
 
-internal interface IGenericResponseMapper<in TEntity, out TModel>
-    where TEntity : class
-    where TModel : class, IGenericResponse, new()
+internal interface IGenericResponseMapper
 {
-    TModel ToModel(TEntity entity);
-    IEnumerable<TModel> ToModel(IEnumerable<TEntity> entities);
+    TResponse? ToModel<TEntity, TResponse>(TEntity? entity)
+        where TEntity : class
+        where TResponse : class, IGenericResponse, new();
+
+    IEnumerable<TResponse>? ToModelEnumerable<TEntity, TResponse>(IEnumerable<TEntity>? entities)
+        where TEntity : class
+        where TResponse : class, IGenericResponse, new();
 }

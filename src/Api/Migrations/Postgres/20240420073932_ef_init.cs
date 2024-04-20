@@ -131,26 +131,12 @@ namespace Api.Migrations.Postgres
                 {
                     table.PrimaryKey("PK_TransactionVersion", x => x.__Generic__Id);
                     table.ForeignKey(
-                        name: "FK_TransactionVersion_Budget_BudgetId",
-                        column: x => x.BudgetId,
-                        principalSchema: "generic",
-                        principalTable: "Budget",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_TransactionVersion_Transaction_TransactionId",
                         column: x => x.TransactionId,
                         principalSchema: "generic",
                         principalTable: "Transaction",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TransactionVersion_User_UserId",
-                        column: x => x.UserId,
-                        principalSchema: "generic",
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateIndex(
@@ -184,22 +170,10 @@ namespace Api.Migrations.Postgres
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TransactionVersion_BudgetId",
-                schema: "generic",
-                table: "TransactionVersion",
-                column: "BudgetId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_TransactionVersion_TransactionId",
                 schema: "generic",
                 table: "TransactionVersion",
                 column: "TransactionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TransactionVersion_UserId",
-                schema: "generic",
-                table: "TransactionVersion",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_User_ActiveBudgetId",

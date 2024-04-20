@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations.SqlServer
 {
     [DbContext(typeof(SqlServerGenericDbContext))]
-    [Migration("20240419150009_ef_init")]
+    [Migration("20240420073928_ef_init")]
     partial class ef_init
     {
         /// <inheritdoc />
@@ -138,11 +138,7 @@ namespace Api.Migrations.SqlServer
 
                     b.HasKey("__Generic__Id");
 
-                    b.HasIndex("BudgetId");
-
                     b.HasIndex("TransactionId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("TransactionVersion", "generic");
                 });
@@ -220,28 +216,13 @@ namespace Api.Migrations.SqlServer
 
             modelBuilder.Entity("Api.Data.TransactionVersion", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "Budget")
-                        .WithMany()
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Api.Data.Transaction", "Transaction")
                         .WithMany("Versions")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Budget");
-
                     b.Navigation("Transaction");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Api.Data.User", b =>
