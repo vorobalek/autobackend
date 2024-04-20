@@ -4,7 +4,7 @@ namespace AutoBackend.Sdk.Data.Mappers;
 
 internal interface IGenericRequestMapper
 {
-    TEntity ToEntity<TEntity, TModel>(TModel model)
+    TEntity ToEntity<TEntity, TRequest>(TRequest model)
         where TEntity : class, new()
-        where TModel : class, IGenericRequest;
+        where TRequest : class, IGenericRequest;
 }

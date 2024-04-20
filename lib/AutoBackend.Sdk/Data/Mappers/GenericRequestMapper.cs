@@ -4,14 +4,13 @@ using AutoBackend.Sdk.Models;
 
 namespace AutoBackend.Sdk.Data.Mappers;
 
-internal class GenericRequestMapper : IGenericRequestMapper
+internal class GenericRequestMapper(IMapperExpressionsCache cache) : IGenericRequestMapper
 {
     public TEntity ToEntity<TEntity, TRequest>(TRequest model)
         where TEntity : class, new()
         where TRequest : class, IGenericRequest
     {
-        var expr = MapExpr<TEntity, TRequest>();
-        var func = expr.Compile();
+        var func = cache.GetOrAddAndCompile(MapExpr<TEntity, TRequest>());
         return func(model);
     }
 

@@ -6,27 +6,26 @@ using AutoBackend.Sdk.Models;
 
 namespace AutoBackend.Sdk.Data.Mappers;
 
-internal class GenericResponseMapper : IGenericResponseMapper
+internal class GenericResponseMapper(IMapperExpressionsCache cache) : IGenericResponseMapper
 {
-    public TModel? ToModel<TEntity, TModel>(TEntity? entity)
+    public TResponse? ToModel<TEntity, TResponse>(TEntity? entity)
         where TEntity : class
-        where TModel : class, IGenericResponse, new()
+        where TResponse : class, IGenericResponse, new()
     {
         if (entity is null) return null;
 
-        var expr = MapExpr<TEntity, TModel>();
-        var func = expr.Compile();
+        var func = cache.GetOrAddAndCompile(MapExpr<TEntity, TResponse>());
         return func(entity);
     }
 
-    public IEnumerable<TModel>? ToModelEnumerable<TEntity, TModel>(IEnumerable<TEntity>? entities)
+    public IEnumerable<TResponse>? ToModelEnumerable<TEntity, TResponse>(IEnumerable<TEntity>? entities)
         where TEntity : class
-        where TModel : class, IGenericResponse, new()
+        where TResponse : class, IGenericResponse, new()
     {
         return entities?.Select(entity => 
-            ToModel<TEntity, TModel>(entity) 
+            ToModel<TEntity, TResponse>(entity) 
             ?? throw new InconsistentDataException()) 
-               ?? Array.Empty<TModel>();
+               ?? Array.Empty<TResponse>();
     }
 
     private Expression<Func<TEntity, TModel>> MapExpr<TEntity, TModel>()

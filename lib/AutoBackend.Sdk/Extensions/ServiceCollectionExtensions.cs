@@ -26,8 +26,7 @@ internal static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         return services
-            .AddGenericRequests()
-            .AddGenericResponses()
+            .AddGenericRequestResponse()
             .AddGenericControllers<TProgram>()
             .AddGenericGql<TProgram>()
             .AddGenericSwagger(typeof(TProgram).Assembly.FullName!)
@@ -51,16 +50,11 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddGenericRequests(
+    private static IServiceCollection AddGenericRequestResponse(
         this IServiceCollection services)
     {
+        services.AddSingleton<IMapperExpressionsCache, MapperExpressionsCache>();
         services.AddScoped<IGenericRequestMapper, GenericRequestMapper>();
-        return services;
-    }
-
-    private static IServiceCollection AddGenericResponses(
-        this IServiceCollection services)
-    {
         services.AddScoped<IGenericResponseMapper, GenericResponseMapper>();
         return services;
     }
