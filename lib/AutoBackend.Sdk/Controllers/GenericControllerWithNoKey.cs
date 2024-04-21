@@ -45,6 +45,6 @@ internal sealed class GenericControllerWithNoKey<
                             .CreateAsync(
                                 genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
-            _cancellationTokenProvider.GlobalCancellationToken);
+            _cancellationTokenProvider.GlobalToken);
     }
 }

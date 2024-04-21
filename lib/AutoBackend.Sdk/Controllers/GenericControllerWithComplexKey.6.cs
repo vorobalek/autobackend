@@ -75,7 +75,7 @@ internal sealed class GenericControllerWithComplexKey<
                         cancellationToken) is { } entity
                     ? _genericResponseMapper.ToModel<TEntity, TResponse>(entity)
                     : null,
-            _cancellationTokenProvider.GlobalCancellationToken);
+            _cancellationTokenProvider.GlobalToken);
     }
 
     [HttpPost("{key1}/{key2}/{key3}/{key4}/{key5}/{key6}")]
@@ -101,7 +101,7 @@ internal sealed class GenericControllerWithComplexKey<
                                 key6,
                                 genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
-            _cancellationTokenProvider.GlobalCancellationToken);
+            _cancellationTokenProvider.GlobalToken);
     }
 
     [HttpPut("{key1}/{key2}/{key3}/{key4}/{key5}/{key6}")]
@@ -127,7 +127,7 @@ internal sealed class GenericControllerWithComplexKey<
                                 key6,
                                 genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
-            _cancellationTokenProvider.GlobalCancellationToken);
+            _cancellationTokenProvider.GlobalToken);
     }
 
     [HttpDelete("{key1}/{key2}/{key3}/{key4}/{key5}/{key6}")]
@@ -149,6 +149,6 @@ internal sealed class GenericControllerWithComplexKey<
                         key5,
                         key6,
                         cancellationToken),
-            _cancellationTokenProvider.GlobalCancellationToken);
+            _cancellationTokenProvider.GlobalToken);
     }
 }
