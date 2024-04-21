@@ -34,7 +34,7 @@ like GraphQL. I dunno. I have already spent much more time trying to express how
 
 # Examples
 
-The basic using scenario can be found in [here](https://github.com/vorobalek/autobackend/tree/main/src).
+The basic using scenario can be found in [here](src/Sample).
 Also, here are the copies of that samples.
 
 ## Initialize AutoBackend from your Program.cs file

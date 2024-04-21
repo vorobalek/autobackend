@@ -9,7 +9,7 @@ and [NuGet](https://www.nuget.org/packages/AutoBackend.SDK).
 
 In this version:
 
-- Added GraphQL with the full filters support
-- Added slice requests
+- Added primitive GraphQL queries and mutations with the full filters support
+- Added get requests pagination
 - Added GenericRequest and GenericResponse attributes to API and GraphQL data contracts
-- Edited [sample project](src/Api)
+- Edited [sample project](src/Sample)
