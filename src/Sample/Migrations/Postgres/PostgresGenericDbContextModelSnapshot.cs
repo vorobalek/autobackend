@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Api.Migrations.Postgres
+namespace Sample.Migrations.Postgres
 {
     [DbContext(typeof(PostgresGenericDbContext))]
     partial class PostgresGenericDbContextModelSnapshot : ModelSnapshot
@@ -22,7 +22,7 @@ namespace Api.Migrations.Postgres
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Api.Data.Budget", b =>
+            modelBuilder.Entity("Sample.Data.Budget", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -45,7 +45,7 @@ namespace Api.Migrations.Postgres
                     b.ToTable("Budget", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Participating", b =>
+            modelBuilder.Entity("Sample.Data.Participating", b =>
                 {
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -60,7 +60,7 @@ namespace Api.Migrations.Postgres
                     b.ToTable("Participating", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Transaction", b =>
+            modelBuilder.Entity("Sample.Data.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -98,7 +98,7 @@ namespace Api.Migrations.Postgres
                     b.ToTable("Transaction", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.TransactionVersion", b =>
+            modelBuilder.Entity("Sample.Data.TransactionVersion", b =>
                 {
                     b.Property<int>("__Generic__Id")
                         .ValueGeneratedOnAdd()
@@ -140,7 +140,7 @@ namespace Api.Migrations.Postgres
                     b.ToTable("TransactionVersion", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.User", b =>
+            modelBuilder.Entity("Sample.Data.User", b =>
                 {
                     b.Property<long>("Id")
                         .HasColumnType("bigint");
@@ -164,9 +164,9 @@ namespace Api.Migrations.Postgres
                     b.ToTable("User", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Budget", b =>
+            modelBuilder.Entity("Sample.Data.Budget", b =>
                 {
-                    b.HasOne("Api.Data.User", "Owner")
+                    b.HasOne("Sample.Data.User", "Owner")
                         .WithMany("OwnedBudgets")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -174,15 +174,15 @@ namespace Api.Migrations.Postgres
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Api.Data.Participating", b =>
+            modelBuilder.Entity("Sample.Data.Participating", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "Budget")
+                    b.HasOne("Sample.Data.Budget", "Budget")
                         .WithMany("Participating")
                         .HasForeignKey("BudgetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.User", "User")
+                    b.HasOne("Sample.Data.User", "User")
                         .WithMany("Participating")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -193,15 +193,15 @@ namespace Api.Migrations.Postgres
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Api.Data.Transaction", b =>
+            modelBuilder.Entity("Sample.Data.Transaction", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "Budget")
+                    b.HasOne("Sample.Data.Budget", "Budget")
                         .WithMany("Transactions")
                         .HasForeignKey("BudgetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.User", "User")
+                    b.HasOne("Sample.Data.User", "User")
                         .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -211,9 +211,9 @@ namespace Api.Migrations.Postgres
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Api.Data.TransactionVersion", b =>
+            modelBuilder.Entity("Sample.Data.TransactionVersion", b =>
                 {
-                    b.HasOne("Api.Data.Transaction", "Transaction")
+                    b.HasOne("Sample.Data.Transaction", "Transaction")
                         .WithMany("Versions")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -222,9 +222,9 @@ namespace Api.Migrations.Postgres
                     b.Navigation("Transaction");
                 });
 
-            modelBuilder.Entity("Api.Data.User", b =>
+            modelBuilder.Entity("Sample.Data.User", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "ActiveBudget")
+                    b.HasOne("Sample.Data.Budget", "ActiveBudget")
                         .WithMany("ActiveUsers")
                         .HasForeignKey("ActiveBudgetId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -232,7 +232,7 @@ namespace Api.Migrations.Postgres
                     b.Navigation("ActiveBudget");
                 });
 
-            modelBuilder.Entity("Api.Data.Budget", b =>
+            modelBuilder.Entity("Sample.Data.Budget", b =>
                 {
                     b.Navigation("ActiveUsers");
 
@@ -241,12 +241,12 @@ namespace Api.Migrations.Postgres
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Api.Data.Transaction", b =>
+            modelBuilder.Entity("Sample.Data.Transaction", b =>
                 {
                     b.Navigation("Versions");
                 });
 
-            modelBuilder.Entity("Api.Data.User", b =>
+            modelBuilder.Entity("Sample.Data.User", b =>
                 {
                     b.Navigation("OwnedBudgets");
 

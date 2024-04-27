@@ -73,7 +73,7 @@ internal abstract class GenericGqlMutationWithComplexKey<
                         key6,
                         key7,
                         genericRequestMapper.ToEntity<TEntity, TRequest>(request),
-                        cancellationTokenProvider.GlobalCancellationToken));
+                        cancellationTokenProvider.GlobalToken));
     }
 
     [GraphQLName("update")]
@@ -113,7 +113,7 @@ internal abstract class GenericGqlMutationWithComplexKey<
                         key6,
                         key7,
                         genericRequestMapper.ToEntity<TEntity, TRequest>(request),
-                        cancellationTokenProvider.GlobalCancellationToken));
+                        cancellationTokenProvider.GlobalToken));
     }
 
     [GraphQLName("delete")]
@@ -147,7 +147,7 @@ internal abstract class GenericGqlMutationWithComplexKey<
                 key5,
                 key6,
                 key7,
-                cancellationTokenProvider.GlobalCancellationToken);
+                cancellationTokenProvider.GlobalToken);
         return true;
     }
 }

@@ -58,6 +58,6 @@ internal abstract class GenericGqlQueryWithComplexKey<
                 key4,
                 key5,
                 key6,
-                cancellationTokenProvider.GlobalCancellationToken);
+                cancellationTokenProvider.GlobalToken);
     }
 }

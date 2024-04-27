@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Api.Migrations.SqlServer
+namespace Sample.Migrations.Postgres
 {
     /// <inheritdoc />
     public partial class ef_init : Migration
@@ -19,8 +20,8 @@ namespace Api.Migrations.SqlServer
                 schema: "generic",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     OwnerId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -34,10 +35,10 @@ namespace Api.Migrations.SqlServer
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TimeZone = table.Column<TimeSpan>(type: "time", nullable: true),
-                    ActiveBudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    FirstName = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: true),
+                    TimeZone = table.Column<TimeSpan>(type: "interval", nullable: true),
+                    ActiveBudgetId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -57,7 +58,7 @@ namespace Api.Migrations.SqlServer
                 columns: table => new
                 {
                     UserId = table.Column<long>(type: "bigint", nullable: false),
-                    BudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    BudgetId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -83,13 +84,13 @@ namespace Api.Migrations.SqlServer
                 schema: "generic",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: true),
-                    BudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(20,4)", precision: 20, scale: 4, nullable: false),
-                    DateTimeUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Comment = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    SecretKey = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false)
+                    BudgetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(20,4)", precision: 20, scale: 4, nullable: false),
+                    DateTimeUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Comment = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    SecretKey = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -115,16 +116,16 @@ namespace Api.Migrations.SqlServer
                 schema: "generic",
                 columns: table => new
                 {
-                    __Generic__Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OriginalTransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VersionDateTimeUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    __Generic__Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TransactionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OriginalTransactionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    VersionDateTimeUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: true),
-                    BudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(20,4)", precision: 20, scale: 4, nullable: false),
-                    DateTimeUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Comment = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false)
+                    BudgetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(20,4)", precision: 20, scale: 4, nullable: false),
+                    DateTimeUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Comment = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false)
                 },
                 constraints: table =>
                 {

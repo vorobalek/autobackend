@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using AutoBackend.Sdk.Attributes;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api.Data;
+namespace Sample.Data;
 
 [GenericEntity]
 [GenericController]

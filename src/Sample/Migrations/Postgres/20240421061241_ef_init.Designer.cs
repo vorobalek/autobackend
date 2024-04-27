@@ -3,16 +3,16 @@ using System;
 using AutoBackend.Sdk.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Api.Migrations.SqlServer
+namespace Sample.Migrations.Postgres
 {
-    [DbContext(typeof(SqlServerGenericDbContext))]
-    [Migration("20240420073928_ef_init")]
+    [DbContext(typeof(PostgresGenericDbContext))]
+    [Migration("20240421061241_ef_init")]
     partial class ef_init
     {
         /// <inheritdoc />
@@ -21,20 +21,20 @@ namespace Api.Migrations.SqlServer
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.4")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Api.Data.Budget", b =>
+            modelBuilder.Entity("Sample.Data.Budget", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<long?>("OwnerId")
                         .HasColumnType("bigint");
@@ -48,13 +48,13 @@ namespace Api.Migrations.SqlServer
                     b.ToTable("Budget", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Participating", b =>
+            modelBuilder.Entity("Sample.Data.Participating", b =>
                 {
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("UserId", "BudgetId");
 
@@ -63,31 +63,31 @@ namespace Api.Migrations.SqlServer
                     b.ToTable("Participating", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Transaction", b =>
+            modelBuilder.Entity("Sample.Data.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(20, 4)
-                        .HasColumnType("decimal(20,4)");
+                        .HasColumnType("numeric(20,4)");
 
                     b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<DateTime>("DateTimeUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SecretKey")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
@@ -101,40 +101,40 @@ namespace Api.Migrations.SqlServer
                     b.ToTable("Transaction", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.TransactionVersion", b =>
+            modelBuilder.Entity("Sample.Data.TransactionVersion", b =>
                 {
                     b.Property<int>("__Generic__Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("__Generic__Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("__Generic__Id"));
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(20, 4)
-                        .HasColumnType("decimal(20,4)");
+                        .HasColumnType("numeric(20,4)");
 
                     b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<DateTime>("DateTimeUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("OriginalTransactionId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("TransactionId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("VersionDateTimeUtc")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("__Generic__Id");
 
@@ -143,22 +143,22 @@ namespace Api.Migrations.SqlServer
                     b.ToTable("TransactionVersion", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.User", b =>
+            modelBuilder.Entity("Sample.Data.User", b =>
                 {
                     b.Property<long>("Id")
                         .HasColumnType("bigint");
 
                     b.Property<Guid?>("ActiveBudgetId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<TimeSpan?>("TimeZone")
-                        .HasColumnType("time");
+                        .HasColumnType("interval");
 
                     b.HasKey("Id");
 
@@ -167,9 +167,9 @@ namespace Api.Migrations.SqlServer
                     b.ToTable("User", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Budget", b =>
+            modelBuilder.Entity("Sample.Data.Budget", b =>
                 {
-                    b.HasOne("Api.Data.User", "Owner")
+                    b.HasOne("Sample.Data.User", "Owner")
                         .WithMany("OwnedBudgets")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -177,15 +177,15 @@ namespace Api.Migrations.SqlServer
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Api.Data.Participating", b =>
+            modelBuilder.Entity("Sample.Data.Participating", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "Budget")
+                    b.HasOne("Sample.Data.Budget", "Budget")
                         .WithMany("Participating")
                         .HasForeignKey("BudgetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.User", "User")
+                    b.HasOne("Sample.Data.User", "User")
                         .WithMany("Participating")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -196,15 +196,15 @@ namespace Api.Migrations.SqlServer
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Api.Data.Transaction", b =>
+            modelBuilder.Entity("Sample.Data.Transaction", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "Budget")
+                    b.HasOne("Sample.Data.Budget", "Budget")
                         .WithMany("Transactions")
                         .HasForeignKey("BudgetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.User", "User")
+                    b.HasOne("Sample.Data.User", "User")
                         .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -214,9 +214,9 @@ namespace Api.Migrations.SqlServer
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Api.Data.TransactionVersion", b =>
+            modelBuilder.Entity("Sample.Data.TransactionVersion", b =>
                 {
-                    b.HasOne("Api.Data.Transaction", "Transaction")
+                    b.HasOne("Sample.Data.Transaction", "Transaction")
                         .WithMany("Versions")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -225,9 +225,9 @@ namespace Api.Migrations.SqlServer
                     b.Navigation("Transaction");
                 });
 
-            modelBuilder.Entity("Api.Data.User", b =>
+            modelBuilder.Entity("Sample.Data.User", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "ActiveBudget")
+                    b.HasOne("Sample.Data.Budget", "ActiveBudget")
                         .WithMany("ActiveUsers")
                         .HasForeignKey("ActiveBudgetId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -235,7 +235,7 @@ namespace Api.Migrations.SqlServer
                     b.Navigation("ActiveBudget");
                 });
 
-            modelBuilder.Entity("Api.Data.Budget", b =>
+            modelBuilder.Entity("Sample.Data.Budget", b =>
                 {
                     b.Navigation("ActiveUsers");
 
@@ -244,12 +244,12 @@ namespace Api.Migrations.SqlServer
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Api.Data.Transaction", b =>
+            modelBuilder.Entity("Sample.Data.Transaction", b =>
                 {
                     b.Navigation("Versions");
                 });
 
-            modelBuilder.Entity("Api.Data.User", b =>
+            modelBuilder.Entity("Sample.Data.User", b =>
                 {
                     b.Navigation("OwnedBudgets");
 

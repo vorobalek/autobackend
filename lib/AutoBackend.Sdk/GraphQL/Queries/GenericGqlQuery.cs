@@ -28,7 +28,7 @@ internal abstract class GenericGqlQuery<
                 await genericRepository
                     .GetAllAsync(
                         filter,
-                        cancellationTokenProvider.GlobalCancellationToken))
+                        cancellationTokenProvider.GlobalToken))
             .ToArray();
     }
 
@@ -41,6 +41,6 @@ internal abstract class GenericGqlQuery<
         return genericRepository
             .GetCountAsync(
                 filter,
-                cancellationTokenProvider.GlobalCancellationToken);
+                cancellationTokenProvider.GlobalToken);
     }
 }

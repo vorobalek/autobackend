@@ -35,6 +35,6 @@ internal abstract class GenericGqlMutationWithNoKey<
                 await genericRepository
                     .CreateAsync(
                         genericRequestMapper.ToEntity<TEntity, TRequest>(request),
-                        cancellationTokenProvider.GlobalCancellationToken));
+                        cancellationTokenProvider.GlobalToken));
     }
 }

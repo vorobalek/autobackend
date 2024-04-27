@@ -18,7 +18,7 @@ internal static class EndpointRouteBuilderExtensions
             var discoveryService = context.RequestServices.GetRequiredService<IClusterDiscovery>();
             await discoveryService.ProcessDiscoveryRequest(
                 context,
-                cancellationTokenProvider.GlobalCancellationToken);
+                cancellationTokenProvider.GlobalToken);
         });
         builder.MapPost(Constants.ClusterDiscoveryServiceUrl, async (
             HttpContext context,
@@ -28,7 +28,7 @@ internal static class EndpointRouteBuilderExtensions
             var discoveryService = context.RequestServices.GetRequiredService<IClusterDiscovery>();
             await discoveryService.ProcessDiscoveryRequest(
                 context,
-                cancellationTokenProvider.GlobalCancellationToken,
+                cancellationTokenProvider.GlobalToken,
                 node);
         });
         return builder;
