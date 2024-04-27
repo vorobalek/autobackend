@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "src\Api\Api.csproj", "{3371B441-3EDA-44E0-A883-0F9C370A91C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "src\Sample\Sample.csproj", "{3371B441-3EDA-44E0-A883-0F9C370A91C6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D904EF08-8914-40F7-960D-AFFB776D5771}"
 EndProject

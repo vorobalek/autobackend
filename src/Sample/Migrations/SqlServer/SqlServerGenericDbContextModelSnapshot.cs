@@ -3,38 +3,35 @@ using System;
 using AutoBackend.Sdk.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Api.Migrations.Postgres
+namespace Sample.Migrations.SqlServer
 {
-    [DbContext(typeof(PostgresGenericDbContext))]
-    [Migration("20240420073932_ef_init")]
-    partial class ef_init
+    [DbContext(typeof(SqlServerGenericDbContext))]
+    partial class SqlServerGenericDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.4")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Api.Data.Budget", b =>
+            modelBuilder.Entity("Sample.Data.Budget", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("character varying(250)");
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<long?>("OwnerId")
                         .HasColumnType("bigint");
@@ -48,13 +45,13 @@ namespace Api.Migrations.Postgres
                     b.ToTable("Budget", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Participating", b =>
+            modelBuilder.Entity("Sample.Data.Participating", b =>
                 {
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.Property<Guid>("BudgetId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("UserId", "BudgetId");
 
@@ -63,31 +60,31 @@ namespace Api.Migrations.Postgres
                     b.ToTable("Participating", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Transaction", b =>
+            modelBuilder.Entity("Sample.Data.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(20, 4)
-                        .HasColumnType("numeric(20,4)");
+                        .HasColumnType("decimal(20,4)");
 
                     b.Property<Guid>("BudgetId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("character varying(250)");
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTime>("DateTimeUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SecretKey")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("character varying(250)");
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
@@ -101,40 +98,40 @@ namespace Api.Migrations.Postgres
                     b.ToTable("Transaction", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.TransactionVersion", b =>
+            modelBuilder.Entity("Sample.Data.TransactionVersion", b =>
                 {
                     b.Property<int>("__Generic__Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("__Generic__Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("__Generic__Id"));
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(20, 4)
-                        .HasColumnType("numeric(20,4)");
+                        .HasColumnType("decimal(20,4)");
 
                     b.Property<Guid>("BudgetId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("character varying(250)");
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTime>("DateTimeUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("OriginalTransactionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("TransactionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("VersionDateTimeUtc")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("__Generic__Id");
 
@@ -143,22 +140,22 @@ namespace Api.Migrations.Postgres
                     b.ToTable("TransactionVersion", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.User", b =>
+            modelBuilder.Entity("Sample.Data.User", b =>
                 {
                     b.Property<long>("Id")
                         .HasColumnType("bigint");
 
                     b.Property<Guid?>("ActiveBudgetId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<TimeSpan?>("TimeZone")
-                        .HasColumnType("interval");
+                        .HasColumnType("time");
 
                     b.HasKey("Id");
 
@@ -167,9 +164,9 @@ namespace Api.Migrations.Postgres
                     b.ToTable("User", "generic");
                 });
 
-            modelBuilder.Entity("Api.Data.Budget", b =>
+            modelBuilder.Entity("Sample.Data.Budget", b =>
                 {
-                    b.HasOne("Api.Data.User", "Owner")
+                    b.HasOne("Sample.Data.User", "Owner")
                         .WithMany("OwnedBudgets")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -177,15 +174,15 @@ namespace Api.Migrations.Postgres
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Api.Data.Participating", b =>
+            modelBuilder.Entity("Sample.Data.Participating", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "Budget")
+                    b.HasOne("Sample.Data.Budget", "Budget")
                         .WithMany("Participating")
                         .HasForeignKey("BudgetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.User", "User")
+                    b.HasOne("Sample.Data.User", "User")
                         .WithMany("Participating")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -196,15 +193,15 @@ namespace Api.Migrations.Postgres
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Api.Data.Transaction", b =>
+            modelBuilder.Entity("Sample.Data.Transaction", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "Budget")
+                    b.HasOne("Sample.Data.Budget", "Budget")
                         .WithMany("Transactions")
                         .HasForeignKey("BudgetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Api.Data.User", "User")
+                    b.HasOne("Sample.Data.User", "User")
                         .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -214,9 +211,9 @@ namespace Api.Migrations.Postgres
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Api.Data.TransactionVersion", b =>
+            modelBuilder.Entity("Sample.Data.TransactionVersion", b =>
                 {
-                    b.HasOne("Api.Data.Transaction", "Transaction")
+                    b.HasOne("Sample.Data.Transaction", "Transaction")
                         .WithMany("Versions")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -225,9 +222,9 @@ namespace Api.Migrations.Postgres
                     b.Navigation("Transaction");
                 });
 
-            modelBuilder.Entity("Api.Data.User", b =>
+            modelBuilder.Entity("Sample.Data.User", b =>
                 {
-                    b.HasOne("Api.Data.Budget", "ActiveBudget")
+                    b.HasOne("Sample.Data.Budget", "ActiveBudget")
                         .WithMany("ActiveUsers")
                         .HasForeignKey("ActiveBudgetId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -235,7 +232,7 @@ namespace Api.Migrations.Postgres
                     b.Navigation("ActiveBudget");
                 });
 
-            modelBuilder.Entity("Api.Data.Budget", b =>
+            modelBuilder.Entity("Sample.Data.Budget", b =>
                 {
                     b.Navigation("ActiveUsers");
 
@@ -244,12 +241,12 @@ namespace Api.Migrations.Postgres
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Api.Data.Transaction", b =>
+            modelBuilder.Entity("Sample.Data.Transaction", b =>
                 {
                     b.Navigation("Versions");
                 });
 
-            modelBuilder.Entity("Api.Data.User", b =>
+            modelBuilder.Entity("Sample.Data.User", b =>
                 {
                     b.Navigation("OwnedBudgets");
 

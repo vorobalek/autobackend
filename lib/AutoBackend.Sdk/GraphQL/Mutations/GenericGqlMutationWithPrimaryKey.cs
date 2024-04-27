@@ -39,7 +39,7 @@ internal abstract class GenericGqlMutationWithPrimaryKey<
                     .CreateByPrimaryKeyAsync(
                         key,
                         genericRequestMapper.ToEntity<TEntity, TRequest>(request),
-                        cancellationTokenProvider.GlobalCancellationToken));
+                        cancellationTokenProvider.GlobalToken));
     }
 
     [GraphQLName("update")]
@@ -57,7 +57,7 @@ internal abstract class GenericGqlMutationWithPrimaryKey<
                     .UpdateByPrimaryKeyAsync(
                         key,
                         genericRequestMapper.ToEntity<TEntity, TRequest>(request),
-                        cancellationTokenProvider.GlobalCancellationToken));
+                        cancellationTokenProvider.GlobalToken));
     }
 
     [GraphQLName("delete")]
@@ -69,7 +69,7 @@ internal abstract class GenericGqlMutationWithPrimaryKey<
         await genericRepository
             .DeleteByPrimaryKeyAsync(
                 key,
-                cancellationTokenProvider.GlobalCancellationToken);
+                cancellationTokenProvider.GlobalToken);
         return true;
     }
 }

@@ -4,12 +4,12 @@ namespace AutoBackend.Sdk.Services.CancellationTokenProvider;
 
 internal sealed class CancellationTokenProvider : ICancellationTokenProvider
 {
-    private readonly CancellationTokenSource _tokenSource = new();
+    private readonly CancellationTokenSource _globalCancellationTokenSource = new();
 
     public CancellationTokenProvider(IHostApplicationLifetime lifetime)
     {
-        lifetime.ApplicationStopping.Register(_tokenSource.Cancel);
+        lifetime.ApplicationStopping.Register(_globalCancellationTokenSource.Cancel);
     }
 
-    public CancellationToken GlobalCancellationToken => _tokenSource.Token;
+    public CancellationToken GlobalToken => _globalCancellationTokenSource.Token;
 }

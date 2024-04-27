@@ -50,7 +50,7 @@ internal sealed class GenericControllerWithPrimaryKey<
                         cancellationToken) is { } entity
                     ? _genericResponseMapper.ToModel<TEntity, TResponse>(entity)
                     : null,
-            _cancellationTokenProvider.GlobalCancellationToken);
+            _cancellationTokenProvider.GlobalToken);
     }
 
     [HttpPost("{key}")]
@@ -66,7 +66,7 @@ internal sealed class GenericControllerWithPrimaryKey<
                                 key,
                                 genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
-            _cancellationTokenProvider.GlobalCancellationToken);
+            _cancellationTokenProvider.GlobalToken);
     }
 
     [HttpPut("{key}")]
@@ -82,7 +82,7 @@ internal sealed class GenericControllerWithPrimaryKey<
                                 key,
                                 genericRequestMapper.ToEntity<TEntity, TRequest>(request),
                                 cancellationToken)),
-            _cancellationTokenProvider.GlobalCancellationToken);
+            _cancellationTokenProvider.GlobalToken);
     }
 
     [HttpDelete("{key}")]
@@ -94,6 +94,6 @@ internal sealed class GenericControllerWithPrimaryKey<
                     .DeleteByPrimaryKeyAsync(
                         key,
                         cancellationToken),
-            _cancellationTokenProvider.GlobalCancellationToken);
+            _cancellationTokenProvider.GlobalToken);
     }
 }

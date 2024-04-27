@@ -221,9 +221,9 @@ internal static class ServiceCollectionExtensions
     {
         return services
             .AddSingleton<IDateTimeProvider, DateTimeProvider>()
+            .AddSingleton<ICancellationTokenProvider, CancellationTokenProvider>()
             .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>()
             .AddScoped<IClusterDiscovery, ClusterDiscovery>()
-            .AddHostedService<ClusterDiscoveryTask>()
-            .AddScoped<ICancellationTokenProvider, CancellationTokenProvider>();
+            .AddHostedService<ClusterDiscoveryTask>();
     }
 }

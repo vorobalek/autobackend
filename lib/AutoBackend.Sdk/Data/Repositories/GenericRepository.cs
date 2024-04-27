@@ -129,6 +129,6 @@ internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFil
                 string.Format(
                     Constants.TheEntityKeyValuesDoesNotMatchTheGivenKeyValues,
                     string.Join(", ", keys.Select(givenKeyValue => givenKeyValue.ToString())),
-                    string.Join(", ", entityKeyValues.Select(entityKeyValue => entityKeyValue.ToString()))));
+                    string.Join(", ", entityKeyValues.Select(entityKeyValue => entityKeyValue?.ToString()))));
     }
 }
