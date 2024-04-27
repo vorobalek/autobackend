@@ -1,16 +1,31 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "src\Sample\Sample.csproj", "{3371B441-3EDA-44E0-A883-0F9C370A91C6}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D904EF08-8914-40F7-960D-AFFB776D5771}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{4B90C1DB-6727-4C36-A6F8-D9DED2D80B80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoBackend.Sdk", "lib\AutoBackend.Sdk\AutoBackend.Sdk.csproj", "{8962946A-694E-47DD-8534-BAAAF073865C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{03461C86-53DE-4246-B369-EDAFAAC99848}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoBackend.Sdk.Tests", "tests\AutoBackend.Sdk.Tests\AutoBackend.Sdk.Tests.csproj", "{AA880E90-5BB0-4767-8C4F-B265D6E3D9DC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A699FC5D-6E34-4DFC-83E2-54B8FC5FD07A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoBackend.Sdk", "src\lib\AutoBackend.Sdk\AutoBackend.Sdk.csproj", "{ABFA1073-DEC6-4BA8-8E40-ABE8CD288C29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "src\samples\Sample\Sample.csproj", "{E597A803-AACE-4FFA-860B-975B16155FEB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{8F16194C-EC14-48D4-BAF3-F72BB51594B4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{AAF2A199-CCE1-40CA-BA51-F53464841964}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\add_migration.sh = scripts\add_migration.sh
+		scripts\remove_migration.sh = scripts\remove_migration.sh
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{DAFD5D38-1576-4A3A-9EB2-67A60CC08091}"
+	ProjectSection(SolutionItems) = preProject
+		docs\github\CODE_OF_CONDUCT.md = docs\github\CODE_OF_CONDUCT.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,22 +33,25 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3371B441-3EDA-44E0-A883-0F9C370A91C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3371B441-3EDA-44E0-A883-0F9C370A91C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3371B441-3EDA-44E0-A883-0F9C370A91C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3371B441-3EDA-44E0-A883-0F9C370A91C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8962946A-694E-47DD-8534-BAAAF073865C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8962946A-694E-47DD-8534-BAAAF073865C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8962946A-694E-47DD-8534-BAAAF073865C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8962946A-694E-47DD-8534-BAAAF073865C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AA880E90-5BB0-4767-8C4F-B265D6E3D9DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AA880E90-5BB0-4767-8C4F-B265D6E3D9DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA880E90-5BB0-4767-8C4F-B265D6E3D9DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA880E90-5BB0-4767-8C4F-B265D6E3D9DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABFA1073-DEC6-4BA8-8E40-ABE8CD288C29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABFA1073-DEC6-4BA8-8E40-ABE8CD288C29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABFA1073-DEC6-4BA8-8E40-ABE8CD288C29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABFA1073-DEC6-4BA8-8E40-ABE8CD288C29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E597A803-AACE-4FFA-860B-975B16155FEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E597A803-AACE-4FFA-860B-975B16155FEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E597A803-AACE-4FFA-860B-975B16155FEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E597A803-AACE-4FFA-860B-975B16155FEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3371B441-3EDA-44E0-A883-0F9C370A91C6} = {D904EF08-8914-40F7-960D-AFFB776D5771}
-		{8962946A-694E-47DD-8534-BAAAF073865C} = {4B90C1DB-6727-4C36-A6F8-D9DED2D80B80}
 		{AA880E90-5BB0-4767-8C4F-B265D6E3D9DC} = {03461C86-53DE-4246-B369-EDAFAAC99848}
+		{A699FC5D-6E34-4DFC-83E2-54B8FC5FD07A} = {D904EF08-8914-40F7-960D-AFFB776D5771}
+		{4B90C1DB-6727-4C36-A6F8-D9DED2D80B80} = {D904EF08-8914-40F7-960D-AFFB776D5771}
+		{ABFA1073-DEC6-4BA8-8E40-ABE8CD288C29} = {4B90C1DB-6727-4C36-A6F8-D9DED2D80B80}
+		{E597A803-AACE-4FFA-860B-975B16155FEB} = {A699FC5D-6E34-4DFC-83E2-54B8FC5FD07A}
+		{DAFD5D38-1576-4A3A-9EB2-67A60CC08091} = {8F16194C-EC14-48D4-BAF3-F72BB51594B4}
 	EndGlobalSection
 EndGlobal
