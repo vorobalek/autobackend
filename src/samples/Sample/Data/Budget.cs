@@ -9,6 +9,8 @@ namespace Sample.Data;
     nameof(Id)
 )]
 [GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
 [GenericRequest(
     nameof(Id),
     nameof(Name),
@@ -19,8 +21,6 @@ namespace Sample.Data;
     nameof(Name),
     nameof(OwnerId)
 )]
-[GenericGqlQuery]
-[GenericGqlMutation]
 [Index(
     nameof(Name),
     nameof(OwnerId)

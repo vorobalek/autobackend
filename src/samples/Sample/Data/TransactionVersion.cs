@@ -7,6 +7,8 @@ namespace Sample.Data;
 
 [GenericEntity]
 [GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
 [GenericRequest(
     nameof(TransactionId),
     nameof(UserId),
@@ -27,8 +29,6 @@ namespace Sample.Data;
     nameof(OriginalTransactionId),
     nameof(VersionDateTimeUtc)
 )]
-[GenericGqlQuery]
-[GenericGqlMutation]
 public class TransactionVersion
 {
     [GenericFilter]

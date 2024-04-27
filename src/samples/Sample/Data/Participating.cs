@@ -9,6 +9,8 @@ namespace Sample.Data;
     nameof(BudgetId)
 )]
 [GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
 [GenericRequest(
     nameof(UserId),
     nameof(BudgetId)
@@ -17,8 +19,6 @@ namespace Sample.Data;
     nameof(UserId),
     nameof(BudgetId)
 )]
-[GenericGqlQuery]
-[GenericGqlMutation]
 public class Participating
 {
     [GenericFilter]

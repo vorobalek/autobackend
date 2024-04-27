@@ -22,6 +22,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{AAF2
 		scripts\remove_migration.sh = scripts\remove_migration.sh
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{DAFD5D38-1576-4A3A-9EB2-67A60CC08091}"
+	ProjectSection(SolutionItems) = preProject
+		docs\github\CODE_OF_CONDUCT.md = docs\github\CODE_OF_CONDUCT.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,5 +52,6 @@ Global
 		{4B90C1DB-6727-4C36-A6F8-D9DED2D80B80} = {D904EF08-8914-40F7-960D-AFFB776D5771}
 		{ABFA1073-DEC6-4BA8-8E40-ABE8CD288C29} = {4B90C1DB-6727-4C36-A6F8-D9DED2D80B80}
 		{E597A803-AACE-4FFA-860B-975B16155FEB} = {A699FC5D-6E34-4DFC-83E2-54B8FC5FD07A}
+		{DAFD5D38-1576-4A3A-9EB2-67A60CC08091} = {8F16194C-EC14-48D4-BAF3-F72BB51594B4}
 	EndGlobalSection
 EndGlobal

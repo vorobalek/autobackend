@@ -8,6 +8,8 @@ namespace Sample.Data;
     nameof(Id)
 )]
 [GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
 [GenericRequest(
     nameof(Id),
     nameof(FirstName),
@@ -22,8 +24,6 @@ namespace Sample.Data;
     nameof(TimeZone),
     nameof(ActiveBudgetId)
 )]
-[GenericGqlQuery]
-[GenericGqlMutation]
 public class User
 {
     [GenericFilter]

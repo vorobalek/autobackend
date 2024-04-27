@@ -5,9 +5,12 @@
 | [![MyGet](https://img.shields.io/myget/autobackend-dev/v/AutoBackend.SDK?label=myget&style=for-the-badge)](https://www.myget.org/feed/autobackend-dev/package/nuget/AutoBackend.SDK) | [![MyGet](https://img.shields.io/myget/autobackend/v/AutoBackend.SDK?label=myget&style=for-the-badge)](https://www.myget.org/feed/autobackend/package/nuget/AutoBackend.SDK) [![NuGet](https://img.shields.io/nuget/v/AutoBackend.SDK?label=nuget&style=for-the-badge)](https://www.nuget.org/packages/AutoBackend.SDK) |
 
 This package provides the boilerplate infrastructure for simplifying creating backend services. 
-It is a pet project without a commercial base and any promises about further development. If you would like to
-use this package or sources of this package, please let me know by texting me@vorobalek.dev. I would prefer if any of
-your scenarios of using this package left consequences in the form of contribution to this repository.
+It is a pet project without a commercial base and any promises about further development. 
+
+# Contribution
+
+I would prefer if any of your scenarios of using this package left consequences in the form of contribution to this repository.
+Please follow the [Contributor Covenant Code of Conduct](docs/github/CODE_OF_CONDUCT.md).
 
 # Features
 
@@ -124,7 +127,9 @@ Use `[GenericEntity(<primary key property name>)]` to mark the model as an entit
 single property.
 
 ```csharp
-[GenericEntity(nameof(Id))]
+[GenericEntity(
+    nameof(Id)
+)]
 public class Budget
 {
     public Guid Id { get; set; }
@@ -143,7 +148,10 @@ to mark the model as an entity with the primary key displayed as a complex set o
 > I hope, it's enough for each scenario you are considering about.
 
 ```csharp
-[GenericEntity(nameof(UserId), nameof(BudgetId))]
+[GenericEntity(
+    nameof(UserId),
+    nameof(BudgetId)
+)]
 public class Participating
 {
     public long UserId { get; set; }
@@ -250,6 +258,7 @@ For more details, you can always request `/swagger` to get the information about
 | `GET`    | `/api/v1/<model name>/count`                 | 🟢      | 🟢        | 🟢       | Get **count** of entities of a specific model                              |
 | `GET`    | `/api/v1/<model name>/<pk1>`                 | 🔴      | 🟢        | 🔴       | Get an entity with the requested primary key of a specific model           |
 | `GET`    | `/api/v1/<model name>/<pk1>/<pk2>/.../<pkN>` | 🔴      | 🔴        | 🟢       | Get an entity with the requested primary key of a specific model           |
+| `POST`   | `/api/v1/<model name>`                       | 🟢      | 🔴        | 🔴       | Create a new one keyless entity of a specific model                        |
 | `POST`   | `/api/v1/<model name>/<pk1>`                 | 🔴      | 🟢        | 🔴       | Create a new one entity with the specified primary key of a specific model |
 | `POST`   | `/api/v1/<model name>/<pk1>/<pk2>/.../<pkN>` | 🔴      | 🔴        | 🟢       | Create a new one entity with the specified primary key of a specific model |
 | `PUT`    | `/api/v1/<model name>/<pk1>`                 | 🔴      | 🟢        | 🔴       | Update the entity with the specified primary key of a specific model       |
@@ -261,10 +270,12 @@ For more details, you can always request `/swagger` to get the information about
 >
 > See more about filtering [bellow](#filtering).
 
-### Code samples
+#### Code samples
 
 ```csharp
-[GenericEntity(nameof(Id))]
+[GenericEntity(
+    nameof(Id)
+)]
 [GenericController]
 public class User
 {
@@ -284,28 +295,134 @@ generate GraphQL **queries** and **mutations** accordingly.
 > Be noticed that `[GenericGqlQuery]` and `[GenericGqlMutation]` only supports models which also marked
 > with `[GenericEntity]`
 
+For more details, you can always request `/graphql` to get the information about all generated queries and mutations.
+
 ### Queries
 
-{::comment} TODO {:/comment}
+`[GenericGqlQuery]` attribute will generate the following GraphQL queries:
+
+| Query   | Arguments                                  | Keyless | Single-PK | Multi-PK | Description                                                      |
+|---------|--------------------------------------------|---------|-----------|----------|------------------------------------------------------------------|
+| `all`   | `filter`: generic filter input model       | 🟢      | 🟢        | 🟢       | Get **all** entities of a specific model                         |
+| `count` | `filter`: generic filter input model       | 🟢      | 🟢        | 🟢       | Get **count** of entities of a specific model                    |
+| `byKey` | `key` entity PK                            | 🔴      | 🟢        | 🔴       | Get an entity with the requested primary key of a specific model |
+| `byKey` | `key1`, `key2`, ..., `keyN`: entity PK-set | 🔴      | 🔴        | 🟢       | Get an entity with the requested primary key of a specific model |
 
 > 📘**Filtering is applicable**
 >
 > See more about filtering [bellow](#filtering).
 
+#### Code samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericGqlQuery]
+public class User
+{
+    public long Id { get; set; }
+
+    // ...
+}
+```
+
 ### Mutations
+
+`[GenericGqlMutation]` attribute will generate the following GraphQL queries:
+
+| Mutation | Arguments                                                                         | Keyless | Single-PK | Multi-PK | Description                                                                |
+|----------|-----------------------------------------------------------------------------------|---------|-----------|----------|----------------------------------------------------------------------------|
+| `create` | `request`: generic entity input model                                             | 🟢      | 🔴        | 🔴       | Create a new one keyless entity of a specific model                        |
+| `create` | `key`: entity PK, `request`: generic entity input model                           | 🔴      | 🟢        | 🔴       | Create a new one entity with the specified primary key of a specific model |
+| `create` | `key1`, `key2`, ..., `keyN`: entity PK-set, `request`: generic entity input model | 🔴      | 🔴        | 🟢       | Create a new one entity with the specified primary key of a specific model |
+| `update` | `key`: entity PK, `request`: generic entity input model                           | 🔴      | 🟢        | 🔴       | Update the entity with the specified primary key of a specific model       |
+| `update` | `key1`, `key2`, ..., `keyN`: entity PK-set, `request`: generic entity input model | 🔴      | 🔴        | 🟢       | Update the entity with the specified primary key of a specific model       |
+| `delete` | `key`: for PK-holder-entities only                                                | 🔴      | 🟢        | 🔴       | Delete the entity with the specified primary key of a specific model       |
+| `delete` | `key1`, `key2`, ..., `keyN`: entity PK-set                                        | 🔴      | 🔴        | 🟢       | Delete the entity with the specified primary key of a specific model       |
+
+#### Code samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericGqlMutation]
+public class User
+{
+    public long Id { get; set; }
+
+    // ...
+}
+```
 
 ## Modeling
 
-{::comment} TODO {:/comment}
+AutoBackend.SDK always creates models for the request and the response for any entity that has HTTP API or GraphQL 
+generation set up. These models include an exact mapping of all the properties of the original entity, until you 
+explicitly specify a set of properties to include in the request model or the response model - in this case, 
+properties not explicitly specified will not be reflected on the model.
+
+### Request models
+
+Use `[GenericRequest]` attribute to specify which properties are allowed to be reflected from request model into entity.
+
+#### Code samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
+[GenericRequest(
+    nameof(Id),
+    nameof(UserId),
+    nameof(BudgetId),
+    nameof(Amount),
+    nameof(DateTimeUtc),
+    nameof(Comment),
+    nameof(SecretKey)
+)]
+public class Transaction
+{
+    // ...
+}
+```
+
+### Response models
+
+Use `[GenericRequest]` attribute to specify which properties are allowed to be reflected from request model into entity.
+
+#### Code samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
+[GenericResponse(
+    nameof(Id),
+    nameof(UserId),
+    nameof(BudgetId),
+    nameof(Amount),
+    nameof(DateTimeUtc),
+    nameof(Comment)
+)]
+public class Transaction
+{
+    // ...
+}
+```
 
 ## Filtering
 
-{::comment} TODO {:/comment}
-
-### Mark the model properties which AutoBackend has to generate filters for
-
-AutoBackend.SDK can automatically create a filter object model with necessary properties
-which also will be standard filter objects with standard set of filter conditions.
+AutoBackend.SDK always creates a filter model for any entity for which HTTP API or GraphQL generation is set up. 
+This model includes only pagination management properties until you explicitly specify model properties, the set of 
+filters for which need to be included in the model filter.
 
 ### Defaults
 

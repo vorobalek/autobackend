@@ -9,6 +9,8 @@ namespace Sample.Data;
     nameof(Id)
 )]
 [GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
 [GenericRequest(
     nameof(Id),
     nameof(UserId),
@@ -26,8 +28,6 @@ namespace Sample.Data;
     nameof(DateTimeUtc),
     nameof(Comment)
 )]
-[GenericGqlQuery]
-[GenericGqlMutation]
 public class Transaction
 {
     [GenericFilter]
