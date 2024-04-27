@@ -7,11 +7,6 @@
 This package provides infrastructure templates for facilitating the creation of backend services.
 It is a personal project without a commercial foundation and offers no guarantees regarding future development.
 
-# Contribution
-
-If you utilize this package, please consider contributing to this repository.
-Adhere to the [Contributor Covenant Code of Conduct](docs/github/CODE_OF_CONDUCT.md) for guidance.
-
 # Features
 
 - [Database](#database)
