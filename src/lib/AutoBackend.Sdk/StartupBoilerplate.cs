@@ -37,7 +37,6 @@ internal sealed class StartupBoilerplate<TProgram>(IConfiguration configuration)
                 {
                     AllowCachingResponses = false
                 });
-                builder.MapClusterDiscovery();
                 builder.MapGraphQL().AllowAnonymous();
             });
     }

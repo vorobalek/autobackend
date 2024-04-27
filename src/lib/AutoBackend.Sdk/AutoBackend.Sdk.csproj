@@ -18,10 +18,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="../../README.md" Pack="true" PackagePath="">
+        <None Include="../../../README.md" Pack="true" PackagePath="">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Include="../../RELEASE_NOTES.md" Pack="true" PackagePath="">
+        <None Include="../../../RELEASE_NOTES.md" Pack="true" PackagePath="">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
@@ -136,7 +136,7 @@
 
     <Target Name="PrepareReleaseNotes" BeforeTargets="GenerateNuspec">
         <PropertyGroup>
-            <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../RELEASE_NOTES.md"))</PackageReleaseNotes>
+            <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../../RELEASE_NOTES.md"))</PackageReleaseNotes>
         </PropertyGroup>
     </Target>
 

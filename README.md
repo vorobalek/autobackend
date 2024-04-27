@@ -4,8 +4,8 @@
 |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [![MyGet](https://img.shields.io/myget/autobackend-dev/v/AutoBackend.SDK?label=myget&style=for-the-badge)](https://www.myget.org/feed/autobackend-dev/package/nuget/AutoBackend.SDK) | [![MyGet](https://img.shields.io/myget/autobackend/v/AutoBackend.SDK?label=myget&style=for-the-badge)](https://www.myget.org/feed/autobackend/package/nuget/AutoBackend.SDK) [![NuGet](https://img.shields.io/nuget/v/AutoBackend.SDK?label=nuget&style=for-the-badge)](https://www.nuget.org/packages/AutoBackend.SDK) |
 
-This package provides the boilerplate infrastructure to create simplified backend services by managing DataBase & API
-layers. It is a pet project without a commercial base and any promises about further development. If you would like to
+This package provides the boilerplate infrastructure for simplifying creating backend services. 
+It is a pet project without a commercial base and any promises about further development. If you would like to
 use this package or sources of this package, please let me know by texting me@vorobalek.dev. I would prefer if any of
 your scenarios of using this package left consequences in the form of contribution to this repository.
 
@@ -30,7 +30,7 @@ your scenarios of using this package left consequences in the form of contributi
 
 # Initialization
 
-The sample using scenario can be found in [here](src/Sample).
+The sample using scenario can be found in [here](src/samples/Sample).
 Also, here are the copies of that samples.
 
 ## Initialize AutoBackend from your Program.cs file
@@ -43,7 +43,7 @@ await new AutoBackendHost<Program>().RunAsync(args);
 
 ## Create the models you need to describe your domain relations
 
-This example references to the [sample project models](src/Sample/Data).
+This example references to the [sample project models](src/samples/Sample/Data).
 
 ```csharp
 public class Budget
@@ -191,8 +191,8 @@ SqlServer.
 Postgres.
 
 Or you can create scripts (like I did)
-for [adding a new migration](add_migration.sh)
-or [removing the last migration](remove_migration.sh) for both
+for [adding a new migration](scripts/add_migration.sh)
+or [removing the last migration](scripts/remove_migration.sh) for both
 database providers.
 
 Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can

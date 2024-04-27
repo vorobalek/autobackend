@@ -9,7 +9,6 @@ using AutoBackend.Sdk.Enums;
 using AutoBackend.Sdk.Exceptions.Configuration;
 using AutoBackend.Sdk.NSwag;
 using AutoBackend.Sdk.Services.CancellationTokenProvider;
-using AutoBackend.Sdk.Services.ClusterDiscovery;
 using AutoBackend.Sdk.Services.DateTimeProvider;
 using AutoBackend.Sdk.Services.ExceptionHandler;
 using Microsoft.EntityFrameworkCore;
@@ -222,8 +221,6 @@ internal static class ServiceCollectionExtensions
         return services
             .AddSingleton<IDateTimeProvider, DateTimeProvider>()
             .AddSingleton<ICancellationTokenProvider, CancellationTokenProvider>()
-            .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>()
-            .AddScoped<IClusterDiscovery, ClusterDiscovery>()
-            .AddHostedService<ClusterDiscoveryTask>();
+            .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>();
     }
 }

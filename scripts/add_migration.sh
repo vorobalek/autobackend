@@ -3,10 +3,10 @@ set -x
 
 MIGRATION_NAME=$1
 
-cd ./src/Sample || exit
+cd ./../src/samples/Sample || exit
 
 (dotnet ef migrations add "ef_$MIGRATION_NAME" -o Migrations/SqlServer -c SqlServerGenericDbContext || true)
 (dotnet ef migrations add "ef_$MIGRATION_NAME" -o Migrations/Postgres -c PostgresGenericDbContext  || true)
 
-cd ../..
+cd ../../../scripts || exit
 exit
