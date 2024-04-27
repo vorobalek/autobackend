@@ -11,9 +11,7 @@ x64/
 x86/
 build/
 bld/
-bin/
-Bin/
-obj/
-Obj/
+[Bb]in/
+[Oo]bj/
 
 AutoBackend.sln.DotSettings.user
