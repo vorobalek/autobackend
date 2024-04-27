@@ -31,7 +31,7 @@ internal abstract class GenericGqlQueryWithPrimaryKey<
         return await genericRepository
             .GetByPrimaryKeyAsync(
                 key,
-                cancellationTokenProvider.GlobalCancellationToken) is { } entity
+                cancellationTokenProvider.GlobalToken) is { } entity
             ? genericResponseMapper.ToModel<TEntity, TResponse>(entity)
             : null;
     }

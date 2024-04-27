@@ -84,7 +84,7 @@ internal abstract class GenericController<
                                 filter,
                                 cancellationToken))
                     .ToArray(),
-            cancellationTokenProvider.GlobalCancellationToken);
+            cancellationTokenProvider.GlobalToken);
     }
 
     [HttpGet("count")]
@@ -96,6 +96,6 @@ internal abstract class GenericController<
                     .GetCountAsync(
                         filter,
                         cancellationToken),
-            cancellationTokenProvider.GlobalCancellationToken);
+            cancellationTokenProvider.GlobalToken);
     }
 }
