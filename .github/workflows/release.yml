@@ -14,7 +14,7 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Verify RELEASE_NOTES.md has been changed before Release
         uses: tj-actions/changed-files@v41
@@ -37,10 +37,10 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -65,11 +65,11 @@ jobs:
       created_release_version: ${{ steps.get_release_version.outputs.result }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Get Release Version
         id: get_release_version
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
@@ -100,10 +100,9 @@ jobs:
           result-encoding: string
 
       - name: Create Github Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v${{ steps.get_release_version.outputs.result }}
           release_name: Release ${{ steps.get_release_version.outputs.result }}
           draft: false
@@ -121,14 +120,14 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set Build Version "${{ needs.create_release.outputs.created_release_version }}"
         run: |
           echo "BUILD_VERSION=${{ needs.create_release.outputs.created_release_version }}" >> ${GITHUB_ENV}
 
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -159,7 +158,7 @@ jobs:
 
     steps:
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -182,7 +181,7 @@ jobs:
 
     steps:
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -205,7 +204,7 @@ jobs:
 
     steps:
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -233,7 +232,7 @@ jobs:
     
     steps:
       - name: Comment Commit with the Version "${{ needs.create_release.outputs.created_release_version }}" build's link
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
