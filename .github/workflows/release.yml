@@ -104,7 +104,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v${{ steps.get_release_version.outputs.result }}
-          release_name: Release ${{ steps.get_release_version.outputs.result }}
+          name: Release ${{ steps.get_release_version.outputs.result }}
           draft: false
           prerelease: false
           body_path: RELEASE_NOTES.md
