@@ -8,7 +8,7 @@ internal class MapperExpressionsCache : IMapperExpressionsCache
 {
     private readonly ConcurrentDictionary<ValueTuple<Type, Type>, Expression> _cacheExpressions = new();
     private readonly ConcurrentDictionary<ValueTuple<Type, Type>, object> _cacheFunc = new();
-    
+
     public Func<TSource, TDestination> GetOrAddAndCompile<
         TSource,
         TDestination

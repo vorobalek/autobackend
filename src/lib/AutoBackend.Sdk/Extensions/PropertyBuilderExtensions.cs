@@ -52,11 +52,11 @@ internal static class PropertyBuilderExtensions
 
     // ReSharper disable once MemberCanBePrivate.Global
     internal static void SetAttribute<TAttribute>(
-        this PropertyBuilder propertyBuilder, 
+        this PropertyBuilder propertyBuilder,
         IReadOnlyDictionary<string, object?>? properties = null,
         IReadOnlyDictionary<string, object?>? fields = null,
         params object[] args)
-        where TAttribute: Attribute
+        where TAttribute : Attribute
     {
         propertyBuilder.SetCustomAttribute(AttributeBuilder.Create<TAttribute>(properties, fields, args));
     }

@@ -83,7 +83,6 @@ internal static class ServiceCollectionExtensions
             .UseOperationResolver()
             .UseOperationVariableCoercion()
             .UseOperationExecution()
-            
             .AddType(new TimeSpanType(TimeSpanFormat.DotNet));
 
         return services;

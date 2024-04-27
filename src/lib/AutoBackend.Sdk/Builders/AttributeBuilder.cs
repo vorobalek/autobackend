@@ -21,9 +21,8 @@ internal static class AttributeBuilder
 
         var nameProperties = new List<PropertyInfo>();
         var propertyValues = new List<object?>();
-        
+
         if (properties is not null)
-        {
             foreach (var (name, value) in properties)
             {
                 var propertyInfo = typeof(TAttribute).GetProperty(name);
@@ -33,17 +32,15 @@ internal static class AttributeBuilder
                             Constants.UnableToFindAPropertyWithNameInObject,
                             name,
                             typeof(TAttribute).Name));
-                
+
                 nameProperties.Add(propertyInfo);
                 propertyValues.Add(value);
             }
-        }
 
         var namedFields = new List<FieldInfo>();
         var fieldValues = new List<object?>();
-        
+
         if (fields is not null)
-        {
             foreach (var (name, value) in fields)
             {
                 var fieldInfo = typeof(TAttribute).GetField(name);
@@ -53,11 +50,10 @@ internal static class AttributeBuilder
                             Constants.UnableToFindAFieldWithNameInObject,
                             name,
                             typeof(TAttribute).Name));
-                
+
                 namedFields.Add(fieldInfo);
                 fieldValues.Add(value);
             }
-        }
 
         var attributeBuilder = new CustomAttributeBuilder(
             constructorInfo,

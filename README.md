@@ -106,7 +106,8 @@ There are typically three types of database tables:
 - Single-column primary key,
 - Multi-column primary key.
 
-Depending on the number of columns in your entity, follow the instructions below to enable AutoBackend.SDK to track changes.
+Depending on the number of columns in your entity, follow the instructions below to enable AutoBackend.SDK to track
+changes.
 
 ### Keyless Entities
 
@@ -122,7 +123,8 @@ public class TransactionVersion
 
 ### Single-PK Entities
 
-Use the `[GenericEntity(<primary key property name>)]` attribute to designate a model as an entity with a single property primary key.
+Use the `[GenericEntity(<primary key property name>)]` attribute to designate a model as an entity with a single
+property primary key.
 
 ```csharp
 [GenericEntity(
@@ -138,7 +140,8 @@ public class Budget
 
 ### Multi-PK Entities
 
-Use the `[GenericEntity(<primary key property names>)]` attribute to designate a model as an entity with a composite primary key.
+Use the `[GenericEntity(<primary key property names>)]` attribute to designate a model as an entity with a composite
+primary key.
 
 > Currently, the maximum number of properties in a composite key is **8**.
 >
@@ -180,7 +183,8 @@ The `PrimaryProvider` property accepts one of the following string values:
 - `SqlServer`,
 - `Postgres`.
 
-The `Providers` property must contain an object with optional properties: `InMemory`, `SqlServer`, or `Postgres`. The property corresponding to the chosen `PrimaryProvider` value is mandatory.
+The `Providers` property must contain an object with optional properties: `InMemory`, `SqlServer`, or `Postgres`. The
+property corresponding to the chosen `PrimaryProvider` value is mandatory.
 
 ## Migrations
 
@@ -191,13 +195,17 @@ You can create a new migration with one of the following commands executed from 
 
 `dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext` for Postgres.
 
-Alternatively, use scripts [to add a new migration](scripts/add_migration.sh) or [to remove the last migration](scripts/remove_migration.sh) for both database providers.
+Alternatively, use scripts [to add a new migration](scripts/add_migration.sh)
+or [to remove the last migration](scripts/remove_migration.sh) for both database providers.
 
-If you opt not to have AutoBackend manage database migrations (see above), you can perform migrations manually by executing `dotnet ef database update` from the project root directory.
+If you opt not to have AutoBackend manage database migrations (see above), you can perform migrations manually by
+executing `dotnet ef database update` from the project root directory.
 
 ### Migrate on Startup
 
-If using a relational database (e.g., SqlServer or Postgres), you can configure AutoBackend to either automatically migrate the database at application startup or not, by passing the `migrateRelationalOnStartup` parameter to the `RunAsync` method where AutoBackend is initialized. For example:
+If using a relational database (e.g., SqlServer or Postgres), you can configure AutoBackend to either automatically
+migrate the database at application startup or not, by passing the `migrateRelationalOnStartup` parameter to
+the `RunAsync` method where AutoBackend is initialized. For example:
 
 ```csharp
 await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args, migrateRelationalOnStartup: true);
@@ -273,11 +281,13 @@ public class User
 
 ## GraphQL
 
-Use the `[GenericGqlQuery]` and `[GenericGqlMutation]` attributes on models to generate GraphQL **queries** and **mutations**, respectively.
+Use the `[GenericGqlQuery]` and `[GenericGqlMutation]` attributes on models to generate GraphQL **queries** and *
+*mutations**, respectively.
 
 > ❗**Disclaimer**
 >
-> The `[GenericGqlQuery]` and `[GenericGqlMutation]` attributes are compatible only with models also marked with `[GenericEntity]`.
+> The `[GenericGqlQuery]` and `[GenericGqlMutation]` attributes are compatible only with models also marked
+> with `[GenericEntity]`.
 
 For detailed information on generated queries and mutations, access `/graphql`.
 
@@ -342,11 +352,14 @@ public class User
 
 ## Modeling
 
-AutoBackend.SDK generates request and response models for any entity with configured HTTP API or GraphQL generation. These models include all original entity properties, unless specific properties are explicitly included in request or response models, in which case non-specified properties will be omitted.
+AutoBackend.SDK generates request and response models for any entity with configured HTTP API or GraphQL generation.
+These models include all original entity properties, unless specific properties are explicitly included in request or
+response models, in which case non-specified properties will be omitted.
 
 ### Request Models
 
-The `[GenericRequest]` attribute defines which properties are permitted for reflection from the request model to the entity.
+The `[GenericRequest]` attribute defines which properties are permitted for reflection from the request model to the
+entity.
 
 #### Code Samples
 
@@ -374,7 +387,8 @@ public class Transaction
 
 ### Response Models
 
-The `[GenericResponse]` attribute defines which properties are permitted for reflection from the response model to the entity.
+The `[GenericResponse]` attribute defines which properties are permitted for reflection from the response model to the
+entity.
 
 #### Code Samples
 
@@ -401,11 +415,14 @@ public class Transaction
 
 ## Filtering
 
-AutoBackend.SDK generates filter models for any entity with configured HTTP API or GraphQL generation. By default, these models include only pagination management properties. To include specific entity properties in the filter model, use the `[GenericFilter]` attribute.
+AutoBackend.SDK generates filter models for any entity with configured HTTP API or GraphQL generation. By default, these
+models include only pagination management properties. To include specific entity properties in the filter model, use
+the `[GenericFilter]` attribute.
 
 ### Defaults
 
-By default, two filter parameters are always available for any GET request (returning a list of entities) or GraphQL queries, to manage pagination:
+By default, two filter parameters are always available for any GET request (returning a list of entities) or GraphQL
+queries, to manage pagination:
 
 - `skipCount`: number
 - `takeCount`: number
@@ -436,7 +453,8 @@ public class Budget
 }
 ```
 
-Consequently, AutoBackend will construct a filter model with parameters that can be utilized in API endpoints like `/api/v1/<model name>` or `/api/v1/<model name>/count`, and in GraphQL queries.
+Consequently, AutoBackend will construct a filter model with parameters that can be utilized in API endpoints
+like `/api/v1/<model name>` or `/api/v1/<model name>/count`, and in GraphQL queries.
 
 - API filter parameter names are generated following the pattern: `<property's camelCase-name>.<condition name>`.
 - GraphQL queries will have filtering models with condition properties generated.

@@ -13,11 +13,11 @@ internal static class TypeBuilderExtensions
 
     // ReSharper disable once MemberCanBePrivate.Global
     internal static void SetAttribute<TAttribute>(
-        this TypeBuilder typeBuilder, 
+        this TypeBuilder typeBuilder,
         IReadOnlyDictionary<string, object?>? properties = null,
         IReadOnlyDictionary<string, object?>? fields = null,
         params object[] args)
-        where TAttribute: Attribute
+        where TAttribute : Attribute
     {
         typeBuilder.SetCustomAttribute(AttributeBuilder.Create<TAttribute>(properties, fields, args));
     }

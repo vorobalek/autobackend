@@ -27,10 +27,10 @@ internal class GenericRequestMapper(IMapperExpressionsCache cache) : IGenericReq
         where TEntity : class, new()
         where TRequest : class, IGenericRequest, new()
     {
-        return entities?.Select(entity => 
-                   ToEntity<TEntity, TRequest>(entity) 
-                   ?? throw new InconsistentDataException())
-                .ToArray()
+        return entities?.Select(entity =>
+                       ToEntity<TEntity, TRequest>(entity)
+                       ?? throw new InconsistentDataException())
+                   .ToArray()
                ?? Array.Empty<TEntity>();
     }
 
@@ -52,20 +52,20 @@ internal class GenericRequestMapper(IMapperExpressionsCache cache) : IGenericReq
 
             if (sourceProperty.PropertyType.IsAssignableTo(typeof(IGenericRequest)))
             {
-                var mapMethodInfo = typeof(GenericRequestMapper).GetMethod(nameof(ToEntityNullable)) 
+                var mapMethodInfo = typeof(GenericRequestMapper).GetMethod(nameof(ToEntityNullable))
                                     ?? throw new InheritanceReflectionException();
 
                 var genericMapMethodInfo = mapMethodInfo.MakeGenericMethod(
-                    destinationProperty.PropertyType, 
+                    destinationProperty.PropertyType,
                     sourceProperty.PropertyType);
 
                 bindings.Add(Expression.Bind(
                     destinationProperty,
                     Expression.Call(
-                        Expression.Constant(this), 
-                        genericMapMethodInfo, 
+                        Expression.Constant(this),
+                        genericMapMethodInfo,
                         sourceExpr)));
-                
+
                 continue;
             }
 
@@ -74,7 +74,7 @@ internal class GenericRequestMapper(IMapperExpressionsCache cache) : IGenericReq
                 if (sourceProperty.PropertyType.GetCollectionType() is not { } sourceEnumType ||
                     destinationProperty.PropertyType.GetCollectionType() is not { } destinationEnumType)
                     throw new NotFoundReflectionException();
-                
+
                 if (sourceEnumType.IsAssignableTo(typeof(IGenericRequest)))
                 {
                     var mapMethodInfo = GetType().GetMethod(nameof(ToEntityCollectionNullable))
