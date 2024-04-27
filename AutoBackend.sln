@@ -23,9 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{AAF2
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{DAFD5D38-1576-4A3A-9EB2-67A60CC08091}"
-	ProjectSection(SolutionItems) = preProject
-		docs\github\CODE_OF_CONDUCT.md = docs\github\CODE_OF_CONDUCT.md
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
