@@ -9,32 +9,28 @@ layers. It is a pet project without a commercial base and any promises about fur
 use this package or sources of this package, please let me know by texting me@vorobalek.dev. I would prefer if any of
 your scenarios of using this package left consequences in the form of contribution to this repository.
 
-# Roadmap?
-
-Honestly, I do not have enough time to do something about that. I wrote this code while looking for a job just for fun,
-but now I have only decided to publish it. Probably, somewhere I will improve it or maybe even add some more features
-like GraphQL. I dunno. I have already spent much more time trying to express how it worked than I was supposed to.
-
 # Features
 
-- [Database schema modeling](#mark-the-models-which-autobackend-has-to-generate-tables-in-the-database-for)
-    - [Keyless entities](#configure-a-keyless-entity)
-    - [Single-PK entities](#configure-a-single-pk-entity)
-    - [Multi-PK entities](#configure-a-multi-pk-entity)
-- [Cross-database provider support](#choose-the-database-provider-which-is-the-most-suitable-for-you)
-    - [In-Memory](#in-memory)
-    - [SqlServer](#sqlserver)
-    - [PostgreSQL](#postgresql)
-- [Always up-to-date database schema](#keep-your-relational-database-schema-always-up-to-date)
-- [Full CRUD HTTP API](#mark-the-models-which-autobackend-has-to-generate-http-api-endpoints-for)
-- [GraphQL Queries](#mark-the-models-which-autobackend-has-to-generate-graphql-queries-for)
-- [GraphQL Mutations](#mark-the-models-which-autobackend-has-to-generate-graphql-mutations-for)
-- [Customizable API contracts](#customize-the-data-your-api-consumer-will-see)
-- [Filtering models](#mark-the-model-properties-which-autobackend-has-to-generate-filters-for)
+- [Database](#database)
+    - [Schema modeling](#schema-modeling)
+        - [Keyless entities](#keyless-entities)
+        - [Single-PK entities](#single-pk-entities)
+        - [Multi-PK entities](#multi-pk-entities)
+    - [Providers](#providers)
+    - [Migrations](#migrations)
+        - [Migrate on startup](#migrate-on-startup)
+- [API](#api)
+    - [HTTP API](#http-api)
+    - [GraphQL](#graphql)
+        - [Queries](#queries)
+        - [Mutations](#mutations)
+    - [Modeling](#modeling)
+    - [Filtering](#filtering)
+    - _Authorization: isn't supported yet (might be expected in further releases)_
 
-# Examples
+# Initialization
 
-The basic using scenario can be found in [here](src/Sample).
+The sample using scenario can be found in [here](src/Sample).
 Also, here are the copies of that samples.
 
 ## Initialize AutoBackend from your Program.cs file
@@ -47,104 +43,70 @@ await new AutoBackendHost<Program>().RunAsync(args);
 
 ## Create the models you need to describe your domain relations
 
+This example references to the [sample project models](src/Sample/Data).
+
 ```csharp
 public class Budget
 {
     public Guid Id { get; set; }
     
-    public string Name { get; set; }
-    
-    public long? OwnerId { get; set; }
-    
-    public User? Owner { get; set; }
-    
-    public ICollection<User> ActiveUsers { get; set; }
-
-    public ICollection<Transaction> Transactions { get; set; }
-    
-    public ICollection<Participating> Participatings { get; set; }
-}
-
-public class Participating
-{
-    public long UserId { get; set; }
-    
-    public User User { get; set; }
-    
-    public Guid BudgetId { get; set; }
-    
-    public Budget Budget { get; set; }
+    // ..
 }
 
 public class Transaction
 {
     public Guid Id { get; set; }
     
-    public long? UserId { get; set; }
-    
-    public User? User { get; set; }
-    
-    public Guid BudgetId { get; set; }
-    
-    public Budget Budget { get; set; }
-    
-    public decimal Amount { get; set; }
-    
-    public DateTime DateTimeUtc { get; set; }
-
-    public string Comment { get; set; }
+    // ..
 }
 
 public class TransactionVersion
 {
-    public Guid TransactionId { get; set; }
-    
-    public Transaction Transaction { get; set; }
-    
-    public Guid OriginalTransactionId { get; set; }
-
-    public DateTime VersionDateTimeUtc { get; set; }
-
-    public long? UserId { get; set; }
-
-    public User? User { get; set; }
-
-    public Guid BudgetId { get; set; }
-
-    public Budget Budget { get; set; }
-
-    public decimal Amount { get; set; }
-
-    public DateTime DateTimeUtc { get; set; }
-
-    public string Comment { get; set; }
+    // ..
 }
 
 public class User
 {
     public long Id { get; set; }
-
-    public string? FirstName { get; set; }
-
-    public string? LastName { get; set; }
-
-    public TimeSpan TimeZone { get; set; }
     
-    public Guid? ActiveBudgetId { get; set; }
-    
-    public Budget? ActiveBudget { get; set; }
-    
-    public ICollection<Budget> OwnedBudgets { get; set; }
+    // ..
+}
 
-    public ICollection<Participating> Participatings { get; set; }
+public class Participating
+{
+    public long UserId { get; set; }
     
-    public ICollection<Transaction> Transactions { get; set; }
+    public Guid BudgetId { get; set; }
+    
+    // ..
 }
 ```
 
-## Mark the models which AutoBackend has to generate tables in the database for
+## See bellow to setup all features
 
-### Configure a keyless entity
+---
+
+# Database
+
+Currently, only two types of relational database are supported (plus in-memory):
+
+- SqlServer
+- Postgres
+
+AutoBackend.SDK will create tables and relations between them for entities you have configured.
+
+## Schema modeling
+
+As we all know there are three types of database tables:
+
+- without primary key,
+- with single-column primary key,
+- with multi-column primary key.
+
+Depends on how many columns your entity has, follow the instruction bellow to make AutoBackend.SDK able to observe its
+changes.
+
+### Keyless entities
 
 Use `[GenericEntity]` to mark the model as a keyless entity.
 
@@ -156,7 +118,7 @@ public class TransactionVersion
 }
 ```
 
-### Configure a single-PK entity
+### Single-PK entities
 
 Use `[GenericEntity(<primary key property name>)]` to mark the model as an entity with the primary key displayed as a
 single property.
@@ -171,10 +133,14 @@ public class Budget
 }
 ```
 
-### Configure a multi-PK entity
+### Multi-PK entities
 
 Use `[GenericEntity(<first complex primary key property name>, <second complex primary key property name>, ...,  <N-th complex primary key>)]`
 to mark the model as an entity with the primary key displayed as a complex set of properties.
+
+> The maximum count of key properties in the complex key is _currently_ **8**.
+>
+> I hope, it's enough for each scenario you are considering about.
 
 ```csharp
 [GenericEntity(nameof(UserId), nameof(BudgetId))]
@@ -188,7 +154,7 @@ public class Participating
 }
 ```
 
-## Choose the database provider which is the most suitable for you
+## Providers
 
 To manage database connections, choose the "Database" configuration section.
 
@@ -203,46 +169,36 @@ To manage database connections, choose the "Database" configuration section.
 }
 ```
 
-The property `PrimaryProvider` allows one of the following string values: `InMemory`,  `SqlServer`, or `Postgres`. The
-property `Providers` shall contain an object with optional properties: `InMemory`,  `SqlServer`, or `Postgres`. If you
-chose the `PrimaryProvider` value, the property with the same name as that value is required.
+The property `PrimaryProvider` allows one of the following string values:
 
-For example:
+- `InMemory`,
+- `SqlServer`,
+- `Postgres`.
 
-### In-Memory
+The property `Providers` shall contain an object with optional properties: `InMemory`,  `SqlServer`, or `Postgres`. If
+you chose the `PrimaryProvider` value, the property with the same name as that value is required.
 
-  ```json
-  "Database": {
-    "PrimaryProvider": "InMemory",
-    "Providers": {
-      "InMemory": "<InMemory database name>",
-    }
-  }
-  ```
+## Migrations
 
-### SqlServer
+First, you need to [install Entity Framework Core Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet).
+After that, you can create a new migration using one of the following commands executed from the root of the project
+folder.
 
-  ```json
-  "Database": {
-    "PrimaryProvider": "SqlServer",
-    "Providers": {
-      "SqlServer": "<SqlServer database connection string>",
-    }
-  }
-  ```
+`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerGenericDbContext` - if you use
+SqlServer.
 
-### PostgreSQL
+`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext` - if you use
+Postgres.
 
-  ```json
-  "Database": {
-    "PrimaryProvider": "Postgres",
-    "Providers": {
-      "Postgres": "<Postgres database connection string in the Npgsql format>",
-    }
-  }
-  ```
+Or you can create scripts (like I did)
+for [adding a new migration](add_migration.sh)
+or [removing the last migration](remove_migration.sh) for both
+database providers.
 
-## Keep your relational database schema always up-to-date
+Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
+migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
+
+### Migrate on startup
 
 Suppose you use a relational database (like SqlServer or Postgres). In that case, you can let AutoBackend know whether
 it has to migrate the database automatically on the application startup or doesn't, passing
@@ -253,11 +209,24 @@ Here is an example:
 await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args, migrateRelationalOnStartup: true);
 ```
 
-## Mark the models which AutoBackend has to generate HTTP API endpoints for
+# API
 
-### Contracts and endpoints
+Currently, only two types of AutoBackend.SDK-based application interfaces are supported:
 
-The latest and the only API version now is v1. API v1 supports JSON only, and its output uses contract:
+- Old-school HTTP API
+- Dummy GraphQL
+
+## HTTP API
+
+Mark with `[GenericController]` attribute the models which AutoBackend has to generate HTTP API endpoints for
+
+> ❗**Disclaimer**
+>
+> Be noticed that `[GenericController]` only supports models which also marked with `[GenericEntity]`
+
+### Response container and endpoints
+
+The latest and the only API version now is v1. API v1 supports JSON only, and its output uses response container:
 
 ```
 {
@@ -265,17 +234,15 @@ The latest and the only API version now is v1. API v1 supports JSON only, and it
   "error_code": number,
   "description": string,
   "request_time_ms": number,
-  "result": object
+  "result": <response object>
 }
 ```
 
 For more details, you can always request `/swagger` to get the information about all generated endpoints.
 
-> ❗**Disclaimer**
->
-> Be noticed that `[GenericController]` only supports models which also marked with `[GenericEntity]`
+### Endpoints
 
-Use `[GenericController]` to generate the following HTTP APIs:
+`[GenericController]` attribute will generate the following HTTP API endpoints:
 
 | Method   | Url                                          | Keyless | Single-PK | Multi-PK | Description                                                                |
 |----------|----------------------------------------------|---------|-----------|----------|----------------------------------------------------------------------------|
@@ -292,56 +259,50 @@ Use `[GenericController]` to generate the following HTTP APIs:
 
 > 📘**Filtering is applicable**
 >
-> See more about filtering [bellow](#mark-the-model-properties-which-autobackend-has-to-generate-filters-for).
+> See more about filtering [bellow](#filtering).
 
 ### Code samples
 
 ```csharp
-[GenericEntity]
-[GenericController]
-public class TransactionVersion
-{
-    // ...
-}
-```
-
-```csharp
 [GenericEntity(nameof(Id))]
 [GenericController]
-public class Budget
+public class User
 {
-    public Guid Id { get; set; }
+    public long Id { get; set; }
 
     // ...
 }
 ```
 
-```csharp
-[GenericEntity(nameof(UserId), nameof(BudgetId))]
-[GenericController]
-public class Participating
-{
-    public long UserId { get; set; }
+## GraphQL
 
-    public Guid BudgetId { get; set; }
-    
-    // ...
-}
-```
+Mark with `[GenericGqlQuery]` and with `[GenericGqlMutation]` attributes the models for which AutoBackend has to
+generate GraphQL **queries** and **mutations** accordingly.
 
-## Mark the models which AutoBackend has to generate GraphQL queries for
+> ❗**Disclaimer**
+>
+> Be noticed that `[GenericGqlQuery]` and `[GenericGqlMutation]` only supports models which also marked
+> with `[GenericEntity]`
 
-TODO `[GenericGqlQuery]`
+### Queries
 
-## Mark the models which AutoBackend has to generate GraphQL mutations for
+{::comment} TODO {:/comment}
 
-TODO `[GenericGqlMutation]`
+> 📘**Filtering is applicable**
+>
+> See more about filtering [bellow](#filtering).
 
-## Customize the data your API consumer will see
+### Mutations
 
-TODO `[GenericRequest]` & `[GenericResponse]`
+## Modeling
 
-## Mark the model properties which AutoBackend has to generate filters for
+{::comment} TODO {:/comment}
+
+## Filtering
+
+{::comment} TODO {:/comment}
+
+### Mark the model properties which AutoBackend has to generate filters for
 
 AutoBackend.SDK can automatically create a filter object model with necessary properties
 which also will be standard filter objects with standard set of filter conditions.
@@ -349,7 +310,7 @@ which also will be standard filter objects with standard set of filter condition
 ### Defaults
 
 By default there are always two filter parameters applicable for any GET request
-(which returns list of entities) to paginate request response:
+(which returns list of entities) or GraphQL queries to paginate the response:
 
 - `skipCount`, number
 - `takeCount`, number
@@ -377,61 +338,10 @@ public class Budget
 ```
 
 As a result, AutoBackend will build a filter model with a set of parameters which you can use in the API endpoints, such
-as `/api/v1/<model name>` or `/api/v1/<model name>/count`.
+as `/api/v1/<model name>` or `/api/v1/<model name>/count`, and in the GraphQL queries.
 
-The filter parameter's name will be generated by pattern: `<property's camelCase-name>.<condition name>`.
+- The filter parameter's name for the API will be generated by pattern: `<property's camelCase-name>.<condition name>`.
+- For the GraphQL queries filtering models with the condition properties will be generated.
 
 There are following conditions available:
 `equal`, `notEqual`, `greaterThan`, `greaterThanOrEqual`, `lessThan`, `lessThanOrEqual`, `in`, `isNull`, `equal`.
-
-For the example here are the **optional** query parameters will be available to apply filtering in th query:
-
-- For `Budget.Id`
-    - `id.equal`, string
-    - `id.notEqual`, string
-    - `id.greaterThan`, string
-    - `id.greaterThanOrEqual`, string
-    - `id.lessThan`, string
-    - `id.lessThanOrEqual`, string
-    - `id.in`, array of strings
-    - `id.isNull`, boolean
-    - `id.equal`, string
-- For `Budget.Name`
-    - `name.equal`, string
-    - `name.notEqual`, string
-    - `name.greaterThan`, string
-    - `name.greaterThanOrEqual`, string
-    - `name.lessThan`, string
-    - `name.lessThanOrEqual`, string
-    - `name.in`, array of strings
-    - `name.isNull`, boolean
-    - `name.equal`, string
-- For `Budget.OwnerId`
-    - `ownerId.equal`, number
-    - `ownerId.notEqual`, number
-    - `ownerId.greaterThan`, number
-    - `ownerId.greaterThanOrEqual`, number
-    - `ownerId.lessThan`, number
-    - `ownerId.lessThanOrEqual`, number
-    - `ownerId.in`, array of numbers
-    - `ownerId.isNull`, number
-    - `ownerId.equal`, number
-
-## Migrate the database schema
-
-First, you must [install Entity Framework Core Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet). After that,
-you can create a new migration using one of the following commands executed from the root of the project folder.
-
-`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerGenericDbContext` - if you use
-SqlServer.
-
-`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext` - if you use
-Postgres.
-
-Or you can create scripts (like I did)
-for [adding a new migration](add_migration.sh)
-or [removing the last migration](remove_migration.sh) for both
-database providers.
-
-Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
-migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
