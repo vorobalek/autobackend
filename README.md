@@ -4,169 +4,128 @@
 |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [![MyGet](https://img.shields.io/myget/autobackend-dev/v/AutoBackend.SDK?label=myget&style=for-the-badge)](https://www.myget.org/feed/autobackend-dev/package/nuget/AutoBackend.SDK) | [![MyGet](https://img.shields.io/myget/autobackend/v/AutoBackend.SDK?label=myget&style=for-the-badge)](https://www.myget.org/feed/autobackend/package/nuget/AutoBackend.SDK) [![NuGet](https://img.shields.io/nuget/v/AutoBackend.SDK?label=nuget&style=for-the-badge)](https://www.nuget.org/packages/AutoBackend.SDK) |
 
-This package provides the boilerplate infrastructure to create simplified backend services by managing DataBase & API
-layers. It is a pet project without a commercial base and any promises about further development. If you would like to
-use this package or sources of this package, please let me know by texting me@vorobalek.dev. I would prefer if any of
-your scenarios of using this package left consequences in the form of contribution to this repository.
-
-# Roadmap?
-
-Honestly, I do not have enough time to do something about that. I wrote this code while looking for a job just for fun,
-but now I have only decided to publish it. Probably, somewhere I will improve it or maybe even add some more features
-like GraphQL. I dunno. I have already spent much more time trying to express how it worked than I was supposed to.
+This package provides infrastructure templates for facilitating the creation of backend services.
+It is a personal project without a commercial foundation and offers no guarantees regarding future development.
 
 # Features
 
-- [Database schema modeling](#mark-models-which-autobackend-has-to-generate-tables-in-the-database-for)
-- [CRUD API modeling](#mark-models-which-autobackend-has-to-generate-api-endpoints-for)
-- [Filtering models for API](#mark-model-properties-which-autobackend-has-to-generate-filters-for)
-- [Cross-database provider support](#make-sure-you-have-configured-your-application-database-connection-correctly)
-- [Always up-to-date database schema](#make-sure-you-have-configured-your-application-startup-correctly)
-- [Best practices to use](#be-noticed-of-best-practices)
-    - [GenericDbContext](#genericdbcontext-is-way-better-than-any-other)
+- [Database](#database)
+    - [Schema Modeling](#schema-modeling)
+        - [Keyless Entities](#keyless-entities)
+        - [Single-PK Entities](#single-pk-entities)
+        - [Multi-PK Entities](#multi-pk-entities)
+    - [Providers](#providers)
+    - [Migrations](#migrations)
+        - [Migrate on Startup](#migrate-on-startup)
+- [API](#api)
+    - [HTTP API](#http-api)
+    - [GraphQL](#graphql)
+        - [Queries](#queries)
+        - [Mutations](#mutations)
+    - [Modeling](#modeling)
+    - [Filtering](#filtering)
+    - _Authorization: currently unsupported (may be introduced in future releases)_
 
-# Examples
+# Initialization
 
-The basic using scenario can be found in [the Api project](https://github.com/vorobalek/autobackend/tree/main/src/Api).
-Also, here is a copy of that samples.
+A sample usage scenario is available [here](src/samples/Sample).
+Copies of those samples are also provided.
 
 ## Initialize AutoBackend from your Program.cs file
 
 ```csharp
-await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args);
+using AutoBackend.Sdk;
+
+await new AutoBackendHost<Program>().RunAsync(args);
 ```
 
-## Create models you need to describe your domain relations
+## Define models to represent your domain relationships
+
+Refer to the [sample project models](src/samples/Sample/Data) for examples.
 
 ```csharp
-public class Note
-{
-    public string Content { get; set; } = null!;
-}
-
-public class Album
+public class Budget
 {
     public Guid Id { get; set; }
-
-    public string Title { get; set; } = null!;
-
-    public string? Artist { get; set; }
-
-    public int Score { get; set; } = 0;
+    
+    //..
 }
 
-public class Song
+public class Transaction
 {
     public Guid Id { get; set; }
-
-    public string Title { get; set; } = null!;
-
-    public string? Author { get; set; }
-
-    public string? Text { get; set; }
-
-    public decimal Price { get; set; }
+    
+    //..
 }
 
-public class AlbumContent
+public class TransactionVersion
 {
-    [ForeignKey(nameof(Album))]
-    public Guid AlbumId { get; set; }
-
-    [ForeignKey(nameof(Song))]
-    public Guid SongId { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.Cascade)]
-    public Album Album { get; set; } = null!;
-
-    [DeleteBehavior(DeleteBehavior.Cascade)]
-    public Song Song { get; set; } = null!;
+    //..
 }
 
-public class AlbumSet
+public class User
 {
-    [ForeignKey(nameof(Album1))]
-    public Guid Album1Id { get; set; }
+    public long Id { get; set; }
+    
+    //..
+}
 
-    [ForeignKey(nameof(Album2))]
-    public Guid? Album2Id { get; set; }
-
-    [ForeignKey(nameof(Album3))]
-    public Guid? Album3Id { get; set; }
-
-    [ForeignKey(nameof(Album4))]
-    public Guid Album4Id { get; set; }
-
-    [ForeignKey(nameof(Album5))]
-    public Guid? Album5Id { get; set; }
-
-    [ForeignKey(nameof(Album6))]
-    public Guid? Album6Id { get; set; }
-
-    [ForeignKey(nameof(Album7))]
-    public Guid? Album7Id { get; set; }
-
-    [ForeignKey(nameof(Album8))]
-    public Guid? Album8Id { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.Cascade)]
-    public Album Album1 { get; set; } = null!;
-
-    [DeleteBehavior(DeleteBehavior.SetNull)]
-    public Album? Album2 { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.SetNull)]
-    public Song? Album3 { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.SetNull)]
-    public Song? Album4 { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.SetNull)]
-    public Song? Album5 { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.SetNull)]
-    public Song? Album6 { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.SetNull)]
-    public Song? Album7 { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.SetNull)]
-    public Song? Album8 { get; set; }
-
-    public string Name { get; set; } = null!;
+public class Participating
+{
+    public long UserId { get; set; }
+    
+    public Guid BudgetId { get; set; }
+    
+    //..
 }
 ```
 
-## Mark models which AutoBackend has to generate tables in the database for
+## Configuration of all features is detailed below
 
-- Use `[GenericEntity]` to mark the model as a keyless entity.
+---
+
+# Database
+
+Currently supported relational databases (including in-memory) are:
+
+- SqlServer
+- Postgres
+
+AutoBackend.SDK will generate tables and establish relationships for your configured entities.
+
+## Schema Modeling
+
+There are typically three types of database tables:
+
+- Keyless,
+- Single-column primary key,
+- Multi-column primary key.
+
+Depending on the number of columns in your entity, follow the instructions below to enable AutoBackend.SDK to track
+changes.
+
+### Keyless Entities
+
+Use the `[GenericEntity]` attribute to designate a model as a keyless entity.
 
 ```csharp
 [GenericEntity]
-public class Note
+public class TransactionVersion
 {
-    // ...
+    //...
 }
 ```
 
-- Use `[GenericEntity(<primary key property name>)]` to mark the model as an entity with the primary key displayed as a
-  single property.
+### Single-PK Entities
+
+Use the `[GenericEntity(<primary key property name>)]` attribute to designate a model as an entity with a single
+property primary key.
 
 ```csharp
 [GenericEntity(
     nameof(Id)
 )]
-public class Album
-{
-    public Guid Id { get; set; }
-
-    // ...
-}
-
-[GenericEntity(
-    nameof(Id)
-)]
-public class Song
+public class Budget
 {
     public Guid Id { get; set; }
 
@@ -174,265 +133,33 @@ public class Song
 }
 ```
 
--
+### Multi-PK Entities
 
-Use `[GenericEntity(<first complex primary key property name>, <second complex primary key property name>, ...,  <N-th complex primary key>)]`
-to mark the model as an entity with the primary key displayed as a complex set of properties.
+Use the `[GenericEntity(<primary key property names>)]` attribute to designate a model as an entity with a composite
+primary key.
+
+> Currently, the maximum number of properties in a composite key is **8**.
+>
+> It is anticipated that this limit will suffice for most use cases.
 
 ```csharp
 [GenericEntity(
-    nameof(AlbumId),
-    nameof(SongId)
+    nameof(UserId),
+    nameof(BudgetId)
 )]
-public class AlbumContent
+public class Participating
 {
-    [ForeignKey(nameof(Album))]
-    public Guid AlbumId { get; set; }
+    public long UserId { get; set; }
 
-    [ForeignKey(nameof(Song))]
-    public Guid SongId { get; set; }
+    public Guid BudgetId { get; set; }
     
     // ...
 }
-
-[GenericEntity(
-    nameof(Album1Id),
-    nameof(Album2Id),
-    nameof(Album3Id),
-    nameof(Album4Id),
-    nameof(Album5Id),
-    nameof(Album6Id),
-    nameof(Album7Id),
-    nameof(Album8Id)
-)]
-public class AlbumSet
-{
-    [ForeignKey(nameof(Album1))]
-    public Guid Album1Id { get; set; }
-
-    [ForeignKey(nameof(Album2))]
-    public Guid? Album2Id { get; set; }
-
-    [ForeignKey(nameof(Album3))]
-    public Guid? Album3Id { get; set; }
-
-    [ForeignKey(nameof(Album4))]
-    public Guid Album4Id { get; set; }
-
-    [ForeignKey(nameof(Album5))]
-    public Guid? Album5Id { get; set; }
-
-    [ForeignKey(nameof(Album6))]
-    public Guid? Album6Id { get; set; }
-
-    [ForeignKey(nameof(Album7))]
-    public Guid? Album7Id { get; set; }
-
-    [ForeignKey(nameof(Album8))]
-    public Guid? Album8Id { get; set; }
-
-    // ...
-}
 ```
 
-## Mark models which AutoBackend has to generate API endpoints for
+## Providers
 
-The latest API version is v1. APIv1 supports JSON only, and its output uses contract:
-
-```
-{
-  "ok": boolean,
-  "error_code": number,
-  "description": string,
-  "request_time_ms": number,
-  "result": object
-}
-```
-
-For more details, you can always request `/swagger` to get the information about all generated endpoints.
-
-### ❗️❗️❗️ Be noticed that [GenericController] supports only models also marked with [GenericEntity]
-
-Use `[GenericController]` to generate for:
-
-- Keyless entity:\
-  **GET** `/api/v1/<model name>` - returns all entities\
-  **GET** `/api/v1/<model name>/count` - returns count of all entities\
-  **POST** `/api/v1/<model name>/filter` - return filtered entities\
-  **POST** `/api/v1/<model name>/filter/count` - return filtered entities count
-
-  ```csharp
-  [GenericEntity]
-  [GenericController]
-  public class Note
-  {
-      // ...
-  }
-  ```
-
-- Entity with a single primary key:
-  Same as for keyless entity:\
-  **GET** `/api/v1/<model name>` - returns all entities\
-  **GET** `/api/v1/<model name>/count` - returns count of all entities\
-  **POST** `/api/v1/<model name>/filter` - return filtered entities\
-  **POST** `/api/v1/<model name>/filter/count` - return filtered entities count
-
-  And extra\
-  **GET** `/api/v1/<model name>/{key}` - returns a specific entity by the primary key\
-  **POST** `/api/v1/<model name>/{key}` - creates a specific entity by the primary key\
-  **PUT** `/api/v1/<model name>/{key}` - updates a specific entity by the primary key\
-  **DELETE** `/api/v1/<model name>/{key}` - deletes a specific entity by the primary key
-
-  ```csharp
-  [GenericEntity(
-      nameof(Id)
-  )]
-  [GenericController]
-  public class Album
-  {
-      // ...
-  }
-
-  [GenericEntity(
-      nameof(Id)
-  )]
-  [GenericController]
-  public class Song
-  {
-      // ...
-  }
-  ```
-
-- Entity with a complex primary key:
-  Same as for keyless entity:\
-  **GET** `/api/v1/<model name>` - returns all entities\
-  **GET** `/api/v1/<model name>/count` - returns count of all entities\
-  **POST** `/api/v1/<model name>/filter` - return filtered entities\
-  **POST** `/api/v1/<model name>/filter/count` - return filtered entities count
-
-  And extra\
-  **GET** `/api/v1/<model name>/{key1}/{key2}/.../{keyN}` - returns a specific entity by the complex primary key\
-  **POST** `/api/v1/<model name>/{key1}/{key2}/.../{keyN}` - creates a specific entity by the complex primary key\
-  **PUT** `/api/v1/<model name>/{key1}/{key2}/.../{keyN}` - updates a specific entity by the complex primary key\
-  **DELETE** `/api/v1/<model name>/{key1}/{key2}/.../{keyN}` - deletes a specific entity by the complex primary key
-
-  ```csharp
-  [GenericEntity(
-    nameof(AlbumId),
-    nameof(SongId)
-  )]
-  [GenericController]
-  public class AlbumContent
-  {
-      // ...
-  }
-  
-  [GenericEntity(
-    nameof(Album1Id),
-    nameof(Album2Id),
-    nameof(Album3Id),
-    nameof(Album4Id),
-    nameof(Album5Id),
-    nameof(Album6Id),
-    nameof(Album7Id),
-    nameof(Album8Id)
-  )]
-  [GenericController]
-  public class AlbumSet
-  {
-      // ...
-  }
-  ```
-
-## Mark model properties which AutoBackend has to generate filters for
-
-- Use `[GenericFilter]` to mark the model property as a property that the generated entity can be filtered by.
-
-```csharp
-[GenericEntity(
-    nameof(Id)
-)]
-[GenericController]
-public class Album
-{
-    [GenericFilter] public Guid Id { get; set; }
-
-    [GenericFilter] public string Title { get; set; } = null!;
-
-    [GenericFilter] public string? Artist { get; set; }
-
-    [GenericFilter] public int Score { get; set; } = 0;
-}
-```
-
-As a result, AutoBackend will build a filter model that you can use in the API endpoints, such
-as `/api/v1/<model name>/filter` or `/api/v1/<model name>/filter/count`. For the example above, the filter model looks
-like that:
-
-```
-{
-  "id": {
-    "equal": string | null | undefined,
-    "notEqual": string | null | undefined,
-    "isNull": boolean | null | undefined,
-    "greaterThan": string | null | undefined,
-    "greaterThanOrEqual": string | null | undefined,
-    "lessThan": string | null | undefined,
-    "lessThanOrEqual": string | null | undefined,
-    "in": [
-      string | null | undefined,
-      string | null | undefined
-    ]
-  },
-  "title": {
-    "equal": string | null | undefined,
-    "notEqual": string | null | undefined,
-    "isNull": boolean | null | undefined,
-    "greaterThan": string | null | undefined,
-    "greaterThanOrEqual": string | null | undefined,
-    "lessThan": string | null | undefined,
-    "lessThanOrEqual": string | null | undefined,
-    "in": [
-      string | null | undefined,
-      string | null | undefined
-    ]
-  },
-  "artist": {
-    "equal": string | null | undefined,
-    "notEqual": string | null | undefined,
-    "isNull": boolean | null | undefined,
-    "greaterThan": string | null | undefined,
-    "greaterThanOrEqual": string | null | undefined,
-    "lessThan": string | null | undefined,
-    "lessThanOrEqual": string | null | undefined,
-    "in": [
-      string | null | undefined,
-      string | null | undefined
-    ]
-  },
-  "score": {
-    "equal": number | null | undefined,
-    "notEqual": number | null | undefined,
-    "isNull": boolean | null | undefined,
-    "greaterThan": number | null | undefined,
-    "greaterThanOrEqual": number | null | undefined,
-    "lessThan": number | null | undefined,
-    "lessThanOrEqual": number | null | undefined,
-    "in": [
-      number | null | undefined,
-      number | null | undefined
-    ]
-  }
-}
-```
-
-It contains properties with the same names as the model properties marked with `[GenericFilter]`. Each property is an
-object with filter parameters. You can see that each filter parameter type is the same as the model property marked with
-the `[GenericFilter]`. All filter parameters are optional.
-
-## Make sure you have configured your application database connection correctly
-
-To manage database connections, choose the "Database" configuration section.
+For database connection management, configure the "Database" section.
 
 ```json
 "Database": {
@@ -445,74 +172,287 @@ To manage database connections, choose the "Database" configuration section.
 }
 ```
 
-The property `PrimaryProvider` allows one of the following string values: `InMemory`,  `SqlServer`, or `Postgres`. The
-property `Providers` shall contain an object with optional properties: `InMemory`,  `SqlServer`, or `Postgres`. If you
-chose the `PrimaryProvider` value, the property with the same name as that value is required.
+The `PrimaryProvider` property accepts one of the following string values:
 
-For example:
+- `InMemory`,
+- `SqlServer`,
+- `Postgres`.
 
-- If you would like to use the InMemory database, you shall fill in the "Database" configuration section like this:
-  ```json
-  "Database": {
-    "PrimaryProvider": "InMemory",
-    "Providers": {
-      "InMemory": "<InMemory database name>",
-    }
-  }
-  ```
-- If you would like to use the InMemory database, you shall fill in the "Database" configuration section like this:
-  ```json
-  "Database": {
-    "PrimaryProvider": "SqlServer",
-    "Providers": {
-      "SqlServer": "<SqlServer database connection string>",
-    }
-  }
-  ```
-- If you would like to use the InMemory database, you shall fill in the "Database" configuration section like this:
-  ```json
-  "Database": {
-    "PrimaryProvider": "Postgres",
-    "Providers": {
-      "Postgres": "<Postgres database connection string in the Npgsql format>",
-    }
-  }
-  ```
+The `Providers` property must contain an object with optional properties: `InMemory`, `SqlServer`, or `Postgres`. The
+property corresponding to the chosen `PrimaryProvider` value is mandatory.
 
-## Make sure you have configured your application startup correctly
+## Migrations
 
-Suppose you use a relational database (like SqlServer or Postgres). In that case, you can let AutoBackend know whether
-it has to migrate the database automatically on the application startup or doesn't, passing
-the `migrateRelationalOnStartup` parameter to the `RunAsync` method in the place you call it to initialize AutoBackend.
-Here is an example:
+First, [install Entity Framework Core Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet).
+You can create a new migration with one of the following commands executed from the project root directory.
+
+`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerGenericDbContext` for SqlServer.
+
+`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext` for Postgres.
+
+Alternatively, use scripts [to add a new migration](scripts/add_migration.sh)
+or [to remove the last migration](scripts/remove_migration.sh) for both database providers.
+
+If you opt not to have AutoBackend manage database migrations (see above), you can perform migrations manually by
+executing `dotnet ef database update` from the project root directory.
+
+### Migrate on Startup
+
+If using a relational database (e.g., SqlServer or Postgres), you can configure AutoBackend to either automatically
+migrate the database at application startup or not, by passing the `migrateRelationalOnStartup` parameter to
+the `RunAsync` method where AutoBackend is initialized. For example:
 
 ```csharp
 await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args, migrateRelationalOnStartup: true);
 ```
 
-## Migrate the database schema
+# API
 
-First, you must [install Entity Framework Core Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet). After that,
-you can create a new migration using one of the following commands executed from the root of the project folder.
+AutoBackend.SDK currently supports two types of application interfaces:
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerGenericDbContext` - if you use
-SqlServer.
+- Traditional HTTP API
+- Basic GraphQL
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext` - if you use
-Postgres.
+## HTTP API
 
-Or you can create scripts
-for [adding a new migration](https://github.com/vorobalek/autobackend/blob/main/add_migration.sh)
-or [removing the last migration](https://github.com/vorobalek/autobackend/blob/main/remove_migration.sh) for both
-database providers.
+Use the `[GenericController]` attribute on models to generate HTTP API endpoints by AutoBackend.
 
-Finally, suppose you did not choose to delegate the database migrating to AutoBackend (see above). In that case, you can
-migrate it yourself, executing `dotnet ef database update` from the root of the project folder.
+> ❗**Disclaimer**
+>
+> The `[GenericController]` attribute is compatible only with models also marked with `[GenericEntity]`.
 
-## Be noticed of best practices
+### Response Container and Endpoints
 
-### GenericDbContext is way better than any other
+The current and only API version is v1. API v1 supports JSON and uses the following response container format:
 
-Despite the database provider you have chosen, if you need to access the `DbContext` directly from your code, it will be
-the best practice to inject the `GenericDbContext` into your services. This way, you can switch between any database
-providers offered by `AutoBackend.SDK` simply by changing one line in your application config.
+```
+{
+  "ok": boolean,
+  "error_code": number,
+  "description": string,
+  "request_time_ms": number,
+  "result": <response object>
+}
+```
+
+For detailed information on generated endpoints, access `/swagger`.
+
+### Endpoints
+
+The `[GenericController]` attribute generates the following HTTP API endpoints:
+
+| Method   | Url                                          | Keyless | Single-PK | Multi-PK | Description                                                             |
+|----------|----------------------------------------------|---------|-----------|----------|-------------------------------------------------------------------------|
+| `GET`    | `/api/v1/<model name>`                       | ✔️      | ✔️        | ✔️       | Retrieve **all** entities of a specific model                           |
+| `GET`    | `/api/v1/<model name>/count`                 | ✔️      | ✔️        | ✔️       | Retrieve the **count** of entities of a specific model                  |
+| `GET`    | `/api/v1/<model name>/<pk1>`                 | ❌       | ✔️        | ❌        | Retrieve an entity with the requested primary key of a specific model   |
+| `GET`    | `/api/v1/<model name>/<pk1>/<pk2>/.../<pkN>` | ❌       | ❌         | ✔️       | Retrieve an entity with the requested composite primary key of a model  |
+| `POST`   | `/api/v1/<model name>`                       | ✔️      | ❌         | ❌        | Create a new keyless entity of a specific model                         |
+| `POST`   | `/api/v1/<model name>/<pk1>`                 | ❌       | ✔️        | ❌        | Create a new entity with the specified primary key of a specific model  |
+| `POST`   | `/api/v1/<model name>/<pk1>/<pk2>/.../<pkN>` | ❌       | ❌         | ✔️       | Create a new entity with the specified composite primary key of a model |
+| `PUT`    | `/api/v1/<model name>/<pk1>`                 | ❌       | ✔️        | ❌        | Update an entity with the specified primary key of a specific model     |
+| `PUT`    | `/api/v1/<model name>/<pk1>/<pk2>/.../<pkN>` | ❌       | ❌         | ✔️       | Update an entity with the specified composite primary key of a model    |
+| `DELETE` | `/api/v1/<model name>/<pk1>`                 | ❌       | ✔️        | ❌        | Delete an entity with the specified primary key of a specific model     |
+| `DELETE` | `/api/v1/<model name>/<pk1>/<pk2>/.../<pkN>` | ❌       | ❌         | ✔️       | Delete an entity with the specified composite primary key of a model    |
+
+> 📘**Filtering Capabilities**
+>
+> Refer to the [following section](#filtering) for more information on filtering.
+
+#### Code Samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+public class User
+{
+    public long Id { get; set; }
+
+    // ...
+}
+```
+
+## GraphQL
+
+Use the `[GenericGqlQuery]` and `[GenericGqlMutation]` attributes on models to generate GraphQL **queries** and *
+*mutations**, respectively.
+
+> ❗**Disclaimer**
+>
+> The `[GenericGqlQuery]` and `[GenericGqlMutation]` attributes are compatible only with models also marked
+> with `[GenericEntity]`.
+
+For detailed information on generated queries and mutations, access `/graphql`.
+
+### Queries
+
+The `[GenericGqlQuery]` attribute generates the following GraphQL queries:
+
+| Query   | Arguments                                  | Keyless | Single-PK | Multi-PK | Description                                                  |
+|---------|--------------------------------------------|---------|-----------|----------|--------------------------------------------------------------|
+| `all`   | `filter`: generic filter input model       | ✔️      | ✔️        | ✔️       | Retrieve **all** entities of a specific model                |
+| `count` | `filter`: generic filter input model       | ✔️      | ✔️        | ✔️       | Retrieve the **count** of entities of a specific model       |
+| `byKey` | `key`: entity primary key                  | ❌       | ✔️        | ❌        | Retrieve an entity with the requested primary key of a model |
+| `byKey` | `key1`, `key2`, ..., `keyN`: entity PK-set | ❌       | ❌         | ✔️       | Retrieve an entity with the requested composite primary key  |
+
+> 📘**Filtering Capabilities**
+>
+> Refer to the [following section](#filtering) for more information on filtering.
+
+#### Code Samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericGqlQuery]
+public class User
+{
+    public long Id { get; set; }
+
+    // ...
+}
+```
+
+### Mutations
+
+The `[GenericGqlMutation]` attribute generates the following GraphQL mutations:
+
+| Mutation | Arguments                                                                         | Keyless | Single-PK | Multi-PK | Description                                                   |
+|----------|-----------------------------------------------------------------------------------|---------|-----------|----------|---------------------------------------------------------------|
+| `create` | `request`: generic entity input model                                             | ✔️      | ❌         | ❌        | Create a new keyless entity of a specific model               |
+| `create` | `key`: entity primary key, `request`: generic entity input model                  | ❌       | ✔️        | ❌        | Create a new entity with the specified primary key of a model |
+| `create` | `key1`, `key2`, ..., `keyN`: entity PK-set, `request`: generic entity input model | ❌       | ❌         | ✔️       | Create a new entity with the specified composite primary key  |
+| `update` | `key`: entity primary key, `request`: generic entity input model                  | ❌       | ✔️        | ❌        | Update an entity with the specified primary key of a model    |
+| `update` | `key1`, `key2`, ..., `keyN`: entity PK-set, `request`: generic entity input model | ❌       | ❌         | ✔️       | Update an entity with the specified composite primary key     |
+| `delete` | `key`: entity primary key (for PK-holder entities only)                           | ❌       | ✔️        | ❌        | Delete an entity with the specified primary key               |
+| `delete` | `key1`, `key2`, ..., `keyN`: entity PK-set                                        | ❌       | ❌         | ✔️       | Delete an entity with the specified composite primary key     |
+
+#### Code Samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericGqlMutation]
+public class User
+{
+    public long Id { get; set; }
+
+    // ...
+}
+```
+
+## Modeling
+
+AutoBackend.SDK generates request and response models for any entity with configured HTTP API or GraphQL generation.
+These models include all original entity properties, unless specific properties are explicitly included in request or
+response models, in which case non-specified properties will be omitted.
+
+### Request Models
+
+The `[GenericRequest]` attribute defines which properties are permitted for reflection from the request model to the
+entity.
+
+#### Code Samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
+[GenericRequest(
+    nameof(Id),
+    nameof(UserId),
+    nameof(BudgetId),
+    nameof(Amount),
+    nameof(DateTimeUtc),
+    nameof(Comment),
+    nameof(SecretKey)
+)]
+public class Transaction
+{
+    // ...
+}
+```
+
+### Response Models
+
+The `[GenericResponse]` attribute defines which properties are permitted for reflection from the response model to the
+entity.
+
+#### Code Samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
+[GenericResponse(
+    nameof(Id),
+    nameof(UserId),
+    nameof(BudgetId),
+    nameof(Amount),
+    nameof(DateTimeUtc),
+    nameof(Comment)
+)]
+public class Transaction
+{
+    // ...
+}
+```
+
+## Filtering
+
+AutoBackend.SDK generates filter models for any entity with configured HTTP API or GraphQL generation. By default, these
+models include only pagination management properties. To include specific entity properties in the filter model, use
+the `[GenericFilter]` attribute.
+
+### Defaults
+
+By default, two filter parameters are always available for any GET request (returning a list of entities) or GraphQL
+queries, to manage pagination:
+
+- `skipCount`: number
+- `takeCount`: number
+
+### Generic
+
+The `[GenericFilter]` attribute designates a model property as filterable in the generated entity.
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
+public class Budget
+{
+    [GenericFilter]
+    public Guid Id { get; set; }
+
+    [GenericFilter]
+    public string Name { get; set; }
+
+    [GenericFilter]
+    public long? OwnerId { get; set; }
+
+    // ...
+}
+```
+
+Consequently, AutoBackend will construct a filter model with parameters that can be utilized in API endpoints
+like `/api/v1/<model name>` or `/api/v1/<model name>/count`, and in GraphQL queries.
+
+- API filter parameter names are generated following the pattern: `<property's camelCase-name>.<condition name>`.
+- GraphQL queries will have filtering models with condition properties generated.
+
+The following conditions are supported:
+`equal`, `notEqual`, `greaterThan`, `greaterThanOrEqual`, `lessThan`, `lessThanOrEqual`, `in`, `isNull`, `equal`.

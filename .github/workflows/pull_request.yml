@@ -7,28 +7,28 @@ on:
       - main
       - develop
 
-permissions:
-  contents: read
-  pull-requests: write
-
 jobs:
   verify_release_notes:
     if: github.event_name == 'pull_request'
     name: Verify RELEASE_NOTES.md has been changed on Pull Request
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - uses: actions/checkout@v3
+        if: github.base_ref == 'main'
 
       - name: Verify RELEASE_NOTES.md has been changed on ${{ github.base_ref }}
-        uses: tj-actions/changed-files@v35
+        if: github.base_ref == 'main'
+        uses: tj-actions/changed-files@v41
         id: verify_release_notes
         with:
           files: |
             RELEASE_NOTES.md
 
       - name: Abort If RELEASE_NOTES.md has not been changed on ${{ github.base_ref }}
-        if: steps.verify_release_notes.outputs.any_changed != 'true'
+        if: github.base_ref == 'main' && steps.verify_release_notes.outputs.any_changed != 'true' 
         run: exit 1
 
       - name: Success If RELEASE_NOTES.md has been changed on ${{ github.base_ref }}
@@ -37,6 +37,8 @@ jobs:
   test_pull_request:
     name: Run Unit Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - uses: actions/checkout@v3
@@ -44,16 +46,16 @@ jobs:
       - name: Setup
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore lib/AutoBackend.Sdk
+        run: dotnet restore src/lib/AutoBackend.Sdk
 
       - name: Build
-        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+        run: dotnet build src/lib/AutoBackend.Sdk --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
+        run: dotnet test src/lib/AutoBackend.Sdk --no-restore --verbosity normal
 
   create_release_hot:
     if: github.event_name == 'pull_request'
@@ -65,8 +67,6 @@ jobs:
       created_release_version: ${{ steps.get_release_hot_version.outputs.result }}
 
     steps:
-      - uses: actions/checkout@v3
-
       - name: Get Release Hot Version
         id: get_release_hot_version
         uses: actions/github-script@v6
@@ -106,6 +106,8 @@ jobs:
       - test_pull_request
       - create_release_hot
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v3
@@ -117,16 +119,16 @@ jobs:
       - name: Setup
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore lib/AutoBackend.Sdk
+        run: dotnet restore src/lib/AutoBackend.Sdk
 
       - name: Build Version "${{ env.BUILD_VERSION }}"
-        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+        run: dotnet build src/lib/AutoBackend.Sdk --configuration Release --no-restore
 
       - name: Pack Hot Version "${{ env.BUILD_VERSION }}"
-        run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
+        run: dotnet pack src/lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
 
       - uses: actions/upload-artifact@master
         with:
@@ -143,12 +145,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-
       - name: Setup
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 8.0.x
 
       - uses: actions/download-artifact@master
         with:
@@ -167,10 +167,10 @@ jobs:
       - build_package_hot
       - publish_myget_hot
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     
     steps:
-      - uses: actions/checkout@v3
-
       - name: Comment Pull Request with the Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}" build's link
         uses: actions/github-script@v6
         with:
