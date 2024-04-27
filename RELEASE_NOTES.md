@@ -1,4 +1,4 @@
-This is the public release `v0.1.6` of the package `AutoBackend.SDK`.
+This is the public release `v0.1.8` of the package `AutoBackend.SDK`.
 This package provides infrastructure templates for facilitating the creation of backend services.
 For more information, see [readme](https://github.com/vorobalek/autobackend/blob/main/README.md).
 
