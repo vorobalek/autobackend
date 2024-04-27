@@ -23,13 +23,13 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore lib/AutoBackend.Sdk
+        run: dotnet restore src/lib/AutoBackend.Sdk
 
       - name: Build
-        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+        run: dotnet build src/lib/AutoBackend.Sdk --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test lib/AutoBackend.Sdk --no-restore --verbosity normal
+        run: dotnet test src/lib/AutoBackend.Sdk --no-restore --verbosity normal
 
   create_release_dev:
     name: Create Release Dev Version
@@ -98,13 +98,13 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore lib/AutoBackend.Sdk
+        run: dotnet restore src/lib/AutoBackend.Sdk
 
       - name: Build Version "${{ env.BUILD_VERSION }}"
-        run: dotnet build lib/AutoBackend.Sdk --configuration Release --no-restore
+        run: dotnet build src/lib/AutoBackend.Sdk --configuration Release --no-restore
 
       - name: Pack Dev Version "${{ env.BUILD_VERSION }}"
-        run: dotnet pack lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
+        run: dotnet pack src/lib/AutoBackend.Sdk --configuration Release --no-restore --output ${{ env.DOTNET_ROOT }}/Package
 
       - uses: actions/upload-artifact@master
         with:
