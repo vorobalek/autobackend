@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Verify RELEASE_NOTES.md has been changed before Release
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v41
         id: verify_release_notes
         with:
           files: |
