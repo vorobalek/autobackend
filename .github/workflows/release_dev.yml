@@ -15,10 +15,10 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -46,7 +46,7 @@ jobs:
 
       - name: Get Release Dev Version
         id: get_release_dev_version
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
@@ -86,14 +86,14 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set Build Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}"
         run: |
           echo "BUILD_VERSION=${{ needs.create_release_dev.outputs.created_release_version }}" >> ${GITHUB_ENV}
 
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -121,7 +121,7 @@ jobs:
 
     steps:
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -146,7 +146,7 @@ jobs:
     
     steps:
       - name: Comment Commit with the Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}" build's link
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
