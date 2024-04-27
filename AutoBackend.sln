@@ -23,6 +23,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{AAF2
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{DAFD5D38-1576-4A3A-9EB2-67A60CC08091}"
+	ProjectSection(SolutionItems) = preProject
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
+		README.md = README.md
+		docs\SECURITY.md = docs\SECURITY.md
+		docs\CONTRIBUTING.md = docs\CONTRIBUTING.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEMPLATE", "{D0475EB5-C1D6-4775-9078-F4FEE2BA9A68}"
+	ProjectSection(SolutionItems) = preProject
+		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
+		.github\ISSUE_TEMPLATE\bug_report.md = .github\ISSUE_TEMPLATE\bug_report.md
+		.github\ISSUE_TEMPLATE\custom.md = .github\ISSUE_TEMPLATE\custom.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,5 +63,6 @@ Global
 		{ABFA1073-DEC6-4BA8-8E40-ABE8CD288C29} = {4B90C1DB-6727-4C36-A6F8-D9DED2D80B80}
 		{E597A803-AACE-4FFA-860B-975B16155FEB} = {A699FC5D-6E34-4DFC-83E2-54B8FC5FD07A}
 		{DAFD5D38-1576-4A3A-9EB2-67A60CC08091} = {8F16194C-EC14-48D4-BAF3-F72BB51594B4}
+		{D0475EB5-C1D6-4775-9078-F4FEE2BA9A68} = {DAFD5D38-1576-4A3A-9EB2-67A60CC08091}
 	EndGlobalSection
 EndGlobal
