@@ -7,8 +7,25 @@ on:
       - main
 
 jobs:
+  verify_tag:
+    name: Verify tag 'release-*' on the head
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Abort
+        if: github.ref != 'refs/heads/main' || !startsWith(github.ref, 'refs/tags/release-')
+        run: exit 1
+
+      - name: Success
+        if: github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/release-')
+        run: exit 0
+  
   verify_release_notes:
     name: Verify RELEASE_NOTES.md has been changed before Release
+    needs: 
+      - verify_tag
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,15 +40,17 @@ jobs:
           files: |
             RELEASE_NOTES.md
 
-      - name: Abort If RELEASE_NOTES.md has not been changed before Release
+      - name: Abort
         if: steps.verify_release_notes.outputs.any_changed != 'true'
         run: exit 1
 
-      - name: Success If RELEASE_NOTES.md has been changed before Release
+      - name: Success
         run: exit 0
 
   test_release:
     name: Run Unit Tests before Release
+    needs:
+      - verify_tag
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -56,6 +75,7 @@ jobs:
   create_release:
     name: Create Release
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
     runs-on: ubuntu-latest
@@ -111,7 +131,8 @@ jobs:
 
   build_package:
     name: Build Package Version "${{ needs.create_release.outputs.created_release_version }}"
-    needs: 
+    needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -148,6 +169,7 @@ jobs:
   publish_github:
     name: Publish Github Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -173,6 +195,7 @@ jobs:
   publish_myget:
     name: Publish MyGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -196,6 +219,7 @@ jobs:
   publish_nuget:
     name: Publish NuGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -219,6 +243,7 @@ jobs:
   comment_commit:
     name: Comment Commit with the Version build's link
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
