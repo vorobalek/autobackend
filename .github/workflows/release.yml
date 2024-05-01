@@ -7,14 +7,31 @@ on:
       - main
 
 jobs:
+  verify_tag:
+    name: Verify tag 'release-*' on the head
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Abort
+        if: github.ref != 'refs/heads/main' || !startsWith(github.ref, 'refs/tags/release-')
+        run: exit 1
+
+      - name: Success
+        if: github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/release-')
+        run: exit 0
+  
   verify_release_notes:
     name: Verify RELEASE_NOTES.md has been changed before Release
+    needs: 
+      - verify_tag
     runs-on: ubuntu-latest
     permissions:
       contents: read
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Verify RELEASE_NOTES.md has been changed before Release
         uses: tj-actions/changed-files@v41
@@ -23,24 +40,26 @@ jobs:
           files: |
             RELEASE_NOTES.md
 
-      - name: Abort If RELEASE_NOTES.md has not been changed before Release
+      - name: Abort
         if: steps.verify_release_notes.outputs.any_changed != 'true'
         run: exit 1
 
-      - name: Success If RELEASE_NOTES.md has been changed before Release
+      - name: Success
         run: exit 0
 
   test_release:
     name: Run Unit Tests before Release
+    needs:
+      - verify_tag
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -56,6 +75,7 @@ jobs:
   create_release:
     name: Create Release
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
     runs-on: ubuntu-latest
@@ -65,11 +85,11 @@ jobs:
       created_release_version: ${{ steps.get_release_version.outputs.result }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Get Release Version
         id: get_release_version
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
@@ -100,19 +120,19 @@ jobs:
           result-encoding: string
 
       - name: Create Github Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v${{ steps.get_release_version.outputs.result }}
-          release_name: Release ${{ steps.get_release_version.outputs.result }}
+          name: Release ${{ steps.get_release_version.outputs.result }}
           draft: false
           prerelease: false
           body_path: RELEASE_NOTES.md
 
   build_package:
     name: Build Package Version "${{ needs.create_release.outputs.created_release_version }}"
-    needs: 
+    needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -121,14 +141,14 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set Build Version "${{ needs.create_release.outputs.created_release_version }}"
         run: |
           echo "BUILD_VERSION=${{ needs.create_release.outputs.created_release_version }}" >> ${GITHUB_ENV}
 
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -149,6 +169,7 @@ jobs:
   publish_github:
     name: Publish Github Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -159,7 +180,7 @@ jobs:
 
     steps:
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -174,6 +195,7 @@ jobs:
   publish_myget:
     name: Publish MyGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -182,7 +204,7 @@ jobs:
 
     steps:
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -197,6 +219,7 @@ jobs:
   publish_nuget:
     name: Publish NuGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -205,7 +228,7 @@ jobs:
 
     steps:
       - name: Setup
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -220,6 +243,7 @@ jobs:
   comment_commit:
     name: Comment Commit with the Version build's link
     needs:
+      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -233,7 +257,7 @@ jobs:
     
     steps:
       - name: Comment Commit with the Version "${{ needs.create_release.outputs.created_release_version }}" build's link
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
