@@ -23,9 +23,9 @@ internal abstract class GenericGqlQueryWithPrimaryKey<
 {
     [GraphQLName("byKey")]
     public async Task<TResponse?> GetByPrimaryKeyAsync(
-        [Service(ServiceKind.Resolver)] IGenericResponseMapper genericResponseMapper,
-        [Service(ServiceKind.Resolver)] IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> genericRepository,
-        [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
+        [Service] IGenericResponseMapper genericResponseMapper,
+        [Service] IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> genericRepository,
+        [Service] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("key")] TKey key)
     {
         return await genericRepository

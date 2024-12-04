@@ -18,9 +18,9 @@ internal abstract class GenericGqlQuery<
     [GraphQLName("all")]
     [UseProjection]
     public async Task<TResponse[]> GetAllAsync(
-        [Service(ServiceKind.Resolver)] IGenericResponseMapper genericResponseMapper,
-        [Service(ServiceKind.Resolver)] IGenericRepository<TEntity, TFilter> genericRepository,
-        [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
+        [Service] IGenericResponseMapper genericResponseMapper,
+        [Service] IGenericRepository<TEntity, TFilter> genericRepository,
+        [Service] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("filter")] TFilter? filter)
     {
         return genericResponseMapper
@@ -34,8 +34,8 @@ internal abstract class GenericGqlQuery<
 
     [GraphQLName("count")]
     public Task<long> GetCountAsync(
-        [Service(ServiceKind.Resolver)] IGenericRepository<TEntity, TFilter> genericRepository,
-        [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
+        [Service] IGenericRepository<TEntity, TFilter> genericRepository,
+        [Service] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("filter")] TFilter? filter)
     {
         return genericRepository
