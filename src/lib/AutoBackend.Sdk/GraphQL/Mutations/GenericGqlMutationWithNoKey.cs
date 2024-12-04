@@ -24,10 +24,10 @@ internal abstract class GenericGqlMutationWithNoKey<
 {
     [GraphQLName("create")]
     public async Task<TResponse> CreateAsync(
-        [Service(ServiceKind.Resolver)] IGenericRequestMapper genericRequestMapper,
-        [Service(ServiceKind.Resolver)] IGenericResponseMapper genericResponseMapper,
-        [Service(ServiceKind.Resolver)] IGenericRepositoryWithNoKey<TEntity, TFilter> genericRepository,
-        [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
+        [Service] IGenericRequestMapper genericRequestMapper,
+        [Service] IGenericResponseMapper genericResponseMapper,
+        [Service] IGenericRepositoryWithNoKey<TEntity, TFilter> genericRepository,
+        [Service] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("request")] TRequest request)
     {
         return genericResponseMapper

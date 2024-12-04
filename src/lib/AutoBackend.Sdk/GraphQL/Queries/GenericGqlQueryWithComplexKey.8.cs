@@ -36,7 +36,7 @@ internal abstract class GenericGqlQueryWithComplexKey<
 {
     [GraphQLName("byKey")]
     public Task<TEntity?> GetByPrimaryKeyAsync(
-        [Service(ServiceKind.Resolver)] IGenericRepositoryWithComplexKey<
+        [Service] IGenericRepositoryWithComplexKey<
             TEntity,
             TFilter,
             TKey1,
@@ -48,7 +48,7 @@ internal abstract class GenericGqlQueryWithComplexKey<
             TKey7,
             TKey8
         > genericRepository,
-        [Service(ServiceKind.Resolver)] ICancellationTokenProvider cancellationTokenProvider,
+        [Service] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("key1")] TKey1 key1,
         [GraphQLName("key2")] TKey2 key2,
         [GraphQLName("key3")] TKey3 key3,

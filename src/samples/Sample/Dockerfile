@@ -1,7 +1,7 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS restore
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore
 WORKDIR /sln
 COPY ["src/Api/Api.csproj", "src/Api/"]
 COPY ["lib/AutoBackend.Sdk/AutoBackend.Sdk.csproj", "lib/AutoBackend.Sdk/"]
