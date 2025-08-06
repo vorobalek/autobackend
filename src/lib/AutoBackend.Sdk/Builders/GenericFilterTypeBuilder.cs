@@ -119,7 +119,7 @@ internal static class GenericFilterTypeBuilder
                         MethodAttributes.Public |
                         MethodAttributes.SpecialName |
                         MethodAttributes.HideBySig,
-                        null, new[] { propertyType });
+                        null, [propertyType]);
 
                 var setMethodIl = setMethod.GetILGenerator();
                 var modifyProperty = setMethodIl.DefineLabel();
