@@ -73,7 +73,7 @@ internal static class TypeExtensions
 
     internal static bool IsCollection(this Type type)
     {
-        return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>)) ||
+        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>) ||
                type.GetTypeInfo().ImplementedInterfaces.Any(i =>
                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
     }
