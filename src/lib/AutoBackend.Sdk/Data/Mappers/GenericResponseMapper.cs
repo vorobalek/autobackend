@@ -36,7 +36,9 @@ internal class GenericResponseMapper(IMapperExpressionsCache cache) : IGenericRe
                        ToModel<TEntity, TResponse>(entity)
                        ?? throw new InconsistentDataException())
                    .ToArray()
-               ?? Array.Empty<TResponse>();
+               ??
+               [
+               ];
     }
 
     private Expression<Func<TEntity, TModel>> MapExpr<TEntity, TModel>()

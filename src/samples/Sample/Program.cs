@@ -1,3 +1,3 @@
 using AutoBackend.Sdk;
 
-await new AutoBackendHost<Program>().RunAsync(args, migrateRelationalOnStartup: true);
+await new AutoBackendHost<Program>().RunAsync(args, true);

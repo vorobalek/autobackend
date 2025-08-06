@@ -9,7 +9,9 @@ internal static class GenericControllerTypeBuilder
 {
     internal static Type BuildForCandidate(Type candidate)
     {
-        if (candidate.GetCustomAttribute<GenericEntityAttribute>() is not { Keys: not null } genericEntityAttribute)
+        if (candidate.GetCustomAttribute<GenericEntityAttribute>() is not
+            {
+            } genericEntityAttribute)
             throw new NotFoundReflectionException(
                 string.Format(
                     Constants.AGenericControllerCanBeGeneratedOnlyForTypesMarkedWith,

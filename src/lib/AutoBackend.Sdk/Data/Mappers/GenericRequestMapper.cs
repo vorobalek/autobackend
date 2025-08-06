@@ -31,7 +31,9 @@ internal class GenericRequestMapper(IMapperExpressionsCache cache) : IGenericReq
                        ToEntity<TEntity, TRequest>(entity)
                        ?? throw new InconsistentDataException())
                    .ToArray()
-               ?? Array.Empty<TEntity>();
+               ??
+               [
+               ];
     }
 
     private Expression<Func<TRequest, TEntity>> MapExpr<TEntity, TRequest>()
