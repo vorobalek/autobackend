@@ -7,7 +7,9 @@ namespace AutoBackend.Sdk.Data;
 public class GenericDbContext : DbContext
 {
 #pragma warning disable CA2211
-    private static Assembly[] _assemblies = Array.Empty<Assembly>();
+    private static Assembly[] _assemblies =
+    [
+    ];
 #pragma warning restore CA2211
 
     protected GenericDbContext(DbContextOptions options) : base(options)

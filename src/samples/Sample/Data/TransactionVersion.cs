@@ -37,7 +37,7 @@ public class TransactionVersion
 
     [InverseProperty(nameof(Data.Transaction.Versions))]
     public Transaction Transaction { get; set; } = null!;
-    
+
     [GenericFilter]
     public Guid OriginalTransactionId { get; set; }
 
@@ -51,7 +51,7 @@ public class TransactionVersion
     public Guid BudgetId { get; set; }
 
     [GenericFilter]
-    [Precision(20,4)]
+    [Precision(20, 4)]
     public decimal Amount { get; set; }
 
     [GenericFilter]

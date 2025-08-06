@@ -21,7 +21,7 @@ jobs:
 
       - name: Verify RELEASE_NOTES.md has been changed on ${{ github.base_ref }}
         if: github.base_ref == 'main'
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v46
         id: verify_release_notes
         with:
           files: |
@@ -46,7 +46,7 @@ jobs:
       - name: Setup
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
 
       - name: Restore
         run: dotnet restore src/lib/AutoBackend.Sdk
@@ -119,7 +119,7 @@ jobs:
       - name: Setup
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
 
       - name: Restore
         run: dotnet restore src/lib/AutoBackend.Sdk
@@ -148,7 +148,7 @@ jobs:
       - name: Setup
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
 
       - uses: actions/download-artifact@master
         with:

@@ -301,11 +301,10 @@ internal record GenericPropertyFilter<TOriginal, TNullable> : IGenericPropertyFi
         return Expression.Lambda<Func<TEntity, bool>>(
             Expression.Call(
                 method,
-                new Expression[]
-                {
+                [
                     Expression.Constant(In),
                     member
-                }),
+                ]),
             parameter);
     }
 }

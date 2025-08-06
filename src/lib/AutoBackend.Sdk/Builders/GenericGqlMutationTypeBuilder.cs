@@ -99,7 +99,8 @@ internal static class GenericGqlMutationTypeBuilder
                 propertyType,
                 Type.EmptyTypes);
 
-        var constructorInfo = propertyType.GetConstructor(Array.Empty<Type>());
+        var constructorInfo = propertyType.GetConstructor([
+        ]);
 
         var getMethodIl = getMethod.GetILGenerator();
         getMethodIl.Emit(OpCodes.Newobj, constructorInfo ?? throw new NotFoundReflectionException(
@@ -113,7 +114,9 @@ internal static class GenericGqlMutationTypeBuilder
 
     private static Type GetPropertyTypeForCandidate(Type candidate)
     {
-        if (candidate.GetCustomAttribute<GenericEntityAttribute>() is not { Keys: not null } genericEntityAttribute)
+        if (candidate.GetCustomAttribute<GenericEntityAttribute>() is not
+            {
+            } genericEntityAttribute)
             throw new NotFoundReflectionException(
                 string.Format(
                     Constants.AGenericGraphQlMutationCanBeGeneratedOnlyForTypesMarkedWith,

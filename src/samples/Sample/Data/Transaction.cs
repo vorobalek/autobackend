@@ -51,7 +51,7 @@ public class Transaction
     public Budget Budget { get; set; } = null!;
 
     [GenericFilter]
-    [Precision(20,4)]
+    [Precision(20, 4)]
     public decimal Amount { get; set; }
 
     [GenericFilter]
