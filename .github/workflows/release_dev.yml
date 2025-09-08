@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Setup
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.x
 
@@ -93,7 +93,7 @@ jobs:
           echo "BUILD_VERSION=${{ needs.create_release_dev.outputs.created_release_version }}" >> ${GITHUB_ENV}
 
       - name: Setup
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.x
 
@@ -121,7 +121,7 @@ jobs:
 
     steps:
       - name: Setup
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.x
 
