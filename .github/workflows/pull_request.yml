@@ -16,7 +16,7 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         if: github.base_ref == 'main'
 
       - name: Verify RELEASE_NOTES.md has been changed on ${{ github.base_ref }}
@@ -41,7 +41,7 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup
         uses: actions/setup-dotnet@v5
@@ -110,7 +110,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set Build Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}"
         run: |
