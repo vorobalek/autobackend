@@ -20,130 +20,137 @@ namespace AutoBackend.Sdk.Extensions;
 
 internal static class ServiceCollectionExtensions
 {
-    internal static IServiceCollection AddAutoBackend<TProgram>(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        return services
-            .AddGenericRequestResponse()
-            .AddGenericControllers<TProgram>()
-            .AddGenericGql<TProgram>()
-            .AddGenericSwagger(typeof(TProgram).Assembly.FullName!)
-            .AddGenericDbContext<TProgram>(configuration)
-            .AddGenericStorage()
-            .AddInternalServices();
-    }
-
-    private static IServiceCollection AddGenericControllers<TProgram>(
-        this IServiceCollection services)
-    {
-        services
-            .AddControllers(o => o
-                .Conventions
-                .Add(new GenericControllerRouteConvention()))
-            .ConfigureApplicationPartManager(m => m
-                .FeatureProviders
-                .Add(new GenericControllerTypeFeatureProvider(typeof(AutoBackendHost<>).Assembly,
-                    typeof(TProgram).Assembly)));
-
-        return services;
-    }
-
-    private static IServiceCollection AddGenericRequestResponse(
-        this IServiceCollection services)
-    {
-        services.AddSingleton<IMapperExpressionsCache, MapperExpressionsCache>();
-        services.AddScoped<IGenericRequestMapper, GenericRequestMapper>();
-        services.AddScoped<IGenericResponseMapper, GenericResponseMapper>();
-        return services;
-    }
-
-    private static IServiceCollection AddGenericGql<TProgram>(
-        this IServiceCollection services)
-    {
-        var rootQueryType = GenericGqlQueryTypeBuilder.Build(
-            typeof(AutoBackendHost<>).Assembly,
-            typeof(TProgram).Assembly);
-
-        var rootMutationType = GenericGqlMutationTypeBuilder.Build(
-            typeof(AutoBackendHost<>).Assembly,
-            typeof(TProgram).Assembly);
-
-        services
-            .AddGraphQLServer()
-            .AddQueryType(rootQueryType)
-            .AddMutationType(rootMutationType)
-            .AddProjections()
-            .UseExceptions()
-            .UseTimeout()
-            .UseDocumentCache()
-            .UseDocumentParser()
-            .UseDocumentValidation()
-            .UseOperationCache()
-            .UseOperationResolver()
-            .UseOperationVariableCoercion()
-            .UseOperationExecution()
-            .AddType(new TimeSpanType(TimeSpanFormat.DotNet));
-
-        return services;
-    }
-
-    private static IServiceCollection AddGenericSwagger(
-        this IServiceCollection services,
-        string swaggerTitle)
-    {
-        services.AddSwaggerDocument(settings =>
+        internal IServiceCollection AddAutoBackend<TProgram>(IConfiguration configuration)
         {
-            settings.Title = swaggerTitle;
-            settings.DocumentName = Constants.ApiGroupName;
-            settings.PostProcess = document => { document.Info.Version = Constants.ApiVersion; };
-            settings.ApiGroupNames = [Constants.ApiGroupName];
-            settings.SchemaSettings.TypeNameGenerator = new NSwagTypeNameGenerator();
-            settings.SchemaSettings.SchemaNameGenerator = new NSwagSchemaNameGenerator();
+            return services
+                .AddGenericRequestResponse()
+                .AddGenericControllers<TProgram>()
+                .AddGenericGql<TProgram>()
+                .AddGenericSwagger(typeof(TProgram).Assembly.FullName!)
+                .AddGenericDbContext<TProgram>(configuration)
+                .AddGenericStorage()
+                .AddInternalServices();
+        }
 
-            settings.OperationProcessors.Replace<OperationTagsProcessor>(new NSwagOperationTagsProcessor());
-        });
+        private IServiceCollection AddGenericControllers<TProgram>()
+        {
+            services
+                .AddControllers(o => o
+                    .Conventions
+                    .Add(new GenericControllerRouteConvention()))
+                .ConfigureApplicationPartManager(m => m
+                    .FeatureProviders
+                    .Add(new GenericControllerTypeFeatureProvider(typeof(AutoBackendHost<>).Assembly,
+                        typeof(TProgram).Assembly)));
 
-        return services;
-    }
+            return services;
+        }
 
-    private static IServiceCollection AddGenericDbContext<TProgram>(
-        this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        GenericDbContext.SetAssemblies(typeof(AutoBackendHost<>).Assembly, typeof(TProgram).Assembly);
+        private IServiceCollection AddGenericRequestResponse()
+        {
+            services.AddSingleton<IMapperExpressionsCache, MapperExpressionsCache>();
+            services.AddScoped<IGenericRequestMapper, GenericRequestMapper>();
+            services.AddScoped<IGenericResponseMapper, GenericResponseMapper>();
+            return services;
+        }
 
-        var databasesConfiguration = configuration
-            .GetSection(Constants.DatabaseConfigurationSectionName)
-            .Get<DatabaseConfiguration?>();
+        private IServiceCollection AddGenericGql<TProgram>()
+        {
+            var rootQueryType = GenericGqlQueryTypeBuilder.Build(
+                typeof(AutoBackendHost<>).Assembly,
+                typeof(TProgram).Assembly);
 
-        if (databasesConfiguration is null)
-            return services.AddSpecificGenericDbContext<InMemoryGenericDbContext>(true, builder =>
+            var rootMutationType = GenericGqlMutationTypeBuilder.Build(
+                typeof(AutoBackendHost<>).Assembly,
+                typeof(TProgram).Assembly);
+
+            services
+                .AddGraphQLServer()
+                .AddQueryType(rootQueryType)
+                .AddMutationType(rootMutationType)
+                .AddProjections()
+                .UseExceptions()
+                .UseTimeout()
+                .UseDocumentCache()
+                .UseDocumentParser()
+                .UseDocumentValidation()
+                .UseOperationCache()
+                .UseOperationResolver()
+                .UseOperationVariableCoercion()
+                .UseOperationExecution()
+                .AddType(new TimeSpanType(TimeSpanFormat.DotNet));
+
+            return services;
+        }
+
+        private IServiceCollection AddGenericSwagger(string swaggerTitle)
+        {
+            services.AddSwaggerDocument(settings =>
             {
-                builder
-                    .UseInMemoryDatabase(Constants.GenericInMemoryDatabaseName);
+                settings.Title = swaggerTitle;
+                settings.DocumentName = Constants.ApiGroupName;
+                settings.PostProcess = document => { document.Info.Version = Constants.ApiVersion; };
+                settings.ApiGroupNames = [Constants.ApiGroupName];
+                settings.SchemaSettings.TypeNameGenerator = new NSwagTypeNameGenerator();
+                settings.SchemaSettings.SchemaNameGenerator = new NSwagSchemaNameGenerator();
+
+                settings.OperationProcessors.Replace<OperationTagsProcessor>(new NSwagOperationTagsProcessor());
             });
 
-        var isPrimaryConfigured = false;
-        foreach (var databaseConfiguration in databasesConfiguration.Providers)
+            return services;
+        }
+
+        private IServiceCollection AddGenericDbContext<TProgram>(IConfiguration configuration)
         {
-            var isPrimary = databaseConfiguration.Key == databasesConfiguration.PrimaryProvider;
-            switch (databaseConfiguration.Key)
+            GenericDbContext.SetAssemblies(typeof(AutoBackendHost<>).Assembly, typeof(TProgram).Assembly);
+
+            var databasesConfiguration = configuration
+                .GetSection(Constants.DatabaseConfigurationSectionName)
+                .Get<DatabaseConfiguration?>();
+
+            if (databasesConfiguration is null)
+                return services.AddSpecificGenericDbContext<InMemoryGenericDbContext>(true, builder =>
+                {
+                    builder
+                        .UseInMemoryDatabase(Constants.GenericInMemoryDatabaseName);
+                });
+
+            var isPrimaryConfigured = false;
+            foreach (var databaseConfiguration in databasesConfiguration.Providers)
             {
-                case DatabaseProviderType.InMemory:
-                    services.AddSpecificGenericDbContext<InMemoryGenericDbContext>(isPrimary, builder =>
-                    {
-                        builder
-                            .UseInMemoryDatabase(databaseConfiguration.Value);
-                    });
-                    isPrimaryConfigured |= isPrimary;
-                    break;
-                case DatabaseProviderType.SqlServer:
-                    services
-                        .AddSpecificGenericDbContext<SqlServerGenericDbContext>(isPrimary, builder =>
+                var isPrimary = databaseConfiguration.Key == databasesConfiguration.PrimaryProvider;
+                switch (databaseConfiguration.Key)
+                {
+                    case DatabaseProviderType.InMemory:
+                        services.AddSpecificGenericDbContext<InMemoryGenericDbContext>(isPrimary, builder =>
                         {
                             builder
-                                .UseSqlServer(
+                                .UseInMemoryDatabase(databaseConfiguration.Value);
+                        });
+                        isPrimaryConfigured |= isPrimary;
+                        break;
+                    case DatabaseProviderType.SqlServer:
+                        services
+                            .AddSpecificGenericDbContext<SqlServerGenericDbContext>(isPrimary, builder =>
+                            {
+                                builder
+                                    .UseSqlServer(
+                                        databaseConfiguration.Value,
+                                        optionsBuilder =>
+                                        {
+                                            optionsBuilder
+                                                .MigrationsAssembly(typeof(TProgram).Assembly.FullName);
+                                        });
+                            });
+                        isPrimaryConfigured |= isPrimary;
+                        break;
+                    case DatabaseProviderType.Postgres:
+                        services.AddSpecificGenericDbContext<PostgresGenericDbContext>(isPrimary, builder =>
+                        {
+                            builder
+                                .UseNpgsql(
                                     databaseConfiguration.Value,
                                     optionsBuilder =>
                                     {
@@ -151,75 +158,60 @@ internal static class ServiceCollectionExtensions
                                             .MigrationsAssembly(typeof(TProgram).Assembly.FullName);
                                     });
                         });
-                    isPrimaryConfigured |= isPrimary;
-                    break;
-                case DatabaseProviderType.Postgres:
-                    services.AddSpecificGenericDbContext<PostgresGenericDbContext>(isPrimary, builder =>
-                    {
-                        builder
-                            .UseNpgsql(
-                                databaseConfiguration.Value,
-                                optionsBuilder =>
-                                {
-                                    optionsBuilder
-                                        .MigrationsAssembly(typeof(TProgram).Assembly.FullName);
-                                });
-                    });
-                    isPrimaryConfigured |= isPrimary;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(databaseConfiguration.Key));
+                        isPrimaryConfigured |= isPrimary;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(databaseConfiguration.Key));
+                }
             }
+
+            if (!isPrimaryConfigured)
+                throw new InvalidConfigurationException(Constants.NoDatabaseProviderHasBeenChosenAsAPrimaryOne);
+
+            return services;
         }
 
-        if (!isPrimaryConfigured)
-            throw new InvalidConfigurationException(Constants.NoDatabaseProviderHasBeenChosenAsAPrimaryOne);
+        private IServiceCollection AddSpecificGenericDbContext<TContext>(bool isPrimary,
+            Action<DbContextOptionsBuilder>? action = null)
+            where TContext : GenericDbContext, IGenericDbContext<TContext>
+        {
+            services.AddDbContext<TContext>(action);
+            IGenericDbContext<TContext>.DesignTimeFactory.Initialize(services);
 
-        return services;
-    }
+            if (isPrimary) services.AddScoped<GenericDbContext, TContext>();
 
-    private static IServiceCollection AddSpecificGenericDbContext<TContext>(
-        this IServiceCollection services,
-        bool isPrimary,
-        Action<DbContextOptionsBuilder>? action = null)
-        where TContext : GenericDbContext, IGenericDbContext<TContext>
-    {
-        services.AddDbContext<TContext>(action);
-        IGenericDbContext<TContext>.DesignTimeFactory.Initialize(services);
+            return services;
+        }
 
-        if (isPrimary) services.AddScoped<GenericDbContext, TContext>();
+        private IServiceCollection AddGenericStorage()
+        {
+            services.AddScoped(typeof(IGenericStorage<,>), typeof(GenericStorage<,>));
+            services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+            services.AddScoped(typeof(IGenericRepositoryWithNoKey<,>), typeof(GenericRepositoryWithNoKey<,>));
+            services.AddScoped(typeof(IGenericRepositoryWithPrimaryKey<,,>), typeof(GenericRepositoryWithPrimaryKey<,,>));
+            services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,>), typeof(GenericRepositoryWithComplexKey<,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,>),
+                typeof(GenericRepositoryWithComplexKey<,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,>),
+                typeof(GenericRepositoryWithComplexKey<,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,>),
+                typeof(GenericRepositoryWithComplexKey<,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,>),
+                typeof(GenericRepositoryWithComplexKey<,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,>),
+                typeof(GenericRepositoryWithComplexKey<,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,,>),
+                typeof(GenericRepositoryWithComplexKey<,,,,,,,,,>));
 
-        return services;
-    }
+            return services;
+        }
 
-    private static IServiceCollection AddGenericStorage(this IServiceCollection services)
-    {
-        services.AddScoped(typeof(IGenericStorage<,>), typeof(GenericStorage<,>));
-        services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
-        services.AddScoped(typeof(IGenericRepositoryWithNoKey<,>), typeof(GenericRepositoryWithNoKey<,>));
-        services.AddScoped(typeof(IGenericRepositoryWithPrimaryKey<,,>), typeof(GenericRepositoryWithPrimaryKey<,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,>), typeof(GenericRepositoryWithComplexKey<,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,,,,>));
-        services.AddScoped(typeof(IGenericRepositoryWithComplexKey<,,,,,,,,,>),
-            typeof(GenericRepositoryWithComplexKey<,,,,,,,,,>));
-
-        return services;
-    }
-
-    private static IServiceCollection AddInternalServices(this IServiceCollection services)
-    {
-        return services
-            .AddSingleton<IDateTimeProvider, DateTimeProvider>()
-            .AddSingleton<ICancellationTokenProvider, CancellationTokenProvider>()
-            .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>();
+        private IServiceCollection AddInternalServices()
+        {
+            return services
+                .AddSingleton<IDateTimeProvider, DateTimeProvider>()
+                .AddSingleton<ICancellationTokenProvider, CancellationTokenProvider>()
+                .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>();
+        }
     }
 }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Sample.Migrations.Postgres
 {
     [DbContext(typeof(PostgresGenericDbContext))]
-    [Migration("20250806113109_ef_init")]
+    [Migration("20251203205554_ef_init")]
     partial class ef_init
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Sample.Migrations.Postgres
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);

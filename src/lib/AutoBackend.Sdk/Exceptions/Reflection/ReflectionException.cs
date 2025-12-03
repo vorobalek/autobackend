@@ -9,8 +9,4 @@ internal abstract class ReflectionException : AutoBackendException
     protected ReflectionException(string message) : base(message)
     {
     }
-
-    protected ReflectionException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
 }

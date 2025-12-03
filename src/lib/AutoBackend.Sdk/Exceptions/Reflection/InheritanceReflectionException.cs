@@ -9,8 +9,4 @@ internal sealed class InheritanceReflectionException : ReflectionException
     internal InheritanceReflectionException(string message) : base(message)
     {
     }
-
-    internal InheritanceReflectionException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
 }

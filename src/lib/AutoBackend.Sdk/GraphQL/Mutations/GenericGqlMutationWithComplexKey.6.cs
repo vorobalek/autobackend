@@ -17,12 +17,7 @@ internal abstract class GenericGqlMutationWithComplexKey<
     TKey4,
     TKey5,
     TKey6
-> : GenericGqlMutation<
-    TEntity,
-    TRequest,
-    TResponse,
-    TFilter
->
+> : GenericGqlMutation
     where TEntity : class, new()
     where TRequest : class, IGenericRequest
     where TResponse : class, IGenericResponse, new()
@@ -35,7 +30,10 @@ internal abstract class GenericGqlMutationWithComplexKey<
     where TKey6 : notnull
 {
     [GraphQLName("create")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public async Task<TResponse> CreateByComplexKeyAsync(
+#pragma warning restore CA1822
         [Service] IGenericRequestMapper genericRequestMapper,
         [Service] IGenericResponseMapper genericResponseMapper,
         [Service] IGenericRepositoryWithComplexKey<
@@ -72,7 +70,10 @@ internal abstract class GenericGqlMutationWithComplexKey<
     }
 
     [GraphQLName("update")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public async Task<TResponse> UpdateByComplexKeyAsync(
+#pragma warning restore CA1822
         [Service] IGenericRequestMapper genericRequestMapper,
         [Service] IGenericResponseMapper genericResponseMapper,
         [Service] IGenericRepositoryWithComplexKey<
@@ -109,7 +110,10 @@ internal abstract class GenericGqlMutationWithComplexKey<
     }
 
     [GraphQLName("delete")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public async Task<bool> DeleteByComplexKeyAsync(
+#pragma warning restore CA1822
         [Service] IGenericRepositoryWithComplexKey<
             TEntity,
             TFilter,

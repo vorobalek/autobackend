@@ -6,19 +6,21 @@ namespace AutoBackend.Sdk.Extensions;
 internal static class TypeBuilderExtensions
 {
     // ReSharper disable once InconsistentNaming
-    internal static void SetGraphQLNameAttribute(this TypeBuilder typeBuilder, string name)
+    extension(TypeBuilder typeBuilder)
     {
-        typeBuilder.SetAttribute<GraphQLNameAttribute>(args: name);
+        internal void SetGraphQLNameAttribute(string name)
+        {
+            typeBuilder.SetAttribute<GraphQLNameAttribute>(args: name);
+        }
+
+        private void SetAttribute<TAttribute>(IReadOnlyDictionary<string, object?>? properties = null,
+            IReadOnlyDictionary<string, object?>? fields = null,
+            params object[] args)
+            where TAttribute : Attribute
+        {
+            typeBuilder.SetCustomAttribute(AttributeBuilder.Create<TAttribute>(properties, fields, args));
+        }
     }
 
     // ReSharper disable once MemberCanBePrivate.Global
-    internal static void SetAttribute<TAttribute>(
-        this TypeBuilder typeBuilder,
-        IReadOnlyDictionary<string, object?>? properties = null,
-        IReadOnlyDictionary<string, object?>? fields = null,
-        params object[] args)
-        where TAttribute : Attribute
-    {
-        typeBuilder.SetCustomAttribute(AttributeBuilder.Create<TAttribute>(properties, fields, args));
-    }
 }

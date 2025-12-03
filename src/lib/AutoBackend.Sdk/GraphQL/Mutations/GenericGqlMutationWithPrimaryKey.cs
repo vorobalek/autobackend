@@ -12,12 +12,7 @@ internal abstract class GenericGqlMutationWithPrimaryKey<
     TResponse,
     TFilter,
     TKey
-> : GenericGqlMutation<
-    TEntity,
-    TRequest,
-    TResponse,
-    TFilter
->
+> : GenericGqlMutation
     where TEntity : class, new()
     where TRequest : class, IGenericRequest
     where TResponse : class, IGenericResponse, new()
@@ -25,7 +20,10 @@ internal abstract class GenericGqlMutationWithPrimaryKey<
     where TKey : notnull
 {
     [GraphQLName("create")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public async Task<TResponse> CreateByPrimaryKeyAsync(
+#pragma warning restore CA1822
         [Service] IGenericRequestMapper genericRequestMapper,
         [Service] IGenericResponseMapper genericResponseMapper,
         [Service] IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> genericRepository,
@@ -43,7 +41,10 @@ internal abstract class GenericGqlMutationWithPrimaryKey<
     }
 
     [GraphQLName("update")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public async Task<TResponse> UpdateByPrimaryKeyAsync(
+#pragma warning restore CA1822
         [Service] IGenericRequestMapper genericRequestMapper,
         [Service] IGenericResponseMapper genericResponseMapper,
         [Service] IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> genericRepository,
@@ -61,7 +62,10 @@ internal abstract class GenericGqlMutationWithPrimaryKey<
     }
 
     [GraphQLName("delete")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public async Task<bool> DeleteByPrimaryKeyAsync(
+#pragma warning restore CA1822
         [Service] IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> genericRepository,
         [Service] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("key")] TKey key)
