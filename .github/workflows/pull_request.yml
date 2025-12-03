@@ -63,6 +63,8 @@ jobs:
     needs:
       - test_pull_request
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       created_release_version: ${{ steps.get_release_hot_version.outputs.result }}
 
