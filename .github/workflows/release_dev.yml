@@ -36,6 +36,8 @@ jobs:
     needs:
       - test_release_dev
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       created_release_version: ${{ steps.get_release_dev_version.outputs.result }}
 
