@@ -145,6 +145,8 @@ jobs:
       - create_release_hot
       - build_package_hot
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Setup
