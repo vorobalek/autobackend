@@ -9,8 +9,4 @@ internal sealed class NotFoundReflectionException : ReflectionException
     internal NotFoundReflectionException(string message) : base(message)
     {
     }
-
-    internal NotFoundReflectionException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
 }

@@ -11,19 +11,17 @@ internal abstract class GenericGqlMutationWithNoKey<
     TRequest,
     TResponse,
     TFilter
-> : GenericGqlMutation<
-    TEntity,
-    TRequest,
-    TResponse,
-    TFilter
->
+> : GenericGqlMutation
     where TEntity : class, new()
     where TRequest : class, IGenericRequest
     where TResponse : class, IGenericResponse, new()
     where TFilter : class, IGenericFilter
 {
     [GraphQLName("create")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public async Task<TResponse> CreateAsync(
+#pragma warning restore CA1822
         [Service] IGenericRequestMapper genericRequestMapper,
         [Service] IGenericResponseMapper genericResponseMapper,
         [Service] IGenericRepositoryWithNoKey<TEntity, TFilter> genericRepository,

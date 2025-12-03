@@ -22,7 +22,10 @@ internal abstract class GenericGqlQueryWithPrimaryKey<
     where TKey : notnull
 {
     [GraphQLName("byKey")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public async Task<TResponse?> GetByPrimaryKeyAsync(
+#pragma warning restore CA1822
         [Service] IGenericResponseMapper genericResponseMapper,
         [Service] IGenericRepositoryWithPrimaryKey<TEntity, TFilter, TKey> genericRepository,
         [Service] ICancellationTokenProvider cancellationTokenProvider,

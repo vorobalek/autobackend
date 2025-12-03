@@ -31,8 +31,10 @@ internal sealed class ApiExceptionHandlerMiddleware(RequestDelegate next)
         return Task.FromResult(exception.ToApiException().StatusCode);
     }
 
-    private Func<Exception, Task<string>> HandleExceptionResponseDefaultAsyncProvider(ILogger logger)
+    private static Func<Exception, Task<string>> HandleExceptionResponseDefaultAsyncProvider(ILogger logger)
     {
+        return HandleExceptionResponseDefaultAsync;
+
         Task<string> HandleExceptionResponseDefaultAsync(Exception exception)
         {
             logger.LogCritical(
@@ -40,7 +42,5 @@ internal sealed class ApiExceptionHandlerMiddleware(RequestDelegate next)
                 Constants.AnUnexpectedInternalServerErrorHasHappenedOutOfTheControllerContext);
             return Task.FromResult(Constants.AnUnexpectedInternalServerErrorHasHappened);
         }
-
-        return HandleExceptionResponseDefaultAsync;
     }
 }

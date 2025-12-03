@@ -48,7 +48,7 @@ internal sealed class GenericStorage<TEntity, TFilter>(GenericDbContext db) : IG
         return db.Entry(entity);
     }
 
-    private Expression<Func<TEntity, bool>> BuildFilterExpression(TFilter? filter)
+    private static Expression<Func<TEntity, bool>> BuildFilterExpression(TFilter? filter)
     {
         var predicate = ExpressionBuilder.True<TEntity>();
 

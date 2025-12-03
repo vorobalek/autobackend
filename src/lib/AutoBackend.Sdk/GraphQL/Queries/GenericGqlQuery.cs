@@ -17,7 +17,10 @@ internal abstract class GenericGqlQuery<
 {
     [GraphQLName("all")]
     [UseProjection]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public async Task<TResponse[]> GetAllAsync(
+#pragma warning restore CA1822
         [Service] IGenericResponseMapper genericResponseMapper,
         [Service] IGenericRepository<TEntity, TFilter> genericRepository,
         [Service] ICancellationTokenProvider cancellationTokenProvider,
@@ -33,7 +36,10 @@ internal abstract class GenericGqlQuery<
     }
 
     [GraphQLName("count")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public Task<long> GetCountAsync(
+#pragma warning restore CA1822
         [Service] IGenericRepository<TEntity, TFilter> genericRepository,
         [Service] ICancellationTokenProvider cancellationTokenProvider,
         [GraphQLName("filter")] TFilter? filter)

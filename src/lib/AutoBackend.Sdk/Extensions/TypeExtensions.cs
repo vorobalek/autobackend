@@ -33,60 +33,63 @@ internal static class TypeExtensions
         typeof(DateTimeOffset)
     ];
 
-    internal static bool IsGenericControllerV1(this Type type)
+    extension(Type type)
     {
-        return type.IsGenericType &&
-               (
-                   type.GetGenericTypeDefinition() == typeof(GenericController<,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithNoKey<,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithPrimaryKey<,,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,,,>) ||
-                   type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,,,,>)
-               );
-    }
+        internal bool IsGenericControllerV1()
+        {
+            return type.IsGenericType &&
+                   (
+                       type.GetGenericTypeDefinition() == typeof(GenericController<,,>) ||
+                       type.GetGenericTypeDefinition() == typeof(GenericControllerWithNoKey<,,,>) ||
+                       type.GetGenericTypeDefinition() == typeof(GenericControllerWithPrimaryKey<,,,,>) ||
+                       type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,>) ||
+                       type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,>) ||
+                       type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,>) ||
+                       type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,>) ||
+                       type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,,>) ||
+                       type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,,,>) ||
+                       type.GetGenericTypeDefinition() == typeof(GenericControllerWithComplexKey<,,,,,,,,,,,>)
+                   );
+        }
 
-    internal static bool IsPrimitiveModelType(this Type type)
-    {
-        if (BuiltInValueTypes.Contains(type))
-            return true;
+        internal bool IsPrimitiveModelType()
+        {
+            if (BuiltInValueTypes.Contains(type))
+                return true;
 
-        if (Nullable.GetUnderlyingType(type) is { } underlyingType &&
-            (BuiltInValueTypes.Contains(underlyingType) ||
-             BuiltInStructures.Contains(underlyingType))) return true;
+            if (Nullable.GetUnderlyingType(type) is { } underlyingType &&
+                (BuiltInValueTypes.Contains(underlyingType) ||
+                 BuiltInStructures.Contains(underlyingType))) return true;
 
-        if (BuiltInStructures.Contains(type))
-            return true;
+            if (BuiltInStructures.Contains(type))
+                return true;
 
-        if (type == typeof(string))
-            return true;
+            if (type == typeof(string))
+                return true;
 
-        if (type.IsEnum)
-            return true;
+            if (type.IsEnum)
+                return true;
 
-        return false;
-    }
+            return false;
+        }
 
-    internal static bool IsCollection(this Type type)
-    {
-        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>) ||
-               type.GetTypeInfo().ImplementedInterfaces.Any(i =>
-                   i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
-    }
+        internal bool IsCollection()
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>) ||
+                   type.GetTypeInfo().ImplementedInterfaces.Any(i =>
+                       i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
+        }
 
-    internal static Type? GetCollectionType(this Type type)
-    {
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>))
-            return type.GetGenericArguments()[0];
+        internal Type? GetCollectionType()
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>))
+                return type.GetGenericArguments()[0];
 
-        if (type.GetTypeInfo().ImplementedInterfaces.SingleOrDefault(i =>
-                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>)) is { } iEnumerableGeneric)
-            return iEnumerableGeneric.GetGenericArguments()[0];
+            if (type.GetTypeInfo().ImplementedInterfaces.SingleOrDefault(i =>
+                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>)) is { } iEnumerableGeneric)
+                return iEnumerableGeneric.GetGenericArguments()[0];
 
-        return null;
+            return null;
+        }
     }
 }

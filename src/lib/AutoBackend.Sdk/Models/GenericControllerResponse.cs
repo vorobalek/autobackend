@@ -11,10 +11,10 @@ internal record GenericControllerResponse(
     bool Ok,
     [property: JsonProperty("error_code", Order = 2)]
     [property: JsonPropertyName("error_code")]
-    int? ErrorCode = default,
+    int? ErrorCode = null,
     [property: JsonProperty("description", Order = 3)]
     [property: JsonPropertyName("description")]
-    string? Description = default)
+    string? Description = null)
 {
     [JsonProperty("request_time_ms", Order = 4)]
     [JsonPropertyName("request_time_ms")]
@@ -26,16 +26,6 @@ internal record GenericControllerResponse(
 
         return this;
     }
-
-    internal static GenericControllerResponse<T> CreateOk<T>(T? value = default)
-    {
-        return new GenericControllerResponse<T>(true, value);
-    }
-
-    internal static GenericControllerResponse<T> CreateOk<T>(HttpContext context, T? value = default)
-    {
-        return CreateOk(value).WithRequestTime(context);
-    }
 }
 
 internal sealed record GenericControllerResponse<T>(
@@ -43,8 +33,8 @@ internal sealed record GenericControllerResponse<T>(
     [property: JsonProperty("result", Order = 1)]
     [property: JsonPropertyName("result")]
     T? Result = default,
-    int? ErrorCode = default,
-    string? Description = default)
+    int? ErrorCode = null,
+    string? Description = null)
     : GenericControllerResponse(Ok, ErrorCode, Description)
 {
     internal new GenericControllerResponse<T> WithRequestTime(HttpContext httpContext)

@@ -1,9 +1,8 @@
 ﻿#nullable disable
 
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Sample.Migrations.Postgres;
+namespace Sample.Migrations.SqlServer;
 
 /// <inheritdoc />
 public partial class ef_init : Migration
@@ -19,8 +18,8 @@ public partial class ef_init : Migration
             schema: "generic",
             columns: table => new
             {
-                Id = table.Column<Guid>("uuid", nullable: false),
-                Name = table.Column<string>("character varying(250)", maxLength: 250, nullable: false),
+                Id = table.Column<Guid>("uniqueidentifier", nullable: false),
+                Name = table.Column<string>("nvarchar(250)", maxLength: 250, nullable: false),
                 OwnerId = table.Column<long>("bigint", nullable: true)
             },
             constraints: table =>
@@ -34,10 +33,10 @@ public partial class ef_init : Migration
             columns: table => new
             {
                 Id = table.Column<long>("bigint", nullable: false),
-                FirstName = table.Column<string>("text", nullable: true),
-                LastName = table.Column<string>("text", nullable: true),
-                TimeZone = table.Column<TimeSpan>("interval", nullable: true),
-                ActiveBudgetId = table.Column<Guid>("uuid", nullable: true)
+                FirstName = table.Column<string>("nvarchar(max)", nullable: true),
+                LastName = table.Column<string>("nvarchar(max)", nullable: true),
+                TimeZone = table.Column<TimeSpan>("time", nullable: true),
+                ActiveBudgetId = table.Column<Guid>("uniqueidentifier", nullable: true)
             },
             constraints: table =>
             {
@@ -57,7 +56,7 @@ public partial class ef_init : Migration
             columns: table => new
             {
                 UserId = table.Column<long>("bigint", nullable: false),
-                BudgetId = table.Column<Guid>("uuid", nullable: false)
+                BudgetId = table.Column<Guid>("uniqueidentifier", nullable: false)
             },
             constraints: table =>
             {
@@ -87,13 +86,13 @@ public partial class ef_init : Migration
             schema: "generic",
             columns: table => new
             {
-                Id = table.Column<Guid>("uuid", nullable: false),
+                Id = table.Column<Guid>("uniqueidentifier", nullable: false),
                 UserId = table.Column<long>("bigint", nullable: true),
-                BudgetId = table.Column<Guid>("uuid", nullable: false),
-                Amount = table.Column<decimal>("numeric(20,4)", precision: 20, scale: 4, nullable: false),
-                DateTimeUtc = table.Column<DateTime>("timestamp with time zone", nullable: false),
-                Comment = table.Column<string>("character varying(250)", maxLength: 250, nullable: false),
-                SecretKey = table.Column<string>("character varying(250)", maxLength: 250, nullable: false)
+                BudgetId = table.Column<Guid>("uniqueidentifier", nullable: false),
+                Amount = table.Column<decimal>("decimal(20,4)", precision: 20, scale: 4, nullable: false),
+                DateTimeUtc = table.Column<DateTime>("datetime2", nullable: false),
+                Comment = table.Column<string>("nvarchar(250)", maxLength: 250, nullable: false),
+                SecretKey = table.Column<string>("nvarchar(250)", maxLength: 250, nullable: false)
             },
             constraints: table =>
             {
@@ -119,16 +118,16 @@ public partial class ef_init : Migration
             schema: "generic",
             columns: table => new
             {
-                __Generic__Id = table.Column<int>("integer", nullable: false)
-                    .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                TransactionId = table.Column<Guid>("uuid", nullable: false),
-                OriginalTransactionId = table.Column<Guid>("uuid", nullable: false),
-                VersionDateTimeUtc = table.Column<DateTime>("timestamp with time zone", nullable: false),
+                __Generic__Id = table.Column<int>("int", nullable: false)
+                    .Annotation("SqlServer:Identity", "1, 1"),
+                TransactionId = table.Column<Guid>("uniqueidentifier", nullable: false),
+                OriginalTransactionId = table.Column<Guid>("uniqueidentifier", nullable: false),
+                VersionDateTimeUtc = table.Column<DateTime>("datetime2", nullable: false),
                 UserId = table.Column<long>("bigint", nullable: true),
-                BudgetId = table.Column<Guid>("uuid", nullable: false),
-                Amount = table.Column<decimal>("numeric(20,4)", precision: 20, scale: 4, nullable: false),
-                DateTimeUtc = table.Column<DateTime>("timestamp with time zone", nullable: false),
-                Comment = table.Column<string>("character varying(250)", maxLength: 250, nullable: false)
+                BudgetId = table.Column<Guid>("uniqueidentifier", nullable: false),
+                Amount = table.Column<decimal>("decimal(20,4)", precision: 20, scale: 4, nullable: false),
+                DateTimeUtc = table.Column<DateTime>("datetime2", nullable: false),
+                Comment = table.Column<string>("nvarchar(250)", maxLength: 250, nullable: false)
             },
             constraints: table =>
             {
@@ -146,7 +145,10 @@ public partial class ef_init : Migration
             "IX_Budget_Name_OwnerId",
             schema: "generic",
             table: "Budget",
-            columns: ["Name", "OwnerId"]);
+            columns: new[]
+            {
+                "Name", "OwnerId"
+            });
 
         migrationBuilder.CreateIndex(
             "IX_Budget_OwnerId",

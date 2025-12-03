@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Sample.Migrations.SqlServer
 {
     [DbContext(typeof(SqlServerGenericDbContext))]
-    [Migration("20250806113102_ef_init")]
+    [Migration("20251203205550_ef_init")]
     partial class ef_init
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Sample.Migrations.SqlServer
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);

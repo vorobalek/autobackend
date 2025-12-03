@@ -23,10 +23,10 @@ internal static class Constants
     #region Generic
 
     internal const string GenericDatabaseSchemaName = "generic";
-    internal const string GenericInternalsPrefix = "__Generic__";
-    internal const string IdName = "Id";
+    private const string GenericInternalsPrefix = "__Generic__";
+    private const string IdName = "Id";
     internal const string GenericIdPropertyName = $"{GenericInternalsPrefix}{IdName}";
-    internal const string GenericAssemblyName = "AutoBackend.Sdk.Runtime";
+    private const string GenericAssemblyName = "AutoBackend.Sdk.Runtime";
 
     internal const string GenericRequestsAssemblyName = $"{GenericAssemblyName}.{GenericRequestsModuleName}";
     internal const string GenericRequestsModuleName = "GenericRequests";

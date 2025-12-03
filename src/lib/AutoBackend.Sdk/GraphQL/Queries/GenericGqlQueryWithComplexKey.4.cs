@@ -27,7 +27,10 @@ internal abstract class GenericGqlQueryWithComplexKey<
     where TKey4 : notnull
 {
     [GraphQLName("byKey")]
+    // ReSharper disable once UnusedMember.Global
+#pragma warning disable CA1822
     public Task<TEntity?> GetByPrimaryKeyAsync(
+#pragma warning restore CA1822
         [Service] IGenericRepositoryWithComplexKey<
             TEntity,
             TFilter,
