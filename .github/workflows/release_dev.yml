@@ -120,6 +120,8 @@ jobs:
       - create_release_dev
       - build_package_dev
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Setup
