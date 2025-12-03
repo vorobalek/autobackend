@@ -227,6 +227,8 @@ jobs:
       - create_release
       - build_package
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Setup
