@@ -25,6 +25,10 @@ namespace Sample.Data;
     nameof(Name),
     nameof(OwnerId)
 )]
+[GenericCreatePermission]
+[GenericReadPermission]
+[GenericUpdatePermission]
+[GenericDeletePermission]
 public class Budget
 {
     [GenericFilter]

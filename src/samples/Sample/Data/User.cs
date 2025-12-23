@@ -24,6 +24,10 @@ namespace Sample.Data;
     nameof(TimeZone),
     nameof(ActiveBudgetId)
 )]
+[GenericCreatePermission]
+[GenericReadPermission]
+[GenericUpdatePermission]
+[GenericDeletePermission]
 public class User
 {
     [GenericFilter]

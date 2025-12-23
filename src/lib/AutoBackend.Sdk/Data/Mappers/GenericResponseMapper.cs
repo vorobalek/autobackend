@@ -9,7 +9,7 @@ namespace AutoBackend.Sdk.Data.Mappers;
 internal class GenericResponseMapper(IMapperExpressionsCache cache) : IGenericResponseMapper
 {
     public TResponse ToModel<TEntity, TResponse>(TEntity entity)
-        where TEntity : class
+        where TEntity : class, new()
         where TResponse : class, IGenericResponse, new()
     {
         var func = cache.GetOrAddAndCompile(MapExpr<TEntity, TResponse>());
@@ -22,14 +22,14 @@ internal class GenericResponseMapper(IMapperExpressionsCache cache) : IGenericRe
     }
 
     public TResponse? ToModelNullable<TEntity, TResponse>(TEntity? entity)
-        where TEntity : class
+        where TEntity : class, new()
         where TResponse : class, IGenericResponse, new()
     {
         return entity is null ? null : ToModel<TEntity, TResponse>(entity);
     }
 
     public ICollection<TResponse> ToModelCollectionNullable<TEntity, TResponse>(ICollection<TEntity>? entities)
-        where TEntity : class
+        where TEntity : class, new()
         where TResponse : class, IGenericResponse, new()
     {
         return entities?.Select(entity =>
@@ -37,12 +37,11 @@ internal class GenericResponseMapper(IMapperExpressionsCache cache) : IGenericRe
                        ?? throw new InconsistentDataException())
                    .ToArray()
                ??
-               [
-               ];
+               [];
     }
 
     private Expression<Func<TEntity, TModel>> MapExpr<TEntity, TModel>()
-        where TEntity : class
+        where TEntity : class, new()
         where TModel : class, IGenericResponse, new()
     {
         var parameter = Expression.Parameter(typeof(TEntity));

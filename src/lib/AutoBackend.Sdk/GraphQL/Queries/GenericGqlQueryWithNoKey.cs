@@ -12,6 +12,6 @@ internal abstract class GenericGqlQueryWithNoKey<
     TResponse,
     TFilter
 >
-    where TEntity : class
+    where TEntity : class, new()
     where TResponse : class, IGenericResponse, new()
     where TFilter : class, IGenericFilter;

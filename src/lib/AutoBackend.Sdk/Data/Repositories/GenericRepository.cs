@@ -1,18 +1,23 @@
 using AutoBackend.Sdk.Data.Storage;
+using AutoBackend.Sdk.Enums;
 using AutoBackend.Sdk.Exceptions.Data;
 using AutoBackend.Sdk.Exceptions.Reflection;
 using AutoBackend.Sdk.Filters;
+using AutoBackend.Sdk.Services.PermissionValidator;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoBackend.Sdk.Data.Repositories;
 
-internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFilter> genericStorage)
+internal class GenericRepository<TEntity, TFilter>(
+    IPermissionValidator permissionValidator,
+    IGenericStorage<TEntity, TFilter> genericStorage)
     : IGenericRepository<TEntity, TFilter>
-    where TEntity : class
+    where TEntity : class, new()
     where TFilter : class, IGenericFilter
 {
     public Task<TEntity[]> GetAllAsync(TFilter? filter, CancellationToken cancellationToken)
     {
+        permissionValidator.Validate<TEntity>(PermissionType.Read);
         var query = genericStorage.GetQuery(filter);
         if (filter?.SkipCount is { } skipCountValue) query = query.Skip(skipCountValue);
         if (filter?.TakeCount is { } takeCountValue) query = query.Take(takeCountValue);
@@ -21,6 +26,7 @@ internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFil
 
     public Task<long> GetCountAsync(TFilter? filter, CancellationToken cancellationToken)
     {
+        permissionValidator.Validate<TEntity>(PermissionType.Read);
         return genericStorage.GetQuery(filter).LongCountAsync(cancellationToken);
     }
 
@@ -28,6 +34,7 @@ internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFil
         CancellationToken cancellationToken,
         params object[] keys)
     {
+        permissionValidator.Validate<TEntity>(PermissionType.Read);
         return await genericStorage.FindAsync(keys, cancellationToken);
     }
 
@@ -36,6 +43,7 @@ internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFil
         CancellationToken cancellationToken,
         params object[]? keys)
     {
+        permissionValidator.Validate<TEntity>(PermissionType.Create);
         if (keys?.Any() ?? false)
         {
             ValidateEntityKeys(entity, keys);
@@ -57,6 +65,7 @@ internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFil
         CancellationToken cancellationToken,
         params object[] keys)
     {
+        permissionValidator.Validate<TEntity>(PermissionType.Update);
         ValidateEntityKeys(entity, keys);
         var current = await genericStorage.FindAsync(keys, cancellationToken);
         if (current is null)
@@ -65,6 +74,7 @@ internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFil
                     Constants.AnEntityWithTheGivenKeyDoesNotExist,
                     string.Join(", ", keys.Select(key => key.ToString()))));
 
+        var affectedProperties = new HashSet<string>();
         foreach (var entryProperty in genericStorage.Entry(current).Properties)
         {
             var entityProperty = typeof(TEntity).GetProperty(entryProperty.Metadata.Name);
@@ -76,8 +86,10 @@ internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFil
                         typeof(TEntity).Name));
             var newValue = entityProperty.GetValue(entity);
             entityProperty.SetValue(current, newValue);
+            if (!Equals(entryProperty.OriginalValue, entryProperty.CurrentValue)) affectedProperties.Add(entryProperty.Metadata.Name);
         }
 
+        permissionValidator.Validate<TEntity>(PermissionType.Update, affectedProperties);
         genericStorage.Update(current);
         await genericStorage.SaveChangesAsync(cancellationToken);
         return entity;
@@ -87,6 +99,7 @@ internal class GenericRepository<TEntity, TFilter>(IGenericStorage<TEntity, TFil
         CancellationToken cancellationToken,
         params object[] keys)
     {
+        permissionValidator.Validate<TEntity>(PermissionType.Delete);
         var current = await genericStorage.FindAsync(keys, cancellationToken);
         if (current is null)
             throw new NotFoundDataException(

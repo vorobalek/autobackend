@@ -3,7 +3,7 @@ using AutoBackend.Sdk.Filters;
 namespace AutoBackend.Sdk.Data.Repositories;
 
 internal interface IGenericRepository<TEntity, in TFilter>
-    where TEntity : class
+    where TEntity : class, new()
     where TFilter : class, IGenericFilter
 {
     Task<TEntity[]> GetAllAsync(TFilter? filter, CancellationToken cancellationToken);

@@ -12,7 +12,7 @@ internal interface IGenericRepositoryWithComplexKey<
     in TKey5,
     in TKey6
 > : IGenericRepository<TEntity, TFilter>
-    where TEntity : class
+    where TEntity : class, new()
     where TFilter : class, IGenericFilter
     where TKey1 : notnull
     where TKey2 : notnull

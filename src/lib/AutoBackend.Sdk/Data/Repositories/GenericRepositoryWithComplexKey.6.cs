@@ -1,5 +1,6 @@
 using AutoBackend.Sdk.Data.Storage;
 using AutoBackend.Sdk.Filters;
+using AutoBackend.Sdk.Services.PermissionValidator;
 
 namespace AutoBackend.Sdk.Data.Repositories;
 
@@ -12,10 +13,10 @@ internal sealed class GenericRepositoryWithComplexKey<
     TKey4,
     TKey5,
     TKey6
->(IGenericStorage<TEntity, TFilter> genericStorage) : GenericRepository<
+>(IPermissionValidator permissionValidator, IGenericStorage<TEntity, TFilter> genericStorage) : GenericRepository<
     TEntity,
     TFilter
->(genericStorage), IGenericRepositoryWithComplexKey<
+>(permissionValidator, genericStorage), IGenericRepositoryWithComplexKey<
     TEntity,
     TFilter,
     TKey1,
@@ -25,7 +26,7 @@ internal sealed class GenericRepositoryWithComplexKey<
     TKey5,
     TKey6
 >
-    where TEntity : class
+    where TEntity : class, new()
     where TFilter : class, IGenericFilter
     where TKey1 : notnull
     where TKey2 : notnull

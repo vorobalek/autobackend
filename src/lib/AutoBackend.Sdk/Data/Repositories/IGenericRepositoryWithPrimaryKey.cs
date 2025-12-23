@@ -10,7 +10,7 @@ internal interface IGenericRepositoryWithPrimaryKey<
     TEntity,
     TFilter
 >
-    where TEntity : class
+    where TEntity : class, new()
     where TFilter : class, IGenericFilter
     where TKey : notnull
 {

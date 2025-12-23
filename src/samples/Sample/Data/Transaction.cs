@@ -26,8 +26,13 @@ namespace Sample.Data;
     nameof(BudgetId),
     nameof(Amount),
     nameof(DateTimeUtc),
-    nameof(Comment)
+    nameof(Comment),
+    nameof(SecretKey)
 )]
+[GenericCreatePermission]
+[GenericReadPermission]
+[GenericUpdatePermission]
+[GenericDeletePermission]
 public class Transaction
 {
     [GenericFilter]
@@ -51,6 +56,7 @@ public class Transaction
     public Budget Budget { get; set; } = null!;
 
     [GenericFilter]
+    [GenericUpdatePermission]
     [Precision(20, 4)]
     public decimal Amount { get; set; }
 

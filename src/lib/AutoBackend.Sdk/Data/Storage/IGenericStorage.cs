@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 namespace AutoBackend.Sdk.Data.Storage;
 
 internal interface IGenericStorage<TEntity, in TFilter>
-    where TEntity : class
+    where TEntity : class, new()
     where TFilter : class, IGenericFilter
 {
     ValueTask<TEntity?> FindAsync(object[] keyValues, CancellationToken cancellationToken);

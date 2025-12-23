@@ -12,9 +12,9 @@ internal sealed class ApiExceptionHandlerMiddleware(RequestDelegate next)
         IExceptionHandlerFactory exceptionHandlerFactory,
         ILogger<ApiExceptionHandlerMiddleware> logger)
     {
-        exceptionHandlerFactory.SetCurrentHandler(
+        exceptionHandlerFactory.SetCurrentApiHandler(
             httpContext,
-            HandleExceptionStatusCodeDefaultAsync,
+            HandleExceptionStatusCodeDefault,
             HandleExceptionResponseDefaultAsyncProvider(logger));
         try
         {
@@ -22,25 +22,25 @@ internal sealed class ApiExceptionHandlerMiddleware(RequestDelegate next)
         }
         catch (Exception exception)
         {
-            await exceptionHandlerFactory.CurrentHandler!.HandleAsync(exception, CancellationToken.None);
+            await exceptionHandlerFactory.CurrentApiExceptionHandler!.HandleAsync(exception, CancellationToken.None);
         }
     }
 
-    private Task<int> HandleExceptionStatusCodeDefaultAsync(Exception exception)
+    private static int HandleExceptionStatusCodeDefault(Exception exception)
     {
-        return Task.FromResult(exception.ToApiException().StatusCode);
+        return exception.ToApiException().StatusCode;
     }
 
-    private static Func<Exception, Task<string>> HandleExceptionResponseDefaultAsyncProvider(ILogger logger)
+    private static Func<Exception, string> HandleExceptionResponseDefaultAsyncProvider(ILogger logger)
     {
         return HandleExceptionResponseDefaultAsync;
 
-        Task<string> HandleExceptionResponseDefaultAsync(Exception exception)
+        string HandleExceptionResponseDefaultAsync(Exception exception)
         {
             logger.LogCritical(
                 exception,
                 Constants.AnUnexpectedInternalServerErrorHasHappenedOutOfTheControllerContext);
-            return Task.FromResult(Constants.AnUnexpectedInternalServerErrorHasHappened);
+            return Constants.AnUnexpectedInternalServerErrorHasHappened;
         }
     }
 }

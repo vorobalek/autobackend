@@ -9,7 +9,7 @@ internal interface IGenericRepositoryWithNoKey<
     TEntity,
     TFilter
 >
-    where TEntity : class
+    where TEntity : class, new()
     where TFilter : class, IGenericFilter
 {
     Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken);
