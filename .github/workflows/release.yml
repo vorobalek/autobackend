@@ -8,21 +8,31 @@ on:
 
 jobs:
   verify_tag:
-    name: Verify tag 'release-*' on the head
+    name: Verify tag 'release-*' exists on the current commit
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    
+
     steps:
       - uses: actions/checkout@v6
 
-      - name: Abort
-        if: github.ref != 'refs/heads/main' || !startsWith(github.ref, 'refs/tags/release-')
-        run: exit 1
+      - name: Check for release tag on current commit
+        run: |
+          # Get current commit hash
+          CURRENT_COMMIT=$(git rev-parse HEAD)
 
-      - name: Success
-        if: github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/release-')
-        run: exit 0
+          # Check if any release-* tag points to current commit
+          RELEASE_TAG=$(git tag --points-at $CURRENT_COMMIT | grep '^release-' | head -1)
+
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "❌ No release-* tag found on current commit $CURRENT_COMMIT"
+            echo "Available tags on this commit:"
+            git tag --points-at $CURRENT_COMMIT || echo "No tags found"
+            exit 1
+          else
+            echo "✅ Found release tag: $RELEASE_TAG on commit $CURRENT_COMMIT"
+            echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          fi
   
   verify_release_notes:
     name: Verify RELEASE_NOTES.md has been changed before Release
