@@ -7,37 +7,8 @@ on:
       - main
 
 jobs:
-  verify_tag:
-    name: Verify tag 'release-*' exists on the current commit
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Check for release tag on current commit
-        run: |
-          # Get current commit hash
-          CURRENT_COMMIT=$(git rev-parse HEAD)
-
-          # Check if any release-* tag points to current commit
-          RELEASE_TAG=$(git tag --points-at $CURRENT_COMMIT | grep '^release-' | head -1)
-
-          if [ -z "$RELEASE_TAG" ]; then
-            echo "❌ No release-* tag found on current commit $CURRENT_COMMIT"
-            echo "Available tags on this commit:"
-            git tag --points-at $CURRENT_COMMIT || echo "No tags found"
-            exit 1
-          else
-            echo "✅ Found release tag: $RELEASE_TAG on commit $CURRENT_COMMIT"
-            echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
-          fi
-  
   verify_release_notes:
     name: Verify RELEASE_NOTES.md has been changed before Release
-    needs: 
-      - verify_tag
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -61,8 +32,6 @@ jobs:
 
   test_release:
     name: Run Unit Tests before Release
-    needs:
-      - verify_tag
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -87,7 +56,6 @@ jobs:
   create_release:
     name: Create Release
     needs:
-      - verify_tag
       - verify_release_notes
       - test_release
     runs-on: ubuntu-latest
@@ -144,7 +112,6 @@ jobs:
   build_package:
     name: Build Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
-      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -181,7 +148,6 @@ jobs:
   publish_github:
     name: Publish Github Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
-      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -207,7 +173,6 @@ jobs:
   publish_myget:
     name: Publish MyGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
-      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -233,7 +198,6 @@ jobs:
   publish_nuget:
     name: Publish NuGet Package Version "${{ needs.create_release.outputs.created_release_version }}"
     needs:
-      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
@@ -259,7 +223,6 @@ jobs:
   comment_commit:
     name: Comment Commit with the Version build's link
     needs:
-      - verify_tag
       - verify_release_notes
       - test_release
       - create_release
