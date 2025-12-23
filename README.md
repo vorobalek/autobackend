@@ -24,7 +24,7 @@ It is a personal project without a commercial foundation and offers no guarantee
         - [Mutations](#mutations)
     - [Modeling](#modeling)
     - [Filtering](#filtering)
-    - _Authorization: currently unsupported (may be introduced in future releases)_
+    - [Authorization](#authorization)
 
 # Initialization
 
@@ -408,6 +408,119 @@ public class Transaction
 }
 ```
 
+## Authorization
+
+AutoBackend.SDK supports permission-based authorization using JWT tokens. You can control access to CRUD operations at both entity and property levels.
+
+### Configuration
+
+Configure JWT settings in your `appsettings.json`:
+
+```json
+"Jwt": {
+  "PublicKey": "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----",
+  "ValidIssuer": "AutoBackendServer",
+  "ValidAudience": "AutoBackendUser"
+}
+```
+
+- `PublicKey`: RSA public key in PEM format (required) - used to verify JWT token signatures
+- `ValidIssuer`: Optional issuer validation
+- `ValidAudience`: Optional audience validation
+
+### Permission Attributes
+
+Use permission attributes on entity classes to require authorization for specific operations:
+
+- `[GenericCreatePermission]` - Requires permission to create entities
+- `[GenericReadPermission]` - Requires permission to read entities
+- `[GenericUpdatePermission]` - Requires permission to update entities
+- `[GenericDeletePermission]` - Requires permission to delete entities
+
+#### Code Samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
+[GenericCreatePermission]
+[GenericReadPermission]
+[GenericUpdatePermission]
+[GenericDeletePermission]
+public class Budget
+{
+    public Guid Id { get; set; }
+    
+    // ...
+}
+```
+
+### Property-Level Permissions
+
+> ⚠️ **Note**: Property-level permissions are currently only processed for **Update** operations.
+
+You can apply permission attributes to individual properties for fine-grained access control during update operations:
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+[GenericGqlMutation]
+[GenericUpdatePermission]
+public class Transaction
+{
+    public Guid Id { get; set; }
+    
+    [GenericUpdatePermission]
+    public string? SecretKey { get; set; }
+    
+    // ...
+}
+```
+
+When updating an entity, AutoBackend will check property-level permissions only for properties that are actually being modified. This allows you to restrict access to sensitive fields while allowing updates to other properties.
+
+### JWT Token Format
+
+JWT tokens must be sent in the `Authorization` header with the `Bearer` prefix:
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+The JWT token must contain claims with:
+- **Type**: `permissions`
+- **Value**: Permission strings in the format `{EntityName}{PermissionType}` or `{EntityName}{PropertyName}{PermissionType}`
+
+#### Permission Name Format
+
+- **Entity permissions**: `{EntityName}{PermissionType}`
+  - Examples: `BudgetCreate`, `BudgetRead`, `BudgetUpdate`, `BudgetDelete`
+- **Property permissions**: `{EntityName}{PropertyName}{PermissionType}` (only for Update operations)
+  - Examples: `TransactionSecretKeyUpdate`
+
+#### Example JWT Claims
+
+```json
+{
+  "permissions": [
+    "BudgetCreate",
+    "BudgetRead",
+    "BudgetUpdate",
+    "BudgetDelete",
+    "TransactionSecretKeyUpdate"
+  ]
+}
+```
+
+### Error Handling
+
+When a request lacks required permissions, AutoBackend returns an `Unauthorized` error with details about missing permissions.
+
 ## Filtering
 
 AutoBackend.SDK generates filter models for any entity with configured HTTP API or GraphQL generation. By default, these
@@ -455,4 +568,4 @@ like `/api/v1/<model name>` or `/api/v1/<model name>/count`, and in GraphQL quer
 - GraphQL queries will have filtering models with condition properties generated.
 
 The following conditions are supported:
-`equal`, `notEqual`, `greaterThan`, `greaterThanOrEqual`, `lessThan`, `lessThanOrEqual`, `in`, `isNull`, `equal`.
+`equal`, `notEqual`, `greaterThan`, `greaterThanOrEqual`, `lessThan`, `lessThanOrEqual`, `in`, `isNull`.
