@@ -35,28 +35,27 @@ internal abstract class GenericController : ControllerBase
     {
         HttpContext
             .RequestServices
-            .GetRequiredService<IExceptionHandlerFactory>().SetCurrentHandler(
+            .GetRequiredService<IExceptionHandlerFactory>().SetCurrentApiHandler(
                 HttpContext,
                 HandleExceptionStatusCodeAsync,
                 HandleExceptionResponseAsync);
     }
 
-    private Task<int> HandleExceptionStatusCodeAsync(Exception exception)
+    private static int HandleExceptionStatusCodeAsync(Exception exception)
     {
-        return Task.FromResult(exception.ToApiException().StatusCode);
+        return exception.ToApiException().StatusCode;
     }
 
-    private Task<GenericControllerResponse> HandleExceptionResponseAsync(Exception exception)
+    private GenericControllerResponse HandleExceptionResponseAsync(Exception exception)
     {
         var statusCode = exception.ToApiException().StatusCode;
-        return Task.FromResult(
-            new GenericControllerResponse(
-                    false,
-                    statusCode,
-                    statusCode == StatusCodes.Status500InternalServerError
-                        ? Constants.AnUnexpectedInternalServerErrorHasHappened
-                        : exception.Message)
-                .WithRequestTime(HttpContext));
+        return new GenericControllerResponse(
+                false,
+                statusCode,
+                statusCode == StatusCodes.Status500InternalServerError
+                    ? Constants.AnUnexpectedInternalServerErrorHasHappened
+                    : exception.Message)
+            .WithRequestTime(HttpContext);
     }
 }
 
@@ -68,7 +67,7 @@ internal abstract class GenericController<
     IGenericResponseMapper genericResponseMapper,
     IGenericRepository<TEntity, TFilter> genericRepository,
     ICancellationTokenProvider cancellationTokenProvider) : GenericController
-    where TEntity : class
+    where TEntity : class, new()
     where TResponse : class, IGenericResponse, new()
     where TFilter : class, IGenericFilter
 {

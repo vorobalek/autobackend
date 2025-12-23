@@ -4,8 +4,8 @@
 |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [![MyGet](https://img.shields.io/myget/autobackend-dev/v/AutoBackend.SDK?label=myget&style=for-the-badge)](https://www.myget.org/feed/autobackend-dev/package/nuget/AutoBackend.SDK) | [![MyGet](https://img.shields.io/myget/autobackend/v/AutoBackend.SDK?label=myget&style=for-the-badge)](https://www.myget.org/feed/autobackend/package/nuget/AutoBackend.SDK) [![NuGet](https://img.shields.io/nuget/v/AutoBackend.SDK?label=nuget&style=for-the-badge)](https://www.nuget.org/packages/AutoBackend.SDK) |
 
-This package provides infrastructure templates for facilitating the creation of backend services.
-It is a personal project without a commercial foundation and offers no guarantees regarding future development.
+This package provides infrastructure templates to facilitate the creation of backend services.
+This is a personal project with no commercial backing and offers no guarantees regarding future development.
 
 # Features
 
@@ -24,12 +24,11 @@ It is a personal project without a commercial foundation and offers no guarantee
         - [Mutations](#mutations)
     - [Modeling](#modeling)
     - [Filtering](#filtering)
-    - _Authorization: currently unsupported (may be introduced in future releases)_
+    - [Authorization](#authorization)
 
 # Initialization
 
 A sample usage scenario is available [here](src/samples/Sample).
-Copies of those samples are also provided.
 
 ## Initialize AutoBackend from your Program.cs file
 
@@ -80,13 +79,15 @@ public class Participating
 }
 ```
 
-## Configuration of all features is detailed below
+## Feature Configuration
+
+All features are detailed in the sections below.
 
 ---
 
 # Database
 
-Currently supported relational databases (including in-memory) are:
+The following relational databases are currently supported (including in-memory):
 
 - SqlServer
 - Postgres
@@ -101,8 +102,7 @@ There are typically three types of database tables:
 - Single-column primary key,
 - Multi-column primary key.
 
-Depending on the number of columns in your entity, follow the instructions below to enable AutoBackend.SDK to track
-changes.
+Depending on the number of primary key columns in your entity, follow the instructions below to enable AutoBackend.SDK to track changes.
 
 ### Keyless Entities
 
@@ -118,8 +118,7 @@ public class TransactionVersion
 
 ### Single-PK Entities
 
-Use the `[GenericEntity(<primary key property name>)]` attribute to designate a model as an entity with a single
-property primary key.
+Use the `[GenericEntity(<primary key property name>)]` attribute to designate a model as an entity with a single-column primary key.
 
 ```csharp
 [GenericEntity(
@@ -140,7 +139,7 @@ primary key.
 
 > Currently, the maximum number of properties in a composite key is **8**.
 >
-> It is anticipated that this limit will suffice for most use cases.
+> This limit should be sufficient for most use cases.
 
 ```csharp
 [GenericEntity(
@@ -159,7 +158,7 @@ public class Participating
 
 ## Providers
 
-For database connection management, configure the "Database" section.
+To configure database connection management, set up the "Database" section in your configuration.
 
 ```json
 "Database": {
@@ -178,29 +177,23 @@ The `PrimaryProvider` property accepts one of the following string values:
 - `SqlServer`,
 - `Postgres`.
 
-The `Providers` property must contain an object with optional properties: `InMemory`, `SqlServer`, or `Postgres`. The
-property corresponding to the chosen `PrimaryProvider` value is mandatory.
+The `Providers` property must contain an object with optional properties: `InMemory`, `SqlServer`, or `Postgres`. The property corresponding to the selected `PrimaryProvider` value is required.
 
 ## Migrations
 
 First, [install Entity Framework Core Tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet).
-You can create a new migration with one of the following commands executed from the project root directory.
+You can create a new migration by executing one of the following commands from the project root directory:
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerGenericDbContext` for SqlServer.
+- For SqlServer: `dotnet ef migrations add "<your migration name>" -o Migrations/SqlServer -c SqlServerGenericDbContext`
+- For Postgres: `dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext`
 
-`dotnet ef migrations add "<your migration name>" -o Migrations/Postgres -c PostgresGenericDbContext` for Postgres.
+Alternatively, you can use the provided scripts [to add a new migration](scripts/add_migration.sh) or [to remove the last migration](scripts/remove_migration.sh) for both database providers.
 
-Alternatively, use scripts [to add a new migration](scripts/add_migration.sh)
-or [to remove the last migration](scripts/remove_migration.sh) for both database providers.
-
-If you opt not to have AutoBackend manage database migrations (see above), you can perform migrations manually by
-executing `dotnet ef database update` from the project root directory.
+If you choose not to use AutoBackend's migration management (see above), you can perform migrations manually by executing `dotnet ef database update` from the project root directory.
 
 ### Migrate on Startup
 
-If using a relational database (e.g., SqlServer or Postgres), you can configure AutoBackend to either automatically
-migrate the database at application startup or not, by passing the `migrateRelationalOnStartup` parameter to
-the `RunAsync` method where AutoBackend is initialized. For example:
+When using a relational database (e.g., SqlServer or Postgres), you can configure AutoBackend to automatically migrate the database at application startup by passing the `migrateRelationalOnStartup` parameter to the `RunAsync` method during AutoBackend initialization. For example:
 
 ```csharp
 await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args, migrateRelationalOnStartup: true);
@@ -208,14 +201,14 @@ await new AutoBackend.Sdk.AutoBackendHost<Program>().RunAsync(args, migrateRelat
 
 # API
 
-AutoBackend.SDK currently supports two types of application interfaces:
+AutoBackend.SDK currently supports two types of API interfaces:
 
-- Traditional HTTP API
-- Basic GraphQL
+- HTTP REST API
+- GraphQL
 
 ## HTTP API
 
-Use the `[GenericController]` attribute on models to generate HTTP API endpoints by AutoBackend.
+Apply the `[GenericController]` attribute to your models to have AutoBackend generate HTTP API endpoints.
 
 > ❗**Disclaimer**
 >
@@ -223,7 +216,7 @@ Use the `[GenericController]` attribute on models to generate HTTP API endpoints
 
 ### Response Container and Endpoints
 
-The current and only API version is v1. API v1 supports JSON and uses the following response container format:
+The current API version is v1. API v1 uses JSON and follows the following response container format:
 
 ```
 {
@@ -235,7 +228,7 @@ The current and only API version is v1. API v1 supports JSON and uses the follow
 }
 ```
 
-For detailed information on generated endpoints, access `/swagger`.
+For detailed information on generated endpoints, visit `/swagger`.
 
 ### Endpoints
 
@@ -276,15 +269,14 @@ public class User
 
 ## GraphQL
 
-Use the `[GenericGqlQuery]` and `[GenericGqlMutation]` attributes on models to generate GraphQL **queries** and *
-*mutations**, respectively.
+Apply the `[GenericGqlQuery]` and `[GenericGqlMutation]` attributes to your models to generate GraphQL **queries** and **mutations**, respectively.
 
 > ❗**Disclaimer**
 >
 > The `[GenericGqlQuery]` and `[GenericGqlMutation]` attributes are compatible only with models also marked
 > with `[GenericEntity]`.
 
-For detailed information on generated queries and mutations, access `/graphql`.
+For detailed information on generated queries and mutations, visit `/graphql`.
 
 ### Queries
 
@@ -347,14 +339,12 @@ public class User
 
 ## Modeling
 
-AutoBackend.SDK generates request and response models for any entity with configured HTTP API or GraphQL generation.
-These models include all original entity properties, unless specific properties are explicitly included in request or
-response models, in which case non-specified properties will be omitted.
+AutoBackend.SDK automatically generates request and response models for any entity with HTTP API or GraphQL generation configured.
+By default, these models include all original entity properties. However, if you explicitly specify properties using the `[GenericRequest]` or `[GenericResponse]` attributes, only those specified properties will be included, and all others will be omitted.
 
 ### Request Models
 
-The `[GenericRequest]` attribute defines which properties are permitted for reflection from the request model to the
-entity.
+The `[GenericRequest]` attribute specifies which properties can be mapped from the request model to the entity.
 
 #### Code Samples
 
@@ -382,8 +372,7 @@ public class Transaction
 
 ### Response Models
 
-The `[GenericResponse]` attribute defines which properties are permitted for reflection from the response model to the
-entity.
+The `[GenericResponse]` attribute specifies which properties can be mapped from the entity to the response model.
 
 #### Code Samples
 
@@ -408,6 +397,119 @@ public class Transaction
 }
 ```
 
+## Authorization
+
+AutoBackend.SDK supports permission-based authorization using JWT tokens. You can control access to CRUD operations at both entity and property levels.
+
+### Configuration
+
+Configure JWT settings in your `appsettings.json`:
+
+```json
+"Jwt": {
+  "PublicKey": "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----",
+  "ValidIssuer": "AutoBackendServer",
+  "ValidAudience": "AutoBackendUser"
+}
+```
+
+- `PublicKey`: RSA public key in PEM format (required) - used to verify JWT token signatures
+- `ValidIssuer`: Optional issuer validation
+- `ValidAudience`: Optional audience validation
+
+### Permission Attributes
+
+Use permission attributes on entity classes to require authorization for specific operations:
+
+- `[GenericCreatePermission]` - Requires permission to create entities
+- `[GenericReadPermission]` - Requires permission to read entities
+- `[GenericUpdatePermission]` - Requires permission to update entities
+- `[GenericDeletePermission]` - Requires permission to delete entities
+
+#### Code Samples
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+[GenericGqlQuery]
+[GenericGqlMutation]
+[GenericCreatePermission]
+[GenericReadPermission]
+[GenericUpdatePermission]
+[GenericDeletePermission]
+public class Budget
+{
+    public Guid Id { get; set; }
+    
+    // ...
+}
+```
+
+### Property-Level Permissions
+
+> ⚠️ **Note**: Property-level permissions are currently only processed for **Update** operations.
+
+You can apply permission attributes to individual properties for fine-grained access control during update operations:
+
+```csharp
+[GenericEntity(
+    nameof(Id)
+)]
+[GenericController]
+[GenericGqlMutation]
+[GenericUpdatePermission]
+public class Transaction
+{
+    public Guid Id { get; set; }
+    
+    [GenericUpdatePermission]
+    public string? SecretKey { get; set; }
+    
+    // ...
+}
+```
+
+When updating an entity, AutoBackend will check property-level permissions only for properties that are actually being modified. This allows you to restrict access to sensitive fields while allowing updates to other properties.
+
+### JWT Token Format
+
+JWT tokens must be sent in the `Authorization` header with the `Bearer` prefix:
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+The JWT token must contain claims with:
+- **Type**: `permissions`
+- **Value**: Permission strings in the format `{EntityName}{PermissionType}` or `{EntityName}{PropertyName}{PermissionType}`
+
+#### Permission Name Format
+
+- **Entity permissions**: `{EntityName}{PermissionType}`
+  - Examples: `BudgetCreate`, `BudgetRead`, `BudgetUpdate`, `BudgetDelete`
+- **Property permissions**: `{EntityName}{PropertyName}{PermissionType}` (only for Update operations)
+  - Examples: `TransactionSecretKeyUpdate`
+
+#### Example JWT Claims
+
+```json
+{
+  "permissions": [
+    "BudgetCreate",
+    "BudgetRead",
+    "BudgetUpdate",
+    "BudgetDelete",
+    "TransactionSecretKeyUpdate"
+  ]
+}
+```
+
+### Error Handling
+
+When a request lacks required permissions, AutoBackend returns an `Unauthorized` error with details about missing permissions.
+
 ## Filtering
 
 AutoBackend.SDK generates filter models for any entity with configured HTTP API or GraphQL generation. By default, these
@@ -416,15 +518,14 @@ the `[GenericFilter]` attribute.
 
 ### Defaults
 
-By default, two filter parameters are always available for any GET request (returning a list of entities) or GraphQL
-queries, to manage pagination:
+By default, two filter parameters are always available for any GET request (returning a list of entities) or GraphQL queries to manage pagination:
 
 - `skipCount`: number
 - `takeCount`: number
 
-### Generic
+### Custom Filtering
 
-The `[GenericFilter]` attribute designates a model property as filterable in the generated entity.
+The `[GenericFilter]` attribute marks a model property as filterable in the generated filter model.
 
 ```csharp
 [GenericEntity(
@@ -448,11 +549,17 @@ public class Budget
 }
 ```
 
-Consequently, AutoBackend will construct a filter model with parameters that can be utilized in API endpoints
-like `/api/v1/<model name>` or `/api/v1/<model name>/count`, and in GraphQL queries.
+AutoBackend will construct a filter model with parameters that can be used in API endpoints like `/api/v1/<model name>` or `/api/v1/<model name>/count`, as well as in GraphQL queries.
 
-- API filter parameter names are generated following the pattern: `<property's camelCase-name>.<condition name>`.
-- GraphQL queries will have filtering models with condition properties generated.
+- API filter parameter names follow the pattern: `<property's camelCase-name>.<condition name>`
+- GraphQL queries will have filtering models with condition properties generated
 
-The following conditions are supported:
-`equal`, `notEqual`, `greaterThan`, `greaterThanOrEqual`, `lessThan`, `lessThanOrEqual`, `in`, `isNull`, `equal`.
+The following filter conditions are supported:
+- `equal`
+- `notEqual`
+- `greaterThan`
+- `greaterThanOrEqual`
+- `lessThan`
+- `lessThanOrEqual`
+- `in`
+- `isNull`

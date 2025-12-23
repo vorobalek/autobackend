@@ -1,6 +1,6 @@
 namespace AutoBackend.Sdk.Services.ExceptionHandler;
 
-internal interface IExceptionHandler
+internal interface IApiExceptionHandler
 {
     Task HandleAsync(Exception exception, CancellationToken cancellationToken);
 }

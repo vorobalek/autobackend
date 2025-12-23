@@ -29,6 +29,10 @@ namespace Sample.Data;
     nameof(OriginalTransactionId),
     nameof(VersionDateTimeUtc)
 )]
+[GenericCreatePermission]
+[GenericReadPermission]
+[GenericUpdatePermission]
+[GenericDeletePermission]
 public class TransactionVersion
 {
     [GenericFilter]

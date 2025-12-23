@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 namespace AutoBackend.Sdk.Data.Storage;
 
 internal sealed class GenericStorage<TEntity, TFilter>(GenericDbContext db) : IGenericStorage<TEntity, TFilter>
-    where TEntity : class
+    where TEntity : class, new()
     where TFilter : class, IGenericFilter
 {
     private DbSet<TEntity> Set => db.Set<TEntity>();

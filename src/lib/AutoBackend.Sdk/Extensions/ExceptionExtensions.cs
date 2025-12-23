@@ -26,6 +26,9 @@ internal static class ExceptionExtensions
                     NotFoundDataException => new NotFoundApiException(
                         Constants.NoDataHasBeenFound,
                         exception),
+                    UnauthorizedAccessDataException => new UnauthorizedApiException(
+                        exception.Message,
+                        exception),
                     _ => fallbackValue
                 },
                 _ => fallbackValue

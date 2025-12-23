@@ -19,6 +19,10 @@ namespace Sample.Data;
     nameof(UserId),
     nameof(BudgetId)
 )]
+[GenericCreatePermission]
+[GenericReadPermission]
+[GenericUpdatePermission]
+[GenericDeletePermission]
 public class Participating
 {
     [GenericFilter]

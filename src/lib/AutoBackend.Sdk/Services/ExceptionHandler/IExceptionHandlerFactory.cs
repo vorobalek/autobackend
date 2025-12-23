@@ -4,10 +4,10 @@ namespace AutoBackend.Sdk.Services.ExceptionHandler;
 
 internal interface IExceptionHandlerFactory
 {
-    IExceptionHandler? CurrentHandler { get; }
-
-    void SetCurrentHandler<TResponse>(
+    IApiExceptionHandler? CurrentApiExceptionHandler { get; }
+    
+    void SetCurrentApiHandler<TResponse>(
         HttpContext httpContext,
-        Func<Exception, Task<int>> handleExceptionStatusCodeAsync,
-        Func<Exception, Task<TResponse>> handleExceptionResponseAsync);
+        Func<Exception, int> handleExceptionStatusCode,
+        Func<Exception, TResponse> handleExceptionResponse);
 }

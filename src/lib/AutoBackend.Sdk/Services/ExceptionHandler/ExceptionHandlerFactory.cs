@@ -5,29 +5,29 @@ namespace AutoBackend.Sdk.Services.ExceptionHandler;
 
 internal sealed class ExceptionHandlerFactory : IExceptionHandlerFactory
 {
-    public IExceptionHandler? CurrentHandler { get; private set; }
+    public IApiExceptionHandler? CurrentApiExceptionHandler { get; private set; }
 
-    public void SetCurrentHandler<TResponse>(
+    public void SetCurrentApiHandler<TResponse>(
         HttpContext httpContext,
-        Func<Exception, Task<int>> handleExceptionStatusCodeAsync,
-        Func<Exception, Task<TResponse>> handleExceptionResponseAsync)
+        Func<Exception, int> handleExceptionStatusCode,
+        Func<Exception, TResponse> handleExceptionResponse)
     {
-        CurrentHandler = new ExceptionHandler<TResponse>(
+        CurrentApiExceptionHandler = new ApiExceptionHandler<TResponse>(
             httpContext,
-            handleExceptionStatusCodeAsync,
-            handleExceptionResponseAsync);
+            handleExceptionStatusCode,
+            handleExceptionResponse);
     }
 
-    private sealed class ExceptionHandler<TResponse>(
+    private sealed class ApiExceptionHandler<TResponse>(
         HttpContext httpContext,
-        Func<Exception, Task<int>> processStatusCode,
-        Func<Exception, Task<TResponse>> processResponse)
-        : IExceptionHandler
+        Func<Exception, int> processStatusCode,
+        Func<Exception, TResponse> processResponse)
+        : IApiExceptionHandler
     {
         public async Task HandleAsync(Exception exception, CancellationToken cancellationToken)
         {
-            var statusCode = await processStatusCode(exception);
-            var response = await processResponse(exception);
+            var statusCode = processStatusCode(exception);
+            var response = processResponse(exception);
             httpContext.Response.StatusCode = statusCode;
             httpContext.Response.ContentType = MediaTypeNames.Application.Json;
             await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);

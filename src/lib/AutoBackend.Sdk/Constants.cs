@@ -2,15 +2,10 @@ namespace AutoBackend.Sdk;
 
 internal static class Constants
 {
-    #region Services
-
-    internal const string ClusterDiscoveryServiceUrl = "/__discovery";
-
-    #endregion
-
     #region Headers
 
-    internal const string XForwardedForHeaderName = "X-Forwarded-For";
+    internal const string AuthorizationHeaderName = "Authorization";
+    internal const string AuthorizationBearerPrefix = "Bearer ";
 
     #endregion
 
@@ -59,6 +54,11 @@ internal static class Constants
     internal const string PropertySetterName = "set_{0}";
 
     internal const string GenericTypeBeautifulName = "{0}<{1}>";
+    
+    internal const string JwtConfigurationSectionName = "Jwt";
+    internal const string GenericEntityPermissionName = "{0}{1}";
+    internal const string GenericPropertyPermissionName = "{0}{1}{2}";
+    public const string GenericPermissionsClaimType = "permissions";
 
     #endregion
 
@@ -92,9 +92,6 @@ internal static class Constants
     internal const string UnableToFindAMethodWithParametersForTheType =
         "Unable to find a method {0} with {1} parameters for the type {2}.";
 
-    internal const string UnableToFindAMethodWithParametersAndGenericArgumentsForTheType =
-        "Unable to find a method {0} with {1} parameters and {2} generic arguments for the type {3}.";
-
     internal const string TheEntityTypeKeySetDoesNotMatchTheGivenKeys =
         "The entity type key set doesn't match the given keys.";
 
@@ -124,6 +121,9 @@ internal static class Constants
 
     internal const string UnableToBuildAGenericGraphQlMutationForTypeThePropertyHasNotBeenFound =
         "Unable to build a generic GraphQL mutation for type {0}. The property {1} has not been found.";
+    
+    internal const string Unauthorized = "Unauthorized";
+    internal const string UnauthorizedMissingPermissions = "Unauthorized. Missing permissions: [{0}]";
 
     #endregion
 
@@ -137,17 +137,7 @@ internal static class Constants
 
     #region Environment
 
-    internal const string HostEnvironmentVariable = "HOST";
     internal const string PortEnvironmentVariable = "PORT";
-
-    #endregion
-
-    #region Logs
-
-    internal const string ClusterDiscoveryRequestLogName = "discovery request";
-
-    internal const string ClusterDiscoveryRequestLogMessage =
-        "Discover at (node: ({NodeId}, {NodeCreatedUtc}, {NodeLastRequestToUtc}, {NodeLastRequestFromUtc}, {NodeRequestTimeMs})) with params (node: ({RemoteNodeId}, {RemoteNodeCreated}, {RemoteNodeLastRequestTo}, {RemoteNodeLastRequestFrom}, {RemoteNodeRequestTimeMs}))";
 
     #endregion
 }

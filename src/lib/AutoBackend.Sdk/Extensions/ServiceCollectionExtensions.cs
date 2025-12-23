@@ -10,7 +10,9 @@ using AutoBackend.Sdk.Exceptions.Configuration;
 using AutoBackend.Sdk.NSwag;
 using AutoBackend.Sdk.Services.CancellationTokenProvider;
 using AutoBackend.Sdk.Services.DateTimeProvider;
+using AutoBackend.Sdk.Services.EntityMetadataProvider;
 using AutoBackend.Sdk.Services.ExceptionHandler;
+using AutoBackend.Sdk.Services.PermissionValidator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +33,7 @@ internal static class ServiceCollectionExtensions
                 .AddGenericSwagger(typeof(TProgram).Assembly.FullName!)
                 .AddGenericDbContext<TProgram>(configuration)
                 .AddGenericStorage()
+                .AddGenericPermissions(configuration)
                 .AddInternalServices();
         }
 
@@ -206,12 +209,26 @@ internal static class ServiceCollectionExtensions
             return services;
         }
 
+        private IServiceCollection AddGenericPermissions(IConfiguration configuration)
+        {
+            services.Configure<JwtConfiguration>(
+                configuration
+                    .GetSection(Constants.JwtConfigurationSectionName));
+
+            services
+                .AddScoped<IPermissionValidator, PermissionValidator>();
+            
+            return services;
+        }
+
         private IServiceCollection AddInternalServices()
         {
             return services
                 .AddSingleton<IDateTimeProvider, DateTimeProvider>()
                 .AddSingleton<ICancellationTokenProvider, CancellationTokenProvider>()
-                .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>();
+                .AddSingleton<IEntityMetadataProvider, EntityMetadataProvider>()
+                .AddScoped<IExceptionHandlerFactory, ExceptionHandlerFactory>()
+                .AddHttpContextAccessor();
         }
     }
 }

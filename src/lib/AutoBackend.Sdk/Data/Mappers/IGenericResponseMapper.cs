@@ -5,10 +5,10 @@ namespace AutoBackend.Sdk.Data.Mappers;
 internal interface IGenericResponseMapper
 {
     TResponse ToModel<TEntity, TResponse>(TEntity entity)
-        where TEntity : class
+        where TEntity : class, new()
         where TResponse : class, IGenericResponse, new();
 
     IEnumerable<TResponse> ToModel<TEntity, TResponse>(IEnumerable<TEntity> entities)
-        where TEntity : class
+        where TEntity : class, new()
         where TResponse : class, IGenericResponse, new();
 }
