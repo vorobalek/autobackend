@@ -2,7 +2,7 @@
 
 #### Enhancements:
 
-- Released version v0.2.0 with major infrastructure updates.
+- Released version v0.1.10 with major infrastructure updates.
 - Added JWT authorization support with configurable public key validation.
 - Refactored AutoBackendHost configuration by consolidating StartupBoilerplate logic inline.
 - Enhanced sample project with PostgreSQL as primary database provider.
