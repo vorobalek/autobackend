@@ -71,7 +71,7 @@ jobs:
     steps:
       - name: Get Release Hot Version
         id: get_release_hot_version
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
@@ -176,7 +176,7 @@ jobs:
     
     steps:
       - name: Comment Pull Request with the Hot Version "${{ needs.create_release_hot.outputs.created_release_version }}" build's link
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
