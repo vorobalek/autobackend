@@ -48,7 +48,7 @@ jobs:
 
       - name: Get Release Dev Version
         id: get_release_dev_version
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             var major = ${{ vars.DEFAULT_MAJOR_VERSION }};
@@ -150,7 +150,7 @@ jobs:
     
     steps:
       - name: Comment Commit with the Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}" build's link
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
