@@ -14,7 +14,7 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Verify RELEASE_NOTES.md has been changed before Release
         uses: tj-actions/changed-files@v47
@@ -37,7 +37,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup
         uses: actions/setup-dotnet@v5
@@ -65,7 +65,7 @@ jobs:
       created_release_version: ${{ steps.get_release_version.outputs.result }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Get Release Version
         id: get_release_version
@@ -120,7 +120,7 @@ jobs:
       contents: read
     
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set Build Version "${{ needs.create_release.outputs.created_release_version }}"
         run: |
