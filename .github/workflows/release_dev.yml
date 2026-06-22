@@ -15,7 +15,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup
         uses: actions/setup-dotnet@v5
@@ -88,7 +88,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set Build Dev Version "${{ needs.create_release_dev.outputs.created_release_version }}"
         run: |
